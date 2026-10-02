@@ -1,3 +1,4 @@
+import '../../assets/hello-canvas.css'
 import BaseUiNumberField from './BaseUiNumberField.jsx'
 
 function Frame({ children }) {

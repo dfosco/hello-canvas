@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { useKnob, useOverride } from '@dfosco/storyboard'
+import { useKnob, useOverride } from '@dfosco/hypercanvas'
 
 function GoogleIcon({ className = 'h-5 w-5' }) {
   return (

@@ -1,3 +1,4 @@
+import '../../assets/hello-canvas.css'
 import BaseUiTabs from './BaseUiTabs.jsx'
 
 function Frame({ children }) {

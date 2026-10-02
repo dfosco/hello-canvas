@@ -1,3 +1,4 @@
+import '../../../assets/hello-canvas.css'
 import Branding from './Branding'
 import SignupForm from './SignupForm'
 

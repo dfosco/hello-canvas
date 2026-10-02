@@ -1,3 +1,4 @@
+import '../../assets/hello-canvas.css'
 import BaseUiTooltip from './BaseUiTooltip.jsx'
 
 function Frame({ children }) {

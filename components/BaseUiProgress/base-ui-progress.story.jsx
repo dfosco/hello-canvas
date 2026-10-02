@@ -1,3 +1,4 @@
+import '../../assets/hello-canvas.css'
 import BaseUiProgress from './BaseUiProgress.jsx'
 
 function Frame({ children }) {

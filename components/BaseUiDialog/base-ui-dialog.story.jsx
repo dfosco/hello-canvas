@@ -1,3 +1,4 @@
+import '../../assets/hello-canvas.css'
 import BaseUiDialog from './BaseUiDialog.jsx'
 
 function Frame({ children }) {

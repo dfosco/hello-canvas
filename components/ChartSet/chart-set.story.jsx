@@ -1,3 +1,5 @@
+import '../../assets/hello-canvas.css'
+
 /**
  * ChartSet component-set stories.
  * One variant per chart type, with appropriate sample data.

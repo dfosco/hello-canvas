@@ -1,3 +1,5 @@
+import '../../assets/hello-canvas.css'
+
 /**
  * ColorModeSwitcher component stories.
  * Showcases the theme switcher dropdown used in Storyboard prototypes.

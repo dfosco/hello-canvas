@@ -1,3 +1,4 @@
+import '../../assets/hello-canvas.css'
 import BaseUiAccordion from './BaseUiAccordion.jsx'
 
 function Frame({ children }) {

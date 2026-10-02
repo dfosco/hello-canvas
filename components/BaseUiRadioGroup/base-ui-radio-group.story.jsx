@@ -1,3 +1,4 @@
+import '../../assets/hello-canvas.css'
 import BaseUiRadioGroup from './BaseUiRadioGroup.jsx'
 
 function Frame({ children }) {

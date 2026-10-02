@@ -1,4 +1,4 @@
-import { useMemo, useSyncExternalStore } from 'react'
+import { useOverride, useRecords } from '@dfosco/hypercanvas'
 import {
   FileDirectoryFillIcon,
   InfoIcon,
@@ -7,10 +7,6 @@ import {
   PencilIcon,
   TrashIcon,
 } from '@primer/octicons-react'
-import { useOverride, useRecords } from '@dfosco/storyboard'
-import { subscribeToHash, setParam } from '@dfosco/storyboard/core'
-
-const DELETED_PREFIX = 'projects.deleted.'
 
 function formatCreated(iso) {
   if (!iso) return '—'
@@ -42,38 +38,18 @@ function parseJson(raw, fallback) {
   }
 }
 
-function getHashString() {
-  return typeof window !== 'undefined' ? window.location.hash : ''
-}
-
-function getHashStringSSR() {
-  return ''
-}
-
-function useDeletedIds() {
-  const hashStr = useSyncExternalStore(subscribeToHash, getHashString, getHashStringSSR)
-  return useMemo(() => {
-    const params = new URLSearchParams(hashStr.replace(/^#/, ''))
-    const ids = new Set()
-    for (const [k, v] of params.entries()) {
-      if (k.startsWith(DELETED_PREFIX) && v !== 'false') {
-        ids.add(k.slice(DELETED_PREFIX.length))
-      }
-    }
-    return ids
-  }, [hashStr])
-}
-
 export default function Projects() {
   const baseProjects = useRecords('projects') ?? []
   const [createdRaw, setCreated] = useOverride('projects.new')
+  const [deletedRaw, setDeleted] = useOverride('projects.deleted')
   const [editedRaw] = useOverride('projects.edited')
   const [, setOpen] = useOverride('createProject.open')
   const [, setEditId] = useOverride('createProject.editId')
   const [, setName] = useOverride('createProject.name')
   const [, setDescription] = useOverride('createProject.description')
   const [menuOpenRaw, setMenuOpen, clearMenuOpen] = useOverride('projects.menuOpen')
-  const deletedIds = useDeletedIds()
+  const parsedDeletedIds = parseJson(deletedRaw, [])
+  const deletedIds = new Set(Array.isArray(parsedDeletedIds) ? parsedDeletedIds : [])
 
   const newProjects = (() => {
     const parsed = parseJson(createdRaw, [])
@@ -114,8 +90,8 @@ export default function Projects() {
       const next = newProjects.filter((p) => p?.id !== project.id)
       setCreated(JSON.stringify(next))
     } else {
-      // Seed record — add a per-id deletion override directly to the hash.
-      setParam(`${DELETED_PREFIX}${project.id}`, 'true')
+      // Seed record — keep deleted IDs in one shareable Notebook override.
+      setDeleted(JSON.stringify([...new Set([...deletedIds, project.id])]))
     }
   }
 

@@ -1,3 +1,5 @@
+import '../../assets/hello-canvas.css'
+
 /**
  * SidebarNavigation component stories.
  * Showcases the sidebar NavList used in Application templates.

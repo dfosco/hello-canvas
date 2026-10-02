@@ -1,3 +1,4 @@
+import '../../assets/hello-canvas.css'
 import BaseUiCheckbox from './BaseUiCheckbox.jsx'
 
 function Frame({ children }) {

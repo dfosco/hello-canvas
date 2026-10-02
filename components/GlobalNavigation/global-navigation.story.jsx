@@ -1,3 +1,5 @@
+import '../../assets/hello-canvas.css'
+
 /**
  * GlobalNavigation component stories.
  * Showcases the GitHub-style repository header with underline nav tabs.

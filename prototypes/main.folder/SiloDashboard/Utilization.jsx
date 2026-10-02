@@ -4,8 +4,8 @@ import {
   CalendarIcon,
   InfoIcon,
 } from '@primer/octicons-react'
-import { useFlowData, useObject } from '@dfosco/storyboard'
-import SiloChart from '@content/components/SiloChart/SiloChart.jsx'
+import { useFlowData, useObject } from '@dfosco/hypercanvas'
+import SiloChart from '../../../components/SiloChart/SiloChart.jsx'
 
 function SummaryCard({ data }) {
   if (!data) return null

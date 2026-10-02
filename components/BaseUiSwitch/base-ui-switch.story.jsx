@@ -1,3 +1,4 @@
+import '../../assets/hello-canvas.css'
 import BaseUiSwitch from './BaseUiSwitch.jsx'
 
 function Frame({ children }) {

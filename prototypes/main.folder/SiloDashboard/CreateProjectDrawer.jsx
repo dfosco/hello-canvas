@@ -1,5 +1,5 @@
 import { XIcon, FileIcon } from '@primer/octicons-react'
-import { useOverride } from '@dfosco/storyboard'
+import { useOverride } from '@dfosco/hypercanvas'
 
 function slugify(s) {
   return String(s ?? '')

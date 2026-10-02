@@ -1,3 +1,4 @@
+import '../../assets/hello-canvas.css'
 import BaseUiSlider from './BaseUiSlider.jsx'
 
 function Frame({ children }) {

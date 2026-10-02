@@ -1,3 +1,4 @@
+import '../../assets/hello-canvas.css'
 import BaseUiSelect from './BaseUiSelect.jsx'
 
 function Frame({ children }) {

@@ -1,4 +1,4 @@
-import { useKnob } from '@dfosco/storyboard'
+import { useKnob } from '@dfosco/hypercanvas'
 
 export default function Branding() {
   const headline = useKnob('headline')

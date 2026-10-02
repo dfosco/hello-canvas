@@ -6,10 +6,11 @@ import {
   PersonIcon,
   PlusIcon,
 } from '@primer/octicons-react'
-import { useFlowData, useOverride } from '@dfosco/storyboard'
+import { useFlowData, useOverride } from '@dfosco/hypercanvas'
 import Utilization from './Utilization.jsx'
 import Projects from './Projects.jsx'
 import CreateProjectDrawer from './CreateProjectDrawer.jsx'
+import '../../../assets/hello-canvas.css'
 
 const ICONS = {
   file: FileIcon,
