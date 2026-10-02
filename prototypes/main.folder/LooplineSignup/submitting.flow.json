@@ -1,0 +1,15 @@
+{
+  "meta": {
+    "title": "Submitting",
+    "description": "Form submitted, awaiting response",
+    "author": "dfosco"
+  },
+  "signup": {
+    "fullName": "Ada Lovelace",
+    "email": "ada@example.com",
+    "company": "Analytical Engines",
+    "password": "********",
+    "agreedToTerms": true,
+    "status": "submitting"
+  }
+}

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "mock-project",
+    "name": "mock-project",
+    "description": "a fake project",
+    "created": "2021-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "other-project",
+    "name": "other-project",
+    "description": "another fake project",
+    "created": "2021-01-15T00:00:00.000Z"
+  },
+  {
+    "id": "project-no-vpcs",
+    "name": "project-no-vpcs",
+    "description": "a project with no VPCs for testing",
+    "created": "2021-01-20T00:00:00.000Z"
+  }
+]

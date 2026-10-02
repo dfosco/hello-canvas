@@ -1,0 +1,17 @@
+# Local runtime and workflow state
+.storyboard/
+.clips/
+node_modules/
+dist/
+publish/
+.DS_Store
+.env
+.env.*
+
+# Private and draft canvas assets
+assets/canvas/images/~*
+assets/canvas/images/drafts/
+assets/canvas/snapshots/~*
+assets/.storyboard-public/terminal-snapshots/~*
+**/canvas/**/drafts/
+**/prototypes/**/drafts/

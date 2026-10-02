@@ -1,0 +1,11 @@
+{
+  "formatVersion": 1,
+  "id": "hello-canvas",
+  "title": "Hello Canvas",
+  "pages": [
+    { "id": "canvas-storyboard-demo", "type": "canvas", "title": "Storyboard Demo", "path": "canvas/storyboard-demo.canvas.jsonl" },
+    { "id": "canvas-component-showcase", "type": "canvas", "title": "Component Showcase", "path": "canvas/component-showcase.canvas.jsonl" },
+    { "id": "prototype-loopline-signup", "type": "prototype", "title": "Loopline Signup", "path": "prototypes/main.folder/LooplineSignup" },
+    { "id": "prototype-silo-dashboard", "type": "prototype", "title": "Silo Dashboard", "path": "prototypes/main.folder/SiloDashboard" }
+  ]
+}

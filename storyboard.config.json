@@ -1,0 +1,38 @@
+{
+	"repository": {
+		"owner": "dfosco",
+		"name": "hello-canvas"
+	},
+	"content": {
+		"dirs": ["data", "images", "templates"]
+	},
+	"prodDomain": "https://dfosco.github.io/hello-canvas/",
+	"devDomain": "hello-canvas",
+	"devDomainColor": "#663399",
+	"ui": {
+		"hide": ["branch-bar"]
+	},
+	"comments": {
+		"discussions": {
+			"category": "Comments"
+		}
+	},
+	"workshop": {
+		"enabled": true,
+		"partials": []
+	},
+	"featureFlags": {},
+	"canvas": {
+		"zoom": {
+			"min": 10,
+			"max": 250,
+			"step": 10
+		}
+	},
+	"customerMode": {
+		"enabled": false,
+		"hideChrome": false,
+		"hideHomepage": false,
+		"protoHomepage": ""
+	}
+}

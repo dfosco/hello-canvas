@@ -1,0 +1,8 @@
+{
+  "meta": {
+    "title": "Silo Dashboard",
+    "description": "Cloud silo utilization dashboard",
+    "author": ["filesystem-cc"],
+    "tags": ["dashboard", "dark"]
+  }
+}
