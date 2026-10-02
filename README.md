@@ -15,7 +15,7 @@ A public example notebook for Hypercanvas 0.30, intended to become the source fo
 
 ## Source
 
-Notebook artifacts originated in [dfosco/storyboard-starter](https://github.com/dfosco/storyboard-starter/tree/66db28e90d778cede84e84d045752f757c3b0674) at commit `66db28e90d778cede84e84d045752f757c3b0674`. Compatibility updates replace legacy `@dfosco/storyboard` imports with the 0.30 `@dfosco/hypercanvas` API, resolve notebook-local assets without the starter's `@content` alias, and provide notebook-owned Tailwind CSS. Chart examples use inline SVG so they do not require a notebook-local package install.
+Notebook artifacts originated in [dfosco/storyboard-starter](https://github.com/dfosco/storyboard-starter/tree/66db28e90d778cede84e84d045752f757c3b0674) at commit `66db28e90d778cede84e84d045752f757c3b0674`. Compatibility updates replace legacy `@dfosco/storyboard` imports with the 0.30 `@dfosco/hypercanvas` API, resolve notebook-local assets without the starter's `@content` alias, and provide notebook-owned Tailwind CSS. ChartSet stories use inline SVG; Silo Dashboard utilization charts use Recharts.
 
 The starter's `.backstage` application, agent tooling, and GitHub deployment workflows are not included. The imported canvas prototype URLs and hash variants have been verified in the 0.30 runtime.
 

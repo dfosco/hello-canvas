@@ -1,0 +1,70 @@
+{
+  "meta": {
+    "author": "dfosco"
+  },
+  "workspace": {
+    "name": "nimbus-forge",
+    "silo": "Acropolis"
+  },
+  "user": {
+    "name": "Idris Okafor",
+    "username": "idris"
+  },
+  "view": "utilization",
+  "nav": {
+    "sections": [
+      {
+        "title": "NIMBUS-FORGE",
+        "items": [
+          {
+            "label": "Projects",
+            "icon": "file",
+            "view": "projects",
+            "create": "project"
+          },
+          {
+            "label": "Images",
+            "icon": "image"
+          },
+          {
+            "label": "Utilization",
+            "icon": "zap",
+            "view": "utilization"
+          },
+          {
+            "label": "Silo Access",
+            "icon": "key"
+          }
+        ]
+      }
+    ]
+  },
+  "summary": {
+    "cpu": {
+      "label": "CPU",
+      "percent": 42.5,
+      "provisioned": 17,
+      "quota": 40,
+      "unit": "vCPUs"
+    },
+    "memory": {
+      "label": "Memory",
+      "percent": 71.25,
+      "provisioned": 285,
+      "quota": 400,
+      "unit": "GiB"
+    },
+    "storage": {
+      "label": "Storage",
+      "percent": 33.75,
+      "provisioned": 2.7,
+      "quota": 8,
+      "unit": "TiB"
+    }
+  },
+  "timeRange": {
+    "label": "Last hour",
+    "from": "16/05/2026, 22:42",
+    "to": "16/05/2026, 23:42"
+  }
+}

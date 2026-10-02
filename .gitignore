@@ -3,7 +3,9 @@
 .clips/
 node_modules/
 dist/
-publish/
+# The generated Notebook publication is deployed from its committed build.
+!publish/dist/
+!publish/dist/**
 .DS_Store
 .env
 .env.*

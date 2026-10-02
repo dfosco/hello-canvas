@@ -1,0 +1,20 @@
+.mainContent {
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+}
+
+@media (min-width: 820px) {
+  .sidebar.sidebar {
+    position: static;
+    z-index: auto;
+    display: flex;
+    width: 20%;
+    flex-shrink: 0;
+  }
+
+  .mobileNavBackdrop.mobileNavBackdrop,
+  .hamburger.hamburger {
+    display: none;
+  }
+}

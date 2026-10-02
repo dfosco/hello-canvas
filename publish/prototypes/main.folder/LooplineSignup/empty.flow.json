@@ -1,0 +1,14 @@
+{
+  "meta": {
+    "title": "Empty form",
+    "description": "Initial blank Loopline signup form",
+    "author": "dfosco"
+  },
+  "signup": {
+    "fullName": "",
+    "email": "",
+    "company": "",
+    "password": "",
+    "agreedToTerms": false
+  }
+}

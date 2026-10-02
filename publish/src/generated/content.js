@@ -1,0 +1,35 @@
+export default {
+  "formatVersion": 1,
+  "title": "Hello Canvas",
+  "notebookId": "hello-canvas",
+  "pages": [
+    {
+      "id": "canvas-storyboard-demo",
+      "type": "canvas",
+      "title": "Storyboard Demo",
+      "slug": "canvas-storyboard-demo",
+      "prototypeName": null
+    },
+    {
+      "id": "canvas-component-showcase",
+      "type": "canvas",
+      "title": "Component Showcase",
+      "slug": "canvas-component-showcase",
+      "prototypeName": null
+    },
+    {
+      "id": "prototype-loopline-signup",
+      "type": "prototype",
+      "title": "Loopline Signup",
+      "slug": "prototype-loopline-signup",
+      "prototypeName": "LooplineSignup"
+    },
+    {
+      "id": "prototype-silo-dashboard",
+      "type": "prototype",
+      "title": "Silo Dashboard",
+      "slug": "prototype-silo-dashboard",
+      "prototypeName": "SiloDashboard"
+    }
+  ]
+}
