@@ -3,8 +3,8 @@
   "branch": "main",
   "deployBranch": "main",
   "folder": "",
-  "sha": "78f605615d1aacf76e7201573e73f7a46fa6c5d7",
-  "generatedAt": "2026-10-03T19:34:20Z",
+  "sha": null,
+  "generatedAt": "2026-10-03T20:33:06Z",
   "basePath": "/hello-canvas/",
   "prototypes": [
     {

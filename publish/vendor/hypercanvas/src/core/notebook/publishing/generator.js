@@ -541,7 +541,7 @@ function normalRuntimeFiles(notebook, sourceFiles, basePath = './') {
   )
   viteConfig = viteConfig.replace(
     '    base,\n',
-    "    base,\n    define: { 'globalThis.__HYPERCANVAS_NOTEBOOK_PUBLICATION__': 'true' },\n",
+    "    base,\n    define: {\n      'globalThis.__HYPERCANVAS_NOTEBOOK_PUBLICATION__': 'true',\n      'import.meta.env.VITE_NOTEBOOK_PUBLISHED': JSON.stringify('1'),\n    },\n",
   )
   files['vite.config.js'] = viteConfig
 

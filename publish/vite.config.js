@@ -20,7 +20,10 @@ export default defineConfig(() => {
 
     return {
     base,
-    define: { 'globalThis.__HYPERCANVAS_NOTEBOOK_PUBLICATION__': 'true' },
+    define: {
+      'globalThis.__HYPERCANVAS_NOTEBOOK_PUBLICATION__': 'true',
+      'import.meta.env.VITE_NOTEBOOK_PUBLISHED': JSON.stringify('1'),
+    },
     resolve: {
         alias: {
             '@': fileURLToPath(new URL('./notebook-content/', import.meta.url)),

@@ -132,6 +132,16 @@ else if (args[0] === 'run' && args[1] === 'build') {
 }
 
 describe('Notebook publishing contract', () => {
+  it.each(['default', 'external'])('locks the %s publication to its embedded Notebook', async mode => {
+    const notebook = temp('notebook-lock')
+    initializeNotebook(notebook, { title: 'Locked Notebook' })
+    const destination = mode === 'default' ? path.join(notebook, 'publish') : temp('notebook-lock-output')
+    await materializeProject({ notebookRoot: notebook, destination, mode })
+
+    const config = fs.readFileSync(path.join(destination, 'vite.config.js'), 'utf8')
+    expect(config).toContain("'import.meta.env.VITE_NOTEBOOK_PUBLISHED': JSON.stringify('1')")
+  })
+
   it('generates the regular read-only Storyboard app with exact dependencies and a Pages fallback', async () => {
     const notebook = temp('notebook')
     initializeNotebook(notebook, { title: 'Export test' })
