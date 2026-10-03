@@ -5,6 +5,7 @@ import SiteEditMenu from './SiteEditMenu.jsx'
 import { notifySiteFailed, notifySiteStarted } from '../site/siteEvents.js'
 import { siteViewerPath } from '../../internals/siteFrameRouteBridge.js'
 import { sbNavigate } from '../navigation/sbNavigate.js'
+import { isLocalDev } from '../utils/prodMode.js'
 
 function apiUrl(basePath, route) {
   const base = (basePath || '/').replace(/\/+$/, '')
@@ -51,17 +52,18 @@ export default function RunningSitesPanel({ basePath = '/' }) {
     siteId: currentSiteId(basePath),
     open: currentRouteTerminalOpen(),
   }))
+  const localMode = isLocalDev()
 
   const load = useCallback(async () => {
     try {
-      const response = await fetch(apiUrl(basePath, '/_storyboard/site/list'))
+      const response = await fetch(apiUrl(basePath, localMode ? '/_storyboard/site/list' : '/hypercanvas.sites.json'))
       const data = await response.json()
       if (!response.ok) throw new Error(data?.error || 'Could not load Sites')
       setSites(Array.isArray(data?.sites) ? data.sites : [])
     } catch (cause) {
       setError(cause?.message || 'Could not load Sites')
     }
-  }, [basePath])
+  }, [basePath, localMode])
 
   useEffect(() => { load() }, [load])
 
@@ -139,6 +141,22 @@ export default function RunningSitesPanel({ basePath = '/' }) {
       {error && <div className="sb-sites-error">{error}</div>}
       {sites.length === 0 && !error && <div className="sb-sites-empty">No Sites registered.</div>}
       {sites.map(site => {
+        if (!localMode) {
+          return (
+            <section className="sb-site-item" key={site.id}>
+              <div className="sb-site-item-header">
+                <Icon name="iconoir/globe" size={16} />
+                <strong>{site.title || site.id}</strong>
+              </div>
+              {site.description && <p className="sb-site-item-id">{site.description}</p>}
+              <div className="sb-site-actions">
+                {site.productionUrl
+                  ? <a href={site.productionUrl} target="_blank" rel="noreferrer">Open production site</a>
+                  : <span className="sb-sites-empty">No production URL configured</span>}
+              </div>
+            </section>
+          )
+        }
         const running = site.binding?.status === 'running'
         const starting = site.binding?.status === 'starting'
         // Opening a Site now starts its stopped server (SitePage auto-start),

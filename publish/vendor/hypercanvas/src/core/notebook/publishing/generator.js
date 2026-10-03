@@ -21,6 +21,7 @@ import { Buffer } from 'node:buffer'
 import { fileURLToPath } from 'node:url'
 import ignore from 'ignore'
 import { inspectNotebook, NOTEBOOK_CONFIG_FILES, NOTEBOOK_MANIFEST_FILE, NOTEBOOK_PUBLISH_DIR, NOTEBOOK_DIRECTORIES } from '../notebook.js'
+import { SiteStore } from '../../site/site.js'
 import { materializeFromText } from '../../canvas/materializer.js'
 import { preparePublishedFrames } from '../frame-snapshot-publishing.js'
 import { publishingError } from './errors.js'
@@ -556,7 +557,7 @@ function normalRuntimeFiles(notebook, sourceFiles, basePath = './') {
   return files
 }
 
-function generatedFiles(notebook, pages, frames, sourceFiles, basePath = './', generatedNotebookFiles = {}) {
+function generatedFiles(notebook, pages, frames, sourceFiles, basePath = './', generatedNotebookFiles = {}, publishedSites = []) {
   const files = normalRuntimeFiles(notebook, sourceFiles, basePath)
   Object.assign(files, vendoredRuntimeFiles())
   Object.assign(files, generatedNotebookFiles)
@@ -578,6 +579,7 @@ function generatedFiles(notebook, pages, frames, sourceFiles, basePath = './', g
   files[PUBLICATION_MARKER_FILE] = jsonScript(publicationMarker(notebook, sourceFiles, Object.keys(generatedNotebookFiles))) + '\n'
   files[NOTEBOOK_MANIFEST_FILE] = jsonScript(notebook.manifest) + '\n'
   files[`public/${NOTEBOOK_MANIFEST_FILE}`] = jsonScript(notebook.manifest) + '\n'
+  files['public/hypercanvas.sites.json'] = jsonScript({ sites: publishedSites }) + '\n'
   files['publish-manifest.json'] = jsonScript({
     formatVersion: 1,
     title: notebook.manifest.title,
@@ -814,7 +816,13 @@ export async function materializeProject({ notebookRoot, destination, mode = 'ex
   const { directory } = ensureProjectDirectory({ destination, notebookRoot: notebook.root, mode })
   const previousMarker = readMarker(directory)
   const generatedNotebookFiles = generatedPrototypeMetadata(pages, sourceFiles)
-  const files = generatedFiles(notebook, pages, frames, sourceFiles, basePath, generatedNotebookFiles)
+  const publishedSites = new SiteStore(notebook.root).list().map(site => ({
+    id: site.id,
+    title: site.title,
+    ...(site.description ? { description: site.description } : {}),
+    productionUrl: site.deployments?.production?.baseUrl || null,
+  }))
+  const files = generatedFiles(notebook, pages, frames, sourceFiles, basePath, generatedNotebookFiles, publishedSites)
   files['package-lock.json'] = null
   preflightSourceFiles({
     notebookRoot: notebook.root,

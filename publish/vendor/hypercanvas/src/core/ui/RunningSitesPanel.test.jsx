@@ -1,4 +1,4 @@
-import { afterEach, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 import RunningSitesPanel from './RunningSitesPanel.jsx'
 import { setNavigationRouter } from '../navigation/sbNavigate.js'
@@ -7,9 +7,39 @@ function renderPanel(props = {}) {
   return render(<RunningSitesPanel {...props} />)
 }
 
+beforeEach(() => {
+  window.__SB_LOCAL_DEV__ = true
+})
+
 afterEach(() => {
   vi.unstubAllGlobals()
+  delete window.__SB_LOCAL_DEV__
   window.history.replaceState(null, '', '/')
+})
+
+it('loads static published Site metadata and links to available production URLs', async () => {
+  delete window.__SB_LOCAL_DEV__
+  const fetchMock = vi.fn(async input => {
+    expect(String(input)).toBe('/branch--preview/hypercanvas.sites.json')
+    return {
+      ok: true,
+      json: async () => ({ sites: [
+        { id: 'docs', title: 'Documentation', description: 'Product docs', productionUrl: 'https://docs.example.com/' },
+        { id: 'draft', title: 'Draft', productionUrl: null },
+      ] }),
+    }
+  })
+  vi.stubGlobal('fetch', fetchMock)
+
+  renderPanel({ basePath: '/branch--preview/' })
+
+  const link = await screen.findByRole('link', { name: 'Open production site' })
+  expect(link.getAttribute('href')).toBe('https://docs.example.com/')
+  expect(link.getAttribute('target')).toBe('_blank')
+  expect(screen.getByText('Product docs')).toBeTruthy()
+  expect(screen.getByText('No production URL configured')).toBeTruthy()
+  expect(screen.queryByRole('button', { name: 'Start' })).toBeNull()
+  expect(fetchMock).toHaveBeenCalledTimes(1)
 })
 
 it('keeps failures in the Sites tool panel without opening a duplicate Site sidebar', async () => {

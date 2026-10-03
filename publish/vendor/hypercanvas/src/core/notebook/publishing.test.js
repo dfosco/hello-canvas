@@ -207,6 +207,36 @@ describe('Notebook publishing contract', () => {
     expect(fs.existsSync(path.join(first, 'dist'))).toBe(false)
   })
 
+  it('publishes only Site descriptions and production URLs, never local bindings', async () => {
+    const notebook = temp('published-sites')
+    const destination = temp('published-sites-output')
+    initializeNotebook(notebook, { title: 'Published Sites' })
+    fs.mkdirSync(path.join(notebook, '.storyboard'), { recursive: true })
+    fs.writeFileSync(path.join(notebook, '.storyboard/sites.config.json'), JSON.stringify({
+      formatVersion: 1,
+      sites: {
+        docs: {
+          id: 'docs',
+          title: 'Documentation',
+          description: 'Product docs',
+          deployments: { production: { baseUrl: 'https://docs.example.com/' } },
+          binding: { source: 'managed', root: '/private/site/source', env: { API_TOKEN: 'private-token' } },
+        },
+        draft: { id: 'draft', title: 'Draft', deployments: {} },
+      },
+    }))
+
+    await materializeProject({ notebookRoot: notebook, destination, mode: 'external' })
+
+    const publishedSites = fs.readFileSync(path.join(destination, 'public/hypercanvas.sites.json'), 'utf8')
+    expect(JSON.parse(publishedSites)).toEqual({ sites: [
+      { id: 'docs', title: 'Documentation', description: 'Product docs', productionUrl: 'https://docs.example.com/' },
+      { id: 'draft', title: 'Draft', productionUrl: null },
+    ] })
+    expect(publishedSites).not.toContain('/private/site/source')
+    expect(publishedSites).not.toContain('private-token')
+  })
+
   it('copies arbitrary Notebook directories, honors ignore rules, and only removes stale owned files', async () => {
     const notebook = temp('publish-custom-folders-notebook')
     const project = temp('publish-custom-folders-project')
