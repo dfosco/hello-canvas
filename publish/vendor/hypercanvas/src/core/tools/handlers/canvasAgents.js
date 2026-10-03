@@ -8,6 +8,8 @@ export const id = 'canvas-agents'
 
 export async function guard(_ctx) {
   void _ctx
+  const { isLocalDev } = await import('../../utils/prodMode.js')
+  if (!isLocalDev()) return false
   const { getConfig } = await import('../../index.js')
   const canvasConfig = getConfig('canvas')
   const agents = canvasConfig?.agents
