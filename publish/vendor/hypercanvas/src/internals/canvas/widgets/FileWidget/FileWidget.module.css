@@ -1,0 +1,359 @@
+.file {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--tc-font-stack, system-ui, -apple-system, sans-serif);
+}
+
+/* ── Content area ──────────────────────────────────────────────────── */
+
+.contentArea {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.editorWrap {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.viewerWrap {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* ── Markdown textarea editor ──────────────────────────────────────── */
+
+.markdownEditor {
+  display: block;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 16px 20px;
+  border: none;
+  outline: none;
+  background: var(--color-background);
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-foreground);
+  resize: none;
+}
+
+/* ── Title bar ─────────────────────────────────────────────────────── */
+
+.titleBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 10px 6px 12px;
+  background: var(--color-background-muted);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--color-foreground);
+  min-width: 0;
+}
+
+.titleLeft {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
+.titleName {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.titleRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.titlePath {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 11px;
+  color: var(--color-foreground-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 240px;
+  direction: rtl;
+  text-align: left;
+}
+
+.saveButton {
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  cursor: pointer;
+  transition: background 0.12s ease, opacity 0.12s ease;
+}
+
+.saveButton:hover:not(:disabled) {
+  background: var(--color-background-muted);
+}
+
+.saveButton:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* ── Title accessory (legacy, kept for backward compat) ────────────── */
+
+.titleAccessory {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 11px;
+  color: var(--color-foreground-muted);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.dirtyDot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-foreground-warning, #d29922);
+  flex-shrink: 0;
+}
+
+/* ── Banner ────────────────────────────────────────────────────────── */
+
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--color-background-muted);
+  border-bottom: 1px solid var(--color-border);
+  font-size: 12px;
+  color: var(--color-foreground-muted);
+  flex-shrink: 0;
+}
+
+.bannerButton {
+  padding: 2px 8px;
+  font-size: 11px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.bannerButton:hover {
+  background: var(--color-background-muted);
+}
+
+/* ── Empty state ───────────────────────────────────────────────────── */
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px 20px;
+  text-align: center;
+  color: var(--color-foreground-muted);
+  font-size: 13px;
+}
+
+.emptyState p {
+  margin: 0;
+}
+
+.pickFileButton {
+  padding: 6px 16px;
+  font-size: 13px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-background-muted);
+  color: var(--color-foreground);
+  cursor: pointer;
+}
+
+.pickFileButton:hover {
+  background: var(--color-background);
+  border-color: var(--color-border-emphasis);
+}
+
+/* ── Error card ────────────────────────────────────────────────────── */
+
+.errorCard {
+  margin: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-foreground-danger, #f85149);
+  background: var(--color-background-muted);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.errorTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-foreground-danger, #f85149);
+  font-family: var(--tc-font-stack, system-ui, -apple-system, sans-serif);
+}
+
+.errorPath {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 11px;
+  color: var(--color-foreground-muted);
+  word-break: break-all;
+}
+
+.errorMessage {
+  font-size: 12px;
+  color: var(--color-foreground);
+  margin: 0;
+  font-family: var(--tc-font-stack, system-ui, -apple-system, sans-serif);
+}
+
+.removeButton {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 4px 10px;
+  font-size: 11px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-background);
+  color: var(--color-foreground-muted);
+  cursor: pointer;
+}
+
+.removeButton:hover {
+  color: var(--color-foreground-danger, #f85149);
+  border-color: var(--color-foreground-danger, #f85149);
+}
+
+/* ── Unsupported state ─────────────────────────────────────────────── */
+
+.unsupportedState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px 20px;
+  text-align: center;
+  color: var(--color-foreground-muted);
+  font-size: 13px;
+}
+
+.unsupportedPath {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 11px;
+  color: var(--color-foreground-muted);
+}
+
+/* ── Loading placeholder (mirrors PrototypeEmbed for visual consistency) ── */
+
+.loadingPlaceholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--color-background-muted, #f6f8fa);
+  color: var(--color-foreground-muted, #656d76);
+  z-index: 2;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-border-muted, #d0d7de);
+  border-top-color: var(--color-foreground-accent, #2f81f7);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ── Expanded views ────────────────────────────────────────────────── */
+
+.expandedEditorWrap {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--color-background);
+}
+
+.expandedEditor {
+  display: block;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 32px 40px;
+  border: none;
+  outline: none;
+  resize: none;
+  background: var(--color-background);
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-foreground);
+  overflow: auto;
+}
+
+.expandedPreview {
+  flex: 1;
+  overflow: auto;
+}
+
+.placeholder {
+  color: var(--color-foreground-muted);
+  font-style: italic;
+}

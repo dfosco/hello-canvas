@@ -1,0 +1,221 @@
+name: Deploy branch preview
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - gh-pages
+  delete:
+
+concurrency:
+  group: gh-pages-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy-preview:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Derive branch folder name
+        id: branch
+        run: |
+          # Sanitize branch name: replace non-alphanumeric chars with hyphens
+          BRANCH_NAME="${GITHUB_REF_NAME}"
+          SAFE_NAME=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9._-]/-/g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//')
+          FOLDER="branch--${SAFE_NAME}"
+
+          echo "folder=$FOLDER" >> "$GITHUB_OUTPUT"
+          echo "base=/${FOLDER}/" >> "$GITHUB_OUTPUT"
+          echo "Preview folder: $FOLDER"
+          echo "Base path: /${FOLDER}/"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build with custom base path
+        run: npm run build
+        env:
+          VITE_BASE_PATH: ${{ steps.branch.outputs.base }}
+
+      - name: Deploy preview to gh-pages
+        run: |
+          set -e
+          FOLDER="${{ steps.branch.outputs.folder }}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin gh-pages:gh-pages 2>/dev/null || true
+          DEPLOY_DIR=$(mktemp -d)
+          if git show-ref --verify --quiet refs/heads/gh-pages; then
+            git worktree add "$DEPLOY_DIR" gh-pages
+          else
+            git worktree add --orphan "$DEPLOY_DIR" gh-pages
+            rm -rf "$DEPLOY_DIR"/*
+          fi
+
+          # Replace only this branch's folder
+          cd "$DEPLOY_DIR"
+          rm -rf "$FOLDER"
+          mkdir -p "$FOLDER"
+          cp -r "$GITHUB_WORKSPACE/dist/." "$FOLDER/"
+
+          # Ensure .nojekyll exists at root (GitHub Pages ignores _-prefixed dirs without it)
+          touch .nojekyll
+
+          git add -A
+          git diff --cached --quiet && echo "No changes to deploy" && exit 0
+          git commit -m "Deploy preview: $FOLDER @ $(echo $GITHUB_SHA | head -c 7)"
+          git push origin gh-pages
+
+      - name: Generate branch manifest
+        run: |
+          set -e
+          # Remove stale worktrees from previous steps
+          git worktree list --porcelain | awk '/^worktree \/tmp/{print $2}' | while read wt; do
+            git worktree remove --force "$wt" 2>/dev/null || true
+          done
+          git fetch origin gh-pages:gh-pages 2>/dev/null || true
+          DEPLOY_DIR=$(mktemp -d)
+          git worktree add "$DEPLOY_DIR" gh-pages
+
+          cd "$DEPLOY_DIR"
+
+          echo '[' > branches.json
+          FIRST=true
+          for dir in branch--*/; do
+            [ -d "$dir" ] || continue
+            FOLDER="${dir%/}"
+            BRANCH="${FOLDER#branch--}"
+            if [ "$FIRST" = true ]; then
+              FIRST=false
+            else
+              echo ',' >> branches.json
+            fi
+            printf '  {"folder":"%s","branch":"%s"}' "$FOLDER" "$BRANCH" >> branches.json
+          done
+          echo '' >> branches.json
+          echo ']' >> branches.json
+
+          git add branches.json
+          git diff --cached --quiet && echo "Manifest unchanged" && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update branch manifest"
+          git push origin gh-pages
+
+      - name: Generate artifacts index
+        run: |
+          set -e
+          # Remove stale worktrees from previous steps
+          git worktree list --porcelain | awk '/^worktree \/tmp/{print $2}' | while read wt; do
+            git worktree remove --force "$wt" 2>/dev/null || true
+          done
+          git fetch origin gh-pages:gh-pages 2>/dev/null || true
+          DEPLOY_DIR=$(mktemp -d)
+          git worktree add "$DEPLOY_DIR" gh-pages
+
+          node "$GITHUB_WORKSPACE/.github/workflows/scripts/aggregate-artifacts.mjs" "$DEPLOY_DIR"
+
+          cd "$DEPLOY_DIR"
+          git add artifacts.index.json
+          git diff --cached --quiet && echo "Artifacts index unchanged" && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update artifacts index"
+          git push origin gh-pages
+
+      - name: Print preview URL
+        run: |
+          echo "## 🔗 Branch Preview" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview deployed at: ${{ steps.branch.outputs.base }}" >> "$GITHUB_STEP_SUMMARY"
+
+  cleanup-preview:
+    if: github.event_name == 'delete' && github.event.ref_type == 'branch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout gh-pages
+        uses: actions/checkout@v6
+        with:
+          ref: gh-pages
+
+      - name: Remove branch preview folder
+        run: |
+          set -e
+          BRANCH_NAME="${{ github.event.ref }}"
+          SAFE_NAME=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9._-]/-/g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//')
+          FOLDER="branch--${SAFE_NAME}"
+
+          if [ -d "$FOLDER" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+
+            rm -rf "$FOLDER"
+            git add -A
+            git commit -m "Remove preview: $FOLDER"
+            git push origin gh-pages
+            echo "Removed preview: $FOLDER"
+          else
+            echo "No preview folder found for: $FOLDER"
+          fi
+
+      - name: Generate branch manifest
+        run: |
+          set -e
+
+          echo '[' > branches.json
+          FIRST=true
+          for dir in branch--*/; do
+            [ -d "$dir" ] || continue
+            FOLDER="${dir%/}"
+            BRANCH="${FOLDER#branch--}"
+            if [ "$FIRST" = true ]; then
+              FIRST=false
+            else
+              echo ',' >> branches.json
+            fi
+            printf '  {"folder":"%s","branch":"%s"}' "$FOLDER" "$BRANCH" >> branches.json
+          done
+          echo '' >> branches.json
+          echo ']' >> branches.json
+
+          git add branches.json
+          git diff --cached --quiet && echo "Manifest unchanged" && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update branch manifest"
+          git push origin gh-pages
+
+      # cleanup-preview does not install npm dependencies. Check out the source
+      # tree separately so the checked-in workflow helper can run with plain Node.
+      - name: Checkout source workflow scripts
+        uses: actions/checkout@v6
+        with:
+          path: source
+
+      - name: Generate artifacts index
+        run: |
+          set -e
+          node source/.github/workflows/scripts/aggregate-artifacts.mjs "$GITHUB_WORKSPACE"
+
+          git add artifacts.index.json
+          git diff --cached --quiet && echo "Artifacts index unchanged" && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update artifacts index"
+          git push origin gh-pages

@@ -1,0 +1,142 @@
+/*
+  Comment layout styles — positioning, pins, overlay, cursor, animations.
+  These support the vanilla DOM elements created by mount.js (pins, overlay, banner).
+  UI components (AuthModal, Composer, etc.) are styled via Tailwind/shadcn.
+*/
+
+/* Comment mode cursor */
+.sb-comment-mode {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' stroke='%231f2328' stroke-width='1.5' d='M19.503 9.97c1.204.489 1.112 2.224-.137 2.583l-6.305 1.813-2.88 5.895c-.571 1.168-2.296.957-2.569-.314L4.677 6.257A1.369 1.369 0 0 1 6.53 4.7z' clip-rule='evenodd'/%3E%3C/svg%3E") 4 2, crosshair;
+  position: relative;
+}
+[data-sb-theme^="dark"] .sb-comment-mode,
+[data-sb-theme^="dark"].sb-comment-mode {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%231c2128' stroke='%23fff' stroke-width='1.5' d='M19.503 9.97c1.204.489 1.112 2.224-.137 2.583l-6.305 1.813-2.88 5.895c-.571 1.168-2.296.957-2.569-.314L4.677 6.257A1.369 1.369 0 0 1 6.53 4.7z' clip-rule='evenodd'/%3E%3C/svg%3E") 4 2, crosshair;
+}
+
+/* Comment overlay */
+.sb-comment-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 99998;
+  pointer-events: none;
+}
+.sb-comment-mode .sb-comment-overlay {
+  pointer-events: auto;
+}
+
+/* Comment pin */
+.sb-comment-pin {
+  position: absolute;
+  border: 3px solid hsl(var(--sb--pin-hue, 140), 50%, 38%);
+  border-radius: 50%;
+  z-index: 100000;
+  width: 32px; height: 32px;
+  margin-left: -16px; margin-top: -16px;
+  transition: transform 100ms ease-in-out;
+  cursor: grab;
+  pointer-events: auto;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  background: var(--color-popover, #fff);
+}
+.sb-comment-pin:active { cursor: grabbing; }
+.sb-pin-img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 50%; }
+.sb-comment-pin[data-resolved="true"] {
+  border-color: var(--color-foreground-muted, #848d97);
+  opacity: 0.5;
+}
+.sb-comment-pin-pending {
+  border-color: var(--color-foreground-muted, #848d97) !important;
+  opacity: 0.6;
+  animation: sb-pin-pulse 1.2s ease-in-out infinite;
+}
+.sb-comment-pin-failed {
+  border-color: var(--color-destructive, #d1242f) !important;
+  cursor: pointer;
+  animation: sb-pin-shake 0.4s ease-in-out;
+}
+@keyframes sb-pin-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+@keyframes sb-pin-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+
+/* Comment composer positioning */
+.sb-composer {
+  position: absolute;
+  width: 280px;
+  z-index: 100001;
+  background: var(--color-popover, #fff);
+  color: var(--color-popover-foreground, #1f2328);
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  overflow: hidden;
+  font-family: "Hubot Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+/* Comment window positioning */
+.sb-comment-window {
+  width: 360px;
+  max-height: 480px;
+  z-index: 100001;
+  scrollbar-width: none;
+  background: var(--color-popover, #fff);
+  color: var(--color-popover-foreground, #1f2328);
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  overflow: hidden;
+}
+.sb-comment-window::-webkit-scrollbar { display: none; }
+.sb-comment-window * { scrollbar-width: none; }
+.sb-comment-window *::-webkit-scrollbar { display: none; }
+
+/* Auth modal positioning */
+.sb-auth-backdrop {
+  z-index: 100000;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+}
+
+/* Comments drawer */
+.sb-comments-drawer-backdrop { z-index: 99997; background: rgba(0,0,0,0.4); }
+.sb-comments-drawer {
+  z-index: 99998;
+  width: 420px;
+  max-width: 90vw;
+  background: var(--color-background, #fff);
+  color: var(--color-foreground, #1f2328);
+}
+
+/* Drawer animation */
+@keyframes sb-drawer-slide-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+.sb-drawer-animate { animation: sb-drawer-slide-in 150ms ease; }
+
+/* Banner */
+.sb-banner {
+  position: fixed;
+  bottom: 12px; left: 50%; transform: translateX(-50%);
+  z-index: 99999;
+  background: var(--color-popover, #fff);
+  color: var(--color-popover-foreground, #1f2328);
+  padding: 6px 16px; border-radius: 8px; font-size: 13px;
+  line-height: 1.4; backdrop-filter: blur(12px);
+  pointer-events: none;
+  display: flex; align-items: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  font-family: "Hubot Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+.sb-kbd {
+  display: inline-block; padding: 1px 6px; font-size: 11px;
+  font-family: inherit; border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 4px; background: rgba(255,255,255,0.1);
+}

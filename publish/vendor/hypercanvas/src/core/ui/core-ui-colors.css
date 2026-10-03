@@ -1,0 +1,99 @@
+/**
+ * Core UI Colors — toolbar theme tokens.
+ *
+ * The CoreUIBar and its children (trigger buttons, dropdowns, menus)
+ * default to light-mode colors. When the user enables toolbar theme sync,
+ * `data-sb-toolbar-theme` switches to the active theme and dark tokens
+ * are applied.
+ *
+ * These override the shadcn/Tailwind design tokens within the
+ * [data-core-ui-bar] scope so that CSS custom-property dark-mode
+ * overrides have no visual effect on semantic tokens.
+ *
+ * Dropdown menus render via a portal (appended to body), so they fall
+ * outside [data-core-ui-bar]. We also scope the tokens to the portaled
+ * dropdown content slots.
+ *
+ * TriggerButton uses the `trigger` button variant (no Tailwind dark:
+ * classes) so its scoped CSS has full control over background/color.
+ *
+ * Concrete color values are pinned (not aliased) so toolbar styling
+ * stays locked to its own scheme regardless of the global theme cascade
+ * defined in `core/styles/tailwind.css`.
+ */
+
+/* Slate palette tokens — global light values.
+   Trigger buttons, the canvas toolbar, collab bar, and connector style button
+   render outside the [data-core-ui-bar] scope (below), and their CSS resolves
+   colors via var(--sb--trigger-*, var(--color-slate-N)) fallbacks. The
+   --sb--trigger-* variables are only set for dark toolbar mode (modes.css) and
+   mode collars, so in light mode these slate fallbacks must resolve globally.
+   Values match Tailwind's default slate palette. */
+:root {
+  --color-slate-100: oklch(96.8% .007 247.896);
+  --color-slate-300: oklch(86.9% .022 252.894);
+  --color-slate-400: oklch(70.4% .04 256.788);
+  --color-slate-600: oklch(44.6% .043 257.281);
+}
+
+/* Default: light tokens */
+[data-core-ui-bar],
+[data-sidepanel],
+[data-slot="dropdown-menu-content"],
+[data-slot="dropdown-menu-sub-content"],
+[data-slot="command-palette-content"],
+[data-slot="dialog-overlay"] {
+  color-scheme: light;
+
+  --color-background: #ffffff;
+  --color-foreground: #1f2328;
+  --color-foreground-muted: #59636e;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #1f2328;
+  --color-primary: #1f2328;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #f6f8fa;
+  --color-secondary-foreground: #1f2328;
+  --color-muted: #f6f8fa;
+  --color-muted-foreground: #59636e;
+  --color-accent: #ddf4ff;
+  --color-accent-foreground: #0969da;
+  --color-border: #d1d9e0;
+  --color-border-muted: #d1d9e0b3;
+  --color-background-neutral-muted: rgba(175, 184, 193, 0.2);
+  --color-input: #d1d9e0;
+}
+
+/* Dark tokens — applied when toolbar syncs with a dark theme. */
+:root[data-sb-toolbar-theme^="dark"] [data-core-ui-bar],
+:root[data-sb-toolbar-theme^="dark"] [data-sidepanel],
+:root[data-sb-toolbar-theme^="dark"] [data-slot="dropdown-menu-content"],
+:root[data-sb-toolbar-theme^="dark"] [data-slot="dropdown-menu-sub-content"],
+:root[data-sb-toolbar-theme^="dark"] [data-slot="command-palette-content"],
+:root[data-sb-toolbar-theme^="dark"] [data-slot="dialog-overlay"] {
+  color-scheme: dark;
+
+  --color-background: #161b22;
+  --color-foreground: #e6edf3;
+  --color-foreground-muted: #8b949e;
+  --color-popover: #161b22;
+  --color-popover-foreground: #e6edf3;
+  --color-primary: #e6edf3;
+  --color-primary-foreground: #161b22;
+  --color-secondary: #21262d;
+  --color-secondary-foreground: #e6edf3;
+  --color-muted: #21262d;
+  --color-muted-foreground: #8b949e;
+  --color-accent: #388bfd1a;
+  --color-accent-foreground: #4493f8;
+  --color-border: #30363d;
+  --color-border-muted: #30363db3;
+  --color-background-neutral-muted: rgba(110, 118, 129, 0.2);
+  --color-input: #30363d;
+
+  /* Slate palette tokens — dark equivalents */
+  --color-slate-100: oklch(20.8% .042 265.755);
+  --color-slate-300: oklch(29.3% .042 264.531);
+  --color-slate-400: oklch(44.6% .043 257.281);
+  --color-slate-600: oklch(44.6% .043 257.281);
+}

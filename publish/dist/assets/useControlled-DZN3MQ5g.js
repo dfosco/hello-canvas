@@ -1,0 +1,1 @@
+var f=Object.defineProperty;var o=(e,t)=>f(e,"name",{value:t,configurable:!0});import{c as a}from"./vendor-react-PJCXJ5Vl.js";function p({controlled:e,default:t,name:i,state:d="value"}){const{current:s}=a.useRef(e!==void 0),[u,l]=a.useState(t),n=s?e:u,r=a.useCallback(c=>{s||l(c)},[]);return[n,r]}o(p,"useControlled");export{p as u};

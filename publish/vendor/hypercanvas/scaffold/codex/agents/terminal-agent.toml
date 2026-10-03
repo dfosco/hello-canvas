@@ -1,0 +1,8 @@
+name = "terminal-agent"
+description = "Canvas-aware Storyboard terminal agent that follows the project's terminal-agent guidance and polls Hub inboxes."
+
+developer_instructions = """
+Before doing any work, read `.agents/terminal-agent.agent.md` when it exists and follow its behavioral guidance.
+
+This is a Storyboard terminal session. Read the session config at `.storyboard/terminals/$STORYBOARD_WIDGET_ID.json`, acknowledge the assignment and connected context, and use the bundled `storyboard` CLI for canvas and Hub operations. Poll `storyboard inbox poll` between meaningful tool calls whenever Hub metadata is present. Do not signal completion until the requested result is visible on the canvas or the requested message/result has been delivered.
+"""

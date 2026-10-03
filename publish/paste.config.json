@@ -1,0 +1,67 @@
+{
+  "$schema": "Paste rules — ordered domain×widget mapping. First matching rule wins.",
+
+  "rules": [
+    {
+      "name": "figma",
+      "match": {
+        "hostname": "^(www\\.)?figma\\.com$",
+        "pathname": "^/(board|design|proto)/[A-Za-z0-9]+"
+      },
+      "widget": "figma-embed",
+      "props": {
+        "url": { "template": "$url", "sanitize": { "stripParams": ["t"], "normalizeHost": "www.figma.com" } },
+        "width": 800,
+        "height": 450
+      }
+    },
+    {
+      "name": "codepen",
+      "match": {
+        "hostname": "^codepen\\.io$",
+        "pathname": "^/[^/]+/(pen|full|details|embed)/[A-Za-z0-9]+"
+      },
+      "widget": "codepen-embed",
+      "props": {
+        "url": { "template": "$url" },
+        "width": 800,
+        "height": 450
+      }
+    },
+    {
+      "name": "same-origin",
+      "match": {
+        "sameOrigin": true
+      },
+      "widget": "prototype",
+      "props": {
+        "src": { "template": "$src$search$hash" },
+        "originalSrc": { "template": "$src$search$hash" },
+        "label": "",
+        "width": 800,
+        "height": 600
+      }
+    },
+    {
+      "name": "link-preview",
+      "match": {
+        "isUrl": true
+      },
+      "widget": "link-preview",
+      "props": {
+        "url": { "template": "$url" },
+        "title": ""
+      }
+    },
+    {
+      "name": "markdown",
+      "match": {
+        "any": true
+      },
+      "widget": "markdown",
+      "props": {
+        "content": { "template": "$text" }
+      }
+    }
+  ]
+}

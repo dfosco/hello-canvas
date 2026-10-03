@@ -1,0 +1,169 @@
+/* tiny-canvas styles */
+
+:root {
+  --tc-border-radius: var(--radius, 12px);
+  --tc-shadow-rest: var(--shadow-resting, 0 1px 3px rgba(0, 0, 0, 0.12));
+  --tc-shadow-float: var(--shadow-floating, 0 4px 12px rgba(0, 0, 0, 0.15));
+  --tc-border-color: var(--color-border-muted, rgba(0, 0, 0, 0.15));
+  --tc-bg-muted: var(--color-background-muted, #f6f8fa);
+  --tc-dot-color: var(--color-overlay-backdrop, rgba(0, 0, 0, 0.08));
+  --tc-grid-size: var(--golden-number, 36px);
+  --tc-grid-offset: calc(var(--tc-grid-size) / -2);
+  --tc-dot-radius: 2px;
+  --tc-font-stack: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Canvas */
+
+.tc-canvas {
+  min-width: max(100vw, 10000px);
+  min-height: max(100vh, 10000px);
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  font-family: var(--tc-font-stack);
+  position: relative;
+  background-color: var(--tc-bg-muted);
+  color-scheme: light dark;
+}
+
+/* Canvas surface sizing — consumer-controlled via `canvas.surface.*` in
+ * storyboard.config.json (see canvasInteractionStore.js). The store
+ * toggles these `<html>` data attrs; CSS clamps each axis independently
+ * so e.g. width can be viewport-locked while height stays "auto" with
+ * the 10000px pannable floor.
+ *
+ * `overflow-{x,y}: hidden` is required on the constrained axis so that
+ * widgets positioned past the surface bounds (absolute-positioned
+ * Draggables) don't contribute to the scroll container's scrollWidth /
+ * scrollHeight at 100% zoom. CSS transforms (the zoom scaling on
+ * `.canvasZoom`) ink-overflow past `overflow: hidden`, so zoom-in still
+ * produces real scroll on the scroller — only the in-bounds layout is
+ * clipped. */
+html[data-canvas-surface-width="viewport"] .tc-canvas {
+  min-width: 100vw;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+html[data-canvas-surface-height="viewport"] .tc-canvas {
+  min-height: 100vh;
+  max-height: 100vh;
+  overflow-y: hidden;
+}
+
+.tc-canvas[data-color-mode="light"] {
+  color-scheme: light;
+}
+
+.tc-canvas[data-color-mode="dark"] {
+  color-scheme: dark;
+}
+
+.tc-canvas[data-dotted] {
+  background-image: radial-gradient(var(--tc-dot-color) var(--tc-dot-radius), transparent var(--tc-dot-radius));
+  background-size: var(--tc-grid-size) var(--tc-grid-size);
+  background-position: var(--tc-grid-offset) var(--tc-grid-offset);
+}
+
+/* Dark mode — system preference (auto) */
+
+@media (prefers-color-scheme: dark) {
+  .tc-canvas:not([data-color-mode="light"]) {
+    --tc-bg-muted: var(--color-background-muted, #161b22);
+    --tc-dot-color: var(--color-overlay-backdrop, rgba(255, 255, 255, 0.1));
+    --tc-border-color: var(--color-border-muted, rgba(255, 255, 255, 0.15));
+    --tc-shadow-rest: var(--shadow-resting, 0 1px 3px rgba(0, 0, 0, 0.3));
+    --tc-shadow-float: var(--shadow-floating, 0 4px 12px rgba(0, 0, 0, 0.4));
+  }
+}
+
+/* Dark mode — explicit override */
+
+.tc-canvas[data-color-mode="dark"] {
+  --tc-bg-muted: var(--color-background-muted, #161b22);
+  --tc-dot-color: var(--color-overlay-backdrop, rgba(255, 255, 255, 0.1));
+  --tc-border-color: var(--color-border-muted, rgba(255, 255, 255, 0.15));
+  --tc-shadow-rest: var(--shadow-resting, 0 1px 3px rgba(0, 0, 0, 0.3));
+  --tc-shadow-float: var(--shadow-floating, 0 4px 12px rgba(0, 0, 0, 0.4));
+}
+
+/* Draggable */
+
+body .tc-draggable-inner:not(:active) {
+  touch-action: none;
+}
+
+.tc-on-translation {
+  transition: transform calc(var(--tc-translation-ms, 150ms) + var(--tc-translation-delay-ms, 50ms))
+    cubic-bezier(0.78, 0.1, 0.51, 0.78) var(--tc-translation-delay-ms, 50ms);
+}
+
+.tc-drag {
+  position: absolute;
+  width: fit-content;
+}
+
+/* Flow-layout mode — widgets sit in normal document flow. Position:
+ * static so they participate in block / flex / grid layouts dictated by
+ * the consumer's CSS, and width: auto so author-provided classes can
+ * control sizing via @media queries. The translate3d on the article
+ * still works as a drag-time offset without removing the widget from
+ * flow. */
+.tc-drag[data-layout="flow"] {
+  position: static;
+  width: auto;
+}
+
+/* In flow mode the canvas has no spatial surface — it should size to
+ * its contents and never paint the grid/dotted background. */
+.tc-canvas[data-layout="flow"] {
+  min-width: 0;
+  min-height: 0;
+  width: auto;
+  height: auto;
+  background-color: transparent;
+  background-image: none;
+  position: static;
+}
+
+.tc-canvas[data-layout="flow"][data-dotted] {
+  background-image: none;
+}
+
+.tc-draggable-inner {
+  position: relative;
+  width: fit-content;
+  height: min-content;
+}
+
+.tc-draggable-inner::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  border-radius: var(--tc-border-radius);
+  box-shadow: var(--tc-shadow-float);
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.tc-on-translation .tc-draggable-inner::after,
+.tc-draggable-inner:active::after,
+.tc-draggable-inner:hover::after {
+  opacity: 0;
+}
+
+.tc-on-translation .tc-draggable-inner,
+.tc-draggable-inner:active,
+.tc-draggable-inner:hover {
+  outline: none;
+}
+
+.tc-canvas[data-locked] * {
+  cursor: default !important;
+}
+
+/* Allow text selection inside draggable items */

@@ -1,0 +1,222 @@
+.embed {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-background, #ffffff);
+  border: 3px solid var(--color-border, #d0d7de);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-foreground-muted, #656d76);
+  background: var(--color-background-muted, #f6f8fa);
+  border-bottom: 1px solid var(--color-border-muted, #d8dee4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: none;
+}
+
+.figmaLogo {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.headerTitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.iframeContainer {
+  width: 100%;
+  height: calc(100% - 10px); /* subtract header height */
+  overflow: hidden;
+}
+
+.iframe {
+  width: 100%;
+  height: calc(100% + 24px); /* clip Figma's built-in bottom toolbar */
+  border: none;
+  display: block;
+}
+
+.resizeHandle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 16px;
+  height: 16px;
+  cursor: nwse-resize;
+  background: linear-gradient(
+    135deg,
+    transparent 40%,
+    var(--color-border-muted, rgba(0, 0, 0, 0.15)) 40%,
+    var(--color-border-muted, rgba(0, 0, 0, 0.15)) 50%,
+    transparent 50%,
+    transparent 65%,
+    var(--color-border-muted, rgba(0, 0, 0, 0.15)) 65%,
+    var(--color-border-muted, rgba(0, 0, 0, 0.15)) 75%,
+    transparent 75%
+  );
+  opacity: 0;
+  transition: opacity 150ms;
+  z-index: 2;
+}
+
+.embed:hover ~ .resizeHandle,
+.resizeHandle:hover {
+  opacity: 1;
+}
+
+/* Expand modal — fullscreen overlay for expanded iframe */
+.expandBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: expandFadeIn 0.15s ease;
+}
+
+@keyframes expandFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.expandContainer {
+  width: 90vw;
+  height: 90vh;
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--color-background, #ffffff);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
+  animation: expandScaleIn 0.2s ease;
+}
+
+@keyframes expandScaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.expandIframe {
+  border: none;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.expandClose {
+  all: unset;
+  cursor: pointer;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #ffffff;
+  font-size: 16px;
+  z-index: 1;
+  transition: background 100ms;
+  backdrop-filter: blur(4px);
+}
+
+.expandClose:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+/* ── Split-screen layout ──────────────────────────────────────────── */
+
+.expandContainerSplit {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  background: var(--color-background, #ffffff);
+}
+
+.expandSplitBody {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: expandScaleIn 0.2s ease;
+}
+
+.expandSplitPanes {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.expandSplitLeft {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  border-right: 1px solid var(--color-border-muted, #d8dee4);
+}
+
+.expandSplitRight {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.expandSecondary {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background: var(--color-background, #ffffff);
+}
+
+.expandSecondaryIframe {
+  border: none;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.expandTerminal {
+  width: 100%;
+  height: 100%;
+  background: #0d1117;
+}
+
+.emptyState {
+  width: 100%;
+  height: calc(100% - 10px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.emptyIcon {
+  color: var(--color-foreground-muted, #656d76);
+  opacity: 0.5;
+}
+
+.emptyLabel {
+  color: var(--color-foreground-muted, #656d76);
+  font-size: 13px;
+  font-style: italic;
+}

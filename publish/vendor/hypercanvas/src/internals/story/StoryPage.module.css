@@ -1,0 +1,18 @@
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  color: var(--color-foreground-muted, #656d76);
+  font-size: 0.875rem;
+}
+
+.error {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 1rem;
+  color: var(--color-foreground-danger, #cf222e);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}

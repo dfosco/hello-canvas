@@ -1,0 +1,125 @@
+.panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10000;
+  width: min(340px, calc(100vw - 48px));
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: var(--color-foreground);
+  background: var(--color-background);
+  border: 1px solid var(--color-border-muted);
+  border-radius: 14px;
+  box-shadow: var(--shadow-floating);
+  font-family: var(--font-sans);
+  opacity: 1;
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.panel[hidden] {
+  display: none;
+}
+
+.panel[data-dragging='true'] {
+  transition: none;
+  user-select: none;
+}
+
+.header {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 40px;
+  align-items: center;
+  min-height: 36px;
+  background: var(--color-background-muted);
+  border-bottom: 1px solid var(--color-border-muted);
+}
+
+.dragHandle {
+  width: 40px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-foreground-muted);
+  background: transparent;
+  border: 0;
+  cursor: grab;
+  touch-action: none;
+}
+
+.dragHandle:active,
+.panel[data-dragging='true'] .dragHandle {
+  cursor: grabbing;
+}
+
+.grip {
+  display: grid;
+  grid-template-columns: repeat(2, 3px);
+  gap: 3px;
+}
+
+.gripDot {
+  width: 3px;
+  height: 3px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.title {
+  min-width: 0;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.panel[data-dragging='true'] .title {
+  cursor: grabbing;
+}
+
+.closeButton {
+  width: 30px;
+  height: 30px;
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-foreground-muted);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.closeButton:hover {
+  color: var(--color-foreground);
+  background: var(--color-background-neutral-muted);
+}
+
+.body {
+  min-height: 0;
+  overflow: auto;
+  padding: 22px;
+}
+
+.emptyState {
+  padding: 18px;
+  color: var(--color-foreground-muted);
+  background: var(--color-background-muted);
+  border: 1px dashed var(--color-border-muted);
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.45;
+}

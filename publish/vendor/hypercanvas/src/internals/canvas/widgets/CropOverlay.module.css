@@ -1,0 +1,154 @@
+/* ── Crop overlay ─────────────────────────────────────────── */
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  cursor: default;
+}
+
+.cropRegion {
+  position: absolute;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3), 0 0 0 9999px rgba(0, 0, 0, 0.5);
+  cursor: move;
+  z-index: 11;
+}
+
+/* Rule-of-thirds grid */
+.cropRegion::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to right, rgba(255,255,255,0.3) 1px, transparent 1px) 33.33% 0 / 33.34% 100%,
+    linear-gradient(to bottom, rgba(255,255,255,0.3) 1px, transparent 1px) 0 33.33% / 100% 33.34%;
+  pointer-events: none;
+}
+
+/* ── Drag handles ─────────────────────────────────────────── */
+
+.handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #ffffff;
+  border: 2px solid var(--color-foreground-accent, #0969da);
+  border-radius: 2px;
+  z-index: 12;
+}
+
+.handleNW { top: -6px; left: -6px; cursor: nw-resize; }
+.handleNE { top: -6px; right: -6px; cursor: ne-resize; }
+.handleSW { bottom: -6px; left: -6px; cursor: sw-resize; }
+.handleSE { bottom: -6px; right: -6px; cursor: se-resize; }
+.handleN  { top: -6px; left: 50%; transform: translateX(-50%); cursor: n-resize; }
+.handleS  { bottom: -6px; left: 50%; transform: translateX(-50%); cursor: s-resize; }
+.handleW  { left: -6px; top: 50%; transform: translateY(-50%); cursor: w-resize; }
+.handleE  { right: -6px; top: 50%; transform: translateY(-50%); cursor: e-resize; }
+
+/* ── Crop confirmation bar (rendered outside widget by ImageWidget) ── */
+
+.cropBar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: var(--color-background, #ffffff);
+  border: 1.6px solid var(--color-border-muted, #d0d7de);
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  white-space: nowrap;
+  pointer-events: auto;
+}
+
+:global([data-sb-canvas-theme^='dark']) .cropBar {
+  background: var(--color-background-muted, #161b22);
+  border-color: var(--color-border-muted, #373e47);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.cropBarBtn {
+  all: unset;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-foreground, #1f2328);
+  transition: background 100ms;
+}
+
+:global([data-sb-canvas-theme^='dark']) .cropBarBtn {
+  color: var(--color-foreground, #e6edf3);
+}
+
+.cropBarBtn:hover {
+  background: var(--color-background-neutral-muted, #eaeef2);
+}
+
+:global([data-sb-canvas-theme^='dark']) .cropBarBtn:hover {
+  background: var(--color-background-neutral-muted, #272c33);
+}
+
+.cropBarBtnSave {
+  background: var(--color-background-success-emphasis, #1a7f37);
+  color: var(--color-foreground-on-emphasis, #ffffff);
+}
+
+.cropBarBtnSave:hover {
+  background: var(--color-background-success-emphasis, #2da44e);
+  filter: brightness(1.1);
+}
+
+:global([data-sb-canvas-theme^='dark']) .cropBarBtnSave {
+  background: var(--color-background-success-emphasis, #238636);
+  color: var(--color-foreground-on-emphasis, #ffffff);
+}
+
+:global([data-sb-canvas-theme^='dark']) .cropBarBtnSave:hover {
+  background: var(--color-background-success-emphasis, #2ea043);
+  filter: brightness(1.1);
+}
+
+.cropBarBtnCancel {
+  color: var(--color-foreground-muted, #656d76);
+}
+
+:global([data-sb-canvas-theme^='dark']) .cropBarBtnCancel {
+  color: var(--color-foreground-muted, #8b949e);
+}
+
+.cropBarBtnCancel:hover {
+  color: var(--color-foreground, #1f2328);
+}
+
+:global([data-sb-canvas-theme^='dark']) .cropBarBtnCancel:hover {
+  color: var(--color-foreground, #e6edf3);
+}
+
+.dimensions {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-foreground-muted, #656d76);
+  padding: 0 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+:global([data-sb-canvas-theme^='dark']) .dimensions {
+  color: var(--color-foreground-muted, #8b949e);
+}
+
+.separator {
+  width: 1px;
+  height: 16px;
+  background: var(--color-border-muted, #d0d7de);
+}
+
+:global([data-sb-canvas-theme^='dark']) .separator {
+  background: var(--color-border-muted, #373e47);
+}

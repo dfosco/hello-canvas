@@ -1,0 +1,109 @@
+.inspector-mono {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+}
+
+.inspector-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-foreground-accent, #7655a4);
+  animation: inspector-pulse 1.5s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes inspector-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+pre {
+  background: transparent;
+}
+
+.source-pre {
+  background: transparent;
+  tab-size: 2;
+  padding: 12px 0;
+  color: #c9d1d9;
+  overflow-x: auto;
+}
+
+.source-pre code {
+  font-family: inherit;
+  display: block;
+}
+
+.source-pre .line {
+  padding: 0 12px 0 0;
+  display: inline-block;
+  width: 100%;
+  min-height: 1.5em;
+}
+
+.source-pre .line:hover {
+  background: var(--inspector-line-hover, rgba(255, 255, 255, 0.04));
+}
+
+.source-pre .highlighted-line {
+  background: color-mix(in srgb, var(--color-foreground-accent, #7655a4) 20%, transparent);
+  border-left: 2px solid var(--color-foreground-accent, #7655a4);
+  padding-left: 10px;
+}
+
+/* Line numbers via CSS counters — works for both highlight.js and plain-text */
+.line-numbers code {
+  counter-reset: line;
+}
+
+.line-numbers .line {
+  padding-left: 0 !important;
+}
+
+.line-numbers .line::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 3.5ch;
+  margin-right: 1.5ch;
+  text-align: right;
+  color: var(--inspector-line-num-color, #484f58);
+  user-select: none;
+}
+
+.code-wrapper pre {
+  margin: 0;
+  padding: 12px 0;
+  font-size: 12px;
+  line-height: 1.6;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  tab-size: 2;
+  background: transparent !important;
+  overflow-x: auto;
+}
+
+.code-wrapper code {
+  font-family: inherit;
+  display: block;
+}
+
+.code-wrapper .line {
+  padding: 0 12px 0 0;
+  display: inline-block;
+  width: 100%;
+  min-height: 1.5em;
+}
+
+.code-wrapper .line:hover {
+  background: var(--inspector-line-hover, rgba(255, 255, 255, 0.04));
+}
+
+.code-wrapper .highlighted-line {
+  background: color-mix(in srgb, var(--color-foreground-accent, #7655a4) 20%, transparent);
+  border-left: 2px solid var(--color-foreground-accent, #7655a4);
+  padding-left: 10px;
+}
+
+/* Force dark chrome on the code block — independent of page theme */
+.inspector-code-link:hover {
+  text-decoration: underline;
+}

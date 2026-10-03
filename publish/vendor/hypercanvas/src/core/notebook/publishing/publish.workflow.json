@@ -1,0 +1,20 @@
+{
+  "name": "notebook-publish",
+  "version": 1,
+  "steps": [
+    { "id": "validate", "uses": "validate-notebook" },
+    { "id": "repository-root", "uses": "resolve-local-repository" },
+    { "id": "generate", "uses": "generate-project" },
+    { "id": "build", "uses": "build-project" },
+    { "id": "initialize-repository", "uses": "initialize-local-repository" },
+    { "id": "repository", "uses": "create-or-connect-remote" },
+    { "id": "workflow", "uses": "install-pages-workflow" },
+    { "id": "stage", "uses": "stage-publication" },
+    { "id": "reconcile", "uses": "reconcile-remote" },
+    { "id": "commit", "uses": "commit-publication", "with": { "message": "Publish Hypercanvas Notebook site" } },
+    { "id": "push", "uses": "push-publication" },
+    { "id": "pages", "uses": "configure-pages" },
+    { "id": "dispatch", "uses": "dispatch-pages-workflow" },
+    { "id": "result", "uses": "collect-publish-result" }
+  ]
+}

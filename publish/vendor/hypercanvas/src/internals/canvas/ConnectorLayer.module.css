@@ -1,0 +1,212 @@
+.connectorLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 1;
+  transition: opacity 0.2s ease;
+}
+
+.connectorLayerHidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Endpoint anchors sit above widgets so they're always visible and interactive */
+.endpointLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 4;
+  transition: opacity 0.2s ease;
+}
+
+/* When the consumer sets `canvas.surface.{width,height}` to "viewport"
+   (see canvasInteractionStore.js), the canvas surface clamps to 100vw/100vh.
+   The SVG layers below are siblings of .tc-canvas inside .canvasZoom and
+   have a hardcoded `width: 100000px; height: 100000px` inline style — so
+   without clamping them too, they grow the scroll container even though
+   .tc-canvas is viewport-sized. Override with !important to beat the
+   inline width/height. Each axis is independent. */
+:global(html[data-canvas-surface-width="viewport"]) .connectorLayer,
+:global(html[data-canvas-surface-width="viewport"]) .endpointLayer {
+  width: 100vw !important;
+}
+:global(html[data-canvas-surface-height="viewport"]) .connectorLayer,
+:global(html[data-canvas-surface-height="viewport"]) .endpointLayer {
+  height: 100vh !important;
+}
+
+.connectorPath {
+  fill: none;
+  stroke: var(--connector-stroke, var(--color-foreground-accent, #0969da));
+  stroke-width: var(--connector-stroke-width, 4px);
+  stroke-dasharray: var(--connector-stroke-dasharray, none);
+  stroke-linecap: var(--connector-stroke-linecap, butt);
+  opacity: var(--connector-opacity, 1);
+  pointer-events: stroke;
+  cursor: pointer;
+  transition: stroke 0.15s ease, stroke-width 0.15s ease;
+}
+
+.connectorPath:hover {
+  stroke: var(--connector-hover-stroke, var(--color-foreground-danger, #cf222e));
+  stroke-width: var(--connector-hover-stroke-width, 5px);
+}
+
+.connectorEndpoint {
+  fill: var(--connector-endpoint-fill, var(--color-foreground-accent, #0969da));
+  stroke: var(--connector-endpoint-stroke, var(--color-background, #ffffff));
+  stroke-width: var(--connector-endpoint-stroke-width, 3px);
+  opacity: var(--connector-endpoint-opacity, var(--connector-opacity, 1));
+  pointer-events: auto;
+  cursor: crosshair;
+  transition: filter 0.1s ease;
+}
+
+.connectorEndpoint:hover {
+  filter: drop-shadow(0 0 4px var(--connector-endpoint-fill, var(--color-foreground-accent, #0969da)));
+}
+
+/* Invisible expanded hit area around connector endpoints */
+.endpointHitArea {
+  fill: transparent;
+  stroke: none;
+  pointer-events: auto;
+  cursor: crosshair;
+}
+
+/* Glow effect when hovering endpoint hit area */
+.endpointHitArea:hover ~ .connectorEndpoint {
+  filter: drop-shadow(0 0 4px var(--connector-endpoint-fill, var(--color-foreground-accent, #0969da)));
+}
+
+.connectorPathHitArea {
+  fill: none;
+  stroke: transparent;
+  stroke-width: var(--connector-hit-area-width, 16px);
+  pointer-events: stroke;
+  cursor: pointer;
+}
+
+/* Trigger the visible connector's hover style from the wider hit area */
+.connectorPathHitArea:hover ~ .connectorPath {
+  stroke: var(--connector-hover-stroke, var(--color-foreground-danger, #cf222e));
+  stroke-width: var(--connector-hover-stroke-width, 5px);
+}
+
+.dragPreviewPath {
+  fill: none;
+  stroke: var(--connector-drag-stroke, var(--color-foreground-accent, #0969da));
+  stroke-width: var(--connector-drag-stroke-width, 2px);
+  stroke-dasharray: var(--connector-drag-dasharray, 6 4);
+  pointer-events: none;
+  opacity: var(--connector-drag-opacity, 0.7);
+}
+
+/* Broadcast-active connector — transparent base, 50% wider */
+.connectorBroadcast {
+  stroke: transparent;
+  stroke-width: 6px;
+}
+
+.connectorPathHitArea:hover ~ .connectorBroadcast {
+  stroke: var(--connector-hover-stroke, var(--color-foreground-danger, #cf222e));
+  stroke-width: var(--connector-hover-stroke-width, 5px);
+}
+
+/* Flowing dots animation along broadcast connectors */
+.broadcastFlow {
+  fill: none;
+  stroke: var(--color-background-accent-emphasis, #0969da);
+  stroke-width: 6px;
+  stroke-dasharray: 3 17;
+  stroke-linecap: round;
+  pointer-events: none;
+  animation: broadcastFlowAnim 0.8s linear infinite;
+  transition: opacity 0.15s ease;
+}
+
+/* Hide dots on hover so the red delete indicator shows cleanly */
+.connectorPathHitArea:hover ~ .broadcastFlow {
+  opacity: 0;
+}
+
+.broadcastFlowReverse {
+  animation-direction: reverse;
+}
+
+@keyframes broadcastFlowAnim {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -20; }
+}
+
+/* =================================================================
+ * Built-in connector variants.
+ *
+ * Authors apply these via JSONL by setting the `data` field on the
+ * connector object:
+ *
+ *   "data": { "variant": "green" }   →  data-variant="green" on the <g>
+ *
+ * Selectors below are attribute selectors → not scoped by CSS Modules,
+ * so they apply globally to any connector group with the matching
+ * `data-variant` attribute (the renderer auto-prefixes keys with `data-`).
+ *
+ * Variants set the same CSS variables documented in SKILL.md, so they
+ * compose with per-connector `style` overrides and with each other (the
+ * later wins).
+ * ================================================================= */
+
+/* `default` / `blue` — the stock look, useful to force when a parent
+ * stylesheet has overridden the page-level connector tokens. */
+[data-connector-variant="default"],
+[data-connector-variant="blue"] {
+  --connector-stroke: var(--color-foreground-accent, #0969da);
+  --connector-endpoint-fill: var(--color-foreground-accent, #0969da);
+}
+
+/* `red` / `hover` — mirrors the live hover/delete state. Use to flag
+ * "danger" / "remove" / "warning" relationships statically. */
+[data-connector-variant="red"],
+[data-connector-variant="hover"] {
+  --connector-stroke: var(--color-foreground-danger, #cf222e);
+  --connector-endpoint-fill: var(--color-foreground-danger, #cf222e);
+}
+
+/* `green` / `ready` — success/ready state (mirrors the green ring used
+ * by ready agents). Use for "agent ready", "approved", "live" links. */
+[data-connector-variant="green"],
+[data-connector-variant="ready"] {
+  --connector-stroke: var(--color-foreground-success, #1a7f37);
+  --connector-endpoint-fill: var(--color-foreground-success, #1a7f37);
+}
+
+/* `moving` / `broadcast` — the dashed-marching-ants look from active
+ * broadcast connectors, applied to a normal (non-messaging) connector.
+ *
+ * The animation must target the path element directly (animations don't
+ * cascade from <g>). Targeting `path` is safe: the hit-area path has a
+ * transparent stroke so the animation is invisible on it, and the
+ * broadcast-flow path only exists when `meta.messagingMode === "two-way"`
+ * (which already has its own animation). */
+[data-connector-variant="moving"],
+[data-connector-variant="broadcast"] {
+  --connector-stroke-dasharray: 8 6;
+  --connector-stroke-linecap: round;
+}
+[data-connector-variant="moving"] path,
+[data-connector-variant="broadcast"] path {
+  animation: connectorVariantMarch 0.8s linear infinite;
+}
+@keyframes connectorVariantMarch {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -14; }
+}

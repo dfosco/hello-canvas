@@ -1,0 +1,49 @@
+{
+  "$id": "artifact:flow",
+  "type": "object",
+  "required": ["name", "prototype"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "maxLength": 64,
+      "description": "Flow name (kebab-case)"
+    },
+    "prototype": {
+      "type": "string",
+      "description": "Target prototype name"
+    },
+    "title": {
+      "type": "string",
+      "description": "Display title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Flow description"
+    },
+    "author": {
+      "oneOf": [
+        { "type": "string" },
+        { "type": "array", "items": { "type": "string" } }
+      ],
+      "description": "Author name(s)"
+    },
+    "folder": {
+      "type": "string",
+      "description": "Parent .folder directory"
+    },
+    "globals": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "$global object names"
+    },
+    "copy-from": {
+      "type": "string",
+      "description": "Existing flow to copy data from"
+    },
+    "starting-page": {
+      "type": "string",
+      "description": "Starting page path"
+    }
+  }
+}

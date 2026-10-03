@@ -1,0 +1,140 @@
+.toolbar {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  font-family: var(--tc-font-stack, system-ui, -apple-system, sans-serif);
+}
+
+@media (prefers-color-scheme: dark) {
+  .toolbar {
+    background: rgba(22, 27, 34, 0.88);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
+}
+
+.btn {
+  all: unset;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: var(--color-foreground, #1f2328);
+  transition: background 120ms;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--color-background-muted, #f6f8fa);
+}
+
+.btn:active:not(:disabled) {
+  background: var(--color-background-neutral-muted, #eaeef2);
+}
+
+.btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* Create widget menu */
+.createGroup {
+  position: relative;
+}
+
+.menu {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  min-width: 160px;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  z-index: 1;
+}
+
+@media (prefers-color-scheme: dark) {
+  .menu {
+    background: rgba(22, 27, 34, 0.92);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  }
+}
+
+.menuLabel {
+  padding: 6px 10px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-foreground-muted, #656d76);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.menuItem {
+  all: unset;
+  cursor: pointer;
+  display: block;
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 13px;
+  color: var(--color-foreground, #1f2328);
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.menuItem:hover {
+  background: var(--color-background-muted, #f6f8fa);
+}
+
+.menuDivider {
+  height: 1px;
+  margin: 4px 8px;
+  background: var(--color-border-muted, rgba(0, 0, 0, 0.1));
+}
+
+.menuHint {
+  font-size: 11px;
+  color: var(--color-foreground-muted, #656d76);
+  margin-left: 8px;
+}
+
+.menuEmpty {
+  padding: 8px 10px;
+  font-size: 12px;
+  color: var(--color-foreground-muted, #656d76);
+  font-style: italic;
+}
+
+.backBtn {
+  all: unset;
+  cursor: pointer;
+  margin-right: 4px;
+  font-size: 13px;
+  color: var(--color-foreground-muted, #656d76);
+}
+
+.backBtn:hover {
+  color: var(--color-foreground, #1f2328);
+}
+
+/* Hide canvas controls when toolbars are hidden */
+:global(html.storyboard-chrome-hidden) .toolbar {
+  display: none;
+}

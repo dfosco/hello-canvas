@@ -1,0 +1,97 @@
+.toolbar {
+  position: fixed;
+  bottom: 80px;
+  left: 24px;
+  z-index: 1000;
+  font-family: var(--tc-font-stack, system-ui, -apple-system, sans-serif);
+}
+
+.addBtn {
+  all: unset;
+  cursor: pointer;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--color-background-accent-emphasis, #2f81f7);
+  color: var(--color-foreground-on-emphasis, #ffffff);
+  font-size: 28px;
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: transform 150ms, background 150ms;
+}
+
+.addBtn:hover {
+  transform: scale(1.08);
+  background: var(--color-background-accent-emphasis, #388bfd);
+}
+
+.menu {
+  background: var(--color-background, #ffffff);
+  border: 1px solid var(--color-border-muted, rgba(0, 0, 0, 0.15));
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  min-width: 180px;
+}
+
+.menuHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-foreground-muted, #656d76);
+  border-bottom: 1px solid var(--color-border-muted, rgba(0, 0, 0, 0.1));
+}
+
+.closeBtn {
+  all: unset;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--color-foreground-muted, #656d76);
+  padding: 0 2px;
+  border-radius: 4px;
+}
+
+.closeBtn:hover {
+  color: var(--color-foreground, #1f2328);
+}
+
+.menuItem {
+  all: unset;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--color-foreground, #1f2328);
+  width: 100%;
+  box-sizing: border-box;
+  transition: background 100ms;
+}
+
+.menuItem:hover {
+  background: var(--color-background-muted, #f6f8fa);
+}
+
+.menuItem:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.menuIcon {
+  font-size: 18px;
+}
+
+/* Hide add-widget toolbar when toolbars are hidden */
+:global(html.storyboard-chrome-hidden) .toolbar {
+  display: none;
+}

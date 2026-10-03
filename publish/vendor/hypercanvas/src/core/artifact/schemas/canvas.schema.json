@@ -1,0 +1,41 @@
+{
+  "$id": "artifact:canvas",
+  "type": "object",
+  "required": ["name"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "maxLength": 64,
+      "description": "Kebab-case identifier"
+    },
+    "title": {
+      "type": "string",
+      "description": "Display title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional description"
+    },
+    "folder": {
+      "type": "string",
+      "description": "Parent folder directory (name only — no .folder suffix). If the folder already exists, its kind wins; otherwise `folderKind` decides whether to create a workspace folder (.folder/) or a multi-page canvas group (plain dir)."
+    },
+    "folderKind": {
+      "type": "string",
+      "enum": ["workspace", "pages"],
+      "default": "pages",
+      "description": "When `folder` is set and doesn't yet exist: `workspace` creates `<folder>.folder/` (each canvas appears under a workspace folder header), `pages` creates a plain `<folder>/` dir (canvases become pages of a shared multi-page group). Ignored when the folder already exists."
+    },
+    "grid": {
+      "type": "boolean",
+      "default": true,
+      "description": "Show dot grid"
+    },
+    "jsx": {
+      "type": "boolean",
+      "default": false,
+      "description": "Include JSX companion file"
+    }
+  }
+}

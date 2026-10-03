@@ -1,0 +1,1 @@
+var c=Object.defineProperty;var o=(e,a)=>c(e,"name",{value:a,configurable:!0});import{c as r}from"./vendor-react-PJCXJ5Vl.js";function i(){return r.useEffect(()=>{const e="/hello-canvas/".replace(/\/+$/,"");window.location.replace(`${e}/workspace${window.location.hash}`)},[]),null}o(i,"ViewfinderRedirect");export{i as default};

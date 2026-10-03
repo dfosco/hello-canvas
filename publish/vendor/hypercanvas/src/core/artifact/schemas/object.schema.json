@@ -1,0 +1,26 @@
+{
+  "$id": "artifact:object",
+  "type": "object",
+  "required": ["name"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "maxLength": 64,
+      "description": "Object name (kebab-case)"
+    },
+    "prototype": {
+      "type": "string",
+      "description": "Prototype to scope this object to (optional)"
+    },
+    "folder": {
+      "type": "string",
+      "description": "Parent folder or prototype scope"
+    },
+    "body": {
+      "type": "object",
+      "description": "Freeform JSON content for the object file",
+      "default": {}
+    }
+  }
+}

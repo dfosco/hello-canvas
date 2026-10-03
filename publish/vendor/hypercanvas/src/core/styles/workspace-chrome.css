@@ -1,0 +1,13 @@
+/**
+ * workspace-chrome.css — CSS dependencies for storyboard's own workspace
+ * UI (Workspace, Viewfinder, CanvasPage, BranchBar, CoreUIBar). Imported
+ * by `src/library/index.jsx` so the workspace SPA loads them.
+ *
+ * Prototypes and stories do NOT load this stylesheet — their CSS chain
+ * is owned by the consumer's `src/_prototype.jsx` / `src/_story.jsx`.
+ *
+ * All color/spacing/typography tokens previously sourced from
+ * `@primer/primitives` now live in `core/styles/tailwind.css` (the
+ * single source of truth). This file is intentionally empty but kept
+ * for backward compatibility with consumers that import it directly.
+ */

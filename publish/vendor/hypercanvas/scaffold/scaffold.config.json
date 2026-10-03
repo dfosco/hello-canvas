@@ -1,0 +1,223 @@
+{
+  "files": [
+    {
+      "source": "scaffold/AGENTS.md",
+      "target": "AGENTS.md",
+      "mode": "scaffold"
+    },
+    {
+      "source": "scaffold/gitignore",
+      "target": ".gitignore",
+      "mode": "scaffold"
+    },
+    {
+      "source": "storyboard.config.json",
+      "target": "storyboard.config.json",
+      "mode": "scaffold"
+    },
+    {
+      "source": "toolbar.config.json",
+      "target": "toolbar.config.json",
+      "mode": "scaffold"
+    },
+    {
+      "source": "commandpalette.config.json",
+      "target": "commandpalette.config.json",
+      "mode": "scaffold"
+    },
+    {
+      "source": "paste.config.json",
+      "target": "paste.config.json",
+      "mode": "scaffold"
+    },
+    {
+      "source": "widgets.config.json",
+      "target": "widgets.config.json",
+      "mode": "scaffold"
+    },
+    {
+      "source": "terminal.config.json",
+      "target": "terminal.config.json",
+      "mode": "scaffold"
+    },
+    {
+      "source": "mascot.config.json",
+      "target": "mascot.config.json",
+      "mode": "scaffold"
+    },
+    {
+      "source": "scaffold/vite.config.js",
+      "target": "vite.config.js",
+      "mode": "updateable"
+    },
+    {
+      "source": "scaffold/vitest.config.js",
+      "target": "vitest.config.js",
+      "mode": "updateable"
+    },
+    {
+      "source": "scaffold/eslint.config.js",
+      "target": "eslint.config.js",
+      "mode": "updateable"
+    },
+    {
+      "source": "scaffold/tsconfig.json",
+      "target": "tsconfig.json",
+      "mode": "updateable"
+    },
+    {
+      "source": "scaffold/scripts/link.sh",
+      "target": "scripts/link.sh",
+      "mode": "updateable"
+    },
+    {
+      "source": "scaffold/scripts/unlink.sh",
+      "target": "scripts/unlink.sh",
+      "mode": "updateable"
+    },
+    {
+      "source": "scaffold/skills/",
+      "target": ".agents/skills/",
+      "mode": "updateable",
+      "directory": true
+    },
+    {
+      "source": "scaffold/roles/",
+      "target": ".agents/roles/",
+      "mode": "updateable",
+      "directory": true
+    },
+    {
+      "source": "scaffold/prompt-agent.agent.md",
+      "target": ".agents/prompt-agent.agent.md",
+      "mode": "updateable"
+    },
+    {
+      "source": "scaffold/terminal-agent.agent.md",
+      "target": ".agents/terminal-agent.agent.md",
+      "mode": "updateable"
+    },
+    {
+      "source": "scaffold/prompt-agent.agent.md",
+      "target": ".github/agents/prompt-agent.agent.md",
+      "mode": "updateable"
+    },
+    {
+      "source": "scaffold/terminal-agent.agent.md",
+      "target": ".github/agents/terminal-agent.agent.md",
+      "mode": "updateable"
+    },
+    {
+      "source": "scaffold/deploy.yml",
+      "target": ".github/workflows/deploy.yml",
+      "mode": "updateable"
+    },
+    {
+      "source": "scaffold/preview.yml",
+      "target": ".github/workflows/preview.yml",
+      "mode": "updateable"
+    },
+    {
+      "source": "scaffold/scripts/aggregate-artifacts.mjs",
+      "target": ".github/workflows/scripts/aggregate-artifacts.mjs",
+      "mode": "updateable"
+    },
+    {
+      "source": "scaffold/githooks/",
+      "target": ".githooks/",
+      "mode": "updateable",
+      "directory": true
+    },
+    {
+      "source": "scaffold/data/",
+      "target": ".agents/data/",
+      "mode": "updateable",
+      "directory": true
+    },
+    {
+      "source": "scaffold/scripts/gen-octicons-list.mjs",
+      "target": "scripts/gen-octicons-list.mjs",
+      "mode": "updateable"
+    },
+    {
+      "source": "scaffold/codex/config.toml",
+      "target": ".codex/config.toml",
+      "mode": "updateable"
+    },
+    {
+      "source": "scaffold/codex/agents/terminal-agent.toml",
+      "target": ".codex/agents/terminal-agent.toml",
+      "mode": "updateable"
+    },
+    {
+      "source": "scaffold/src/library/mount.jsx",
+      "target": "src/library/mount.jsx",
+      "mode": "updateable"
+    },
+    {
+      "source": "scaffold/src/library/prototypes-entry.jsx",
+      "target": "src/library/prototypes-entry.jsx",
+      "mode": "updateable"
+    },
+    {
+      "source": "scaffold/src/library/routes.jsx",
+      "target": "src/library/routes.jsx",
+      "mode": "updateable"
+    },
+    {
+      "source": "scaffold/src/library/_app.jsx",
+      "target": "src/library/_app.jsx",
+      "mode": "updateable"
+    },
+    {
+      "source": "scaffold/src/library/_app.module.css",
+      "target": "src/library/_app.module.css",
+      "mode": "updateable"
+    },
+    {
+      "source": "scaffold/src/library/workspace.jsx",
+      "target": "src/library/workspace.jsx",
+      "mode": "updateable"
+    },
+    {
+      "source": "scaffold/src/library/viewfinder.jsx",
+      "target": "src/library/viewfinder.jsx",
+      "mode": "updateable"
+    },
+    {
+      "source": "scaffold/src/library/create.jsx",
+      "target": "src/library/create.jsx",
+      "mode": "updateable"
+    },
+    {
+      "source": "scaffold/src/library/index.jsx",
+      "target": "src/library/index.jsx",
+      "mode": "updateable"
+    },
+    {
+      "source": "scaffold/src/library/home.jsx",
+      "target": "src/library/home.jsx",
+      "mode": "updateable"
+    },
+    {
+      "source": "scaffold/src/library/README.md",
+      "target": "src/library/README.md",
+      "mode": "updateable"
+    },
+    {
+      "source": "scaffold/src/_prototype.jsx",
+      "target": "src/_prototype.jsx",
+      "mode": "scaffold"
+    },
+    {
+      "source": "scaffold/src/_story.jsx",
+      "target": "src/_story.jsx",
+      "mode": "scaffold"
+    }
+  ],
+  "fragmentSources": [
+    "scaffold/gitignore",
+    "scaffold/AGENTS.md",
+    "scaffold/README.md"
+  ]
+}

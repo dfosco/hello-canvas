@@ -1,0 +1,8 @@
+.local-dot {
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  background: #1a7f37;
+  border-radius: 50%;
+  flex-shrink: 0;
+}

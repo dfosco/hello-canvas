@@ -1,0 +1,53 @@
+.canvas-zoom-bar {
+  display: flex;
+  align-items: center;
+  border-radius: 10px;
+  border: 2.5px solid var(--sb--trigger-border, var(--color-slate-400));
+  background: var(--sb--trigger-bg, var(--color-slate-100));
+  overflow: hidden;
+}
+
+.canvas-zoom-btn {
+  all: unset;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 38px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--sb--trigger-text, var(--color-slate-600));
+  transition: background 120ms;
+}
+
+.canvas-zoom-btn:hover:not(:disabled) {
+  background: var(--sb--trigger-bg-hover, var(--color-slate-300));
+}
+
+.canvas-zoom-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.canvas-zoom-label {
+  all: unset;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  height: 38px;
+  padding: 0 4px;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--sb--trigger-text, var(--color-slate-600));
+  border-left: 2px solid var(--sb--trigger-border, var(--color-slate-400));
+  border-right: 2px solid var(--sb--trigger-border, var(--color-slate-400));
+  transition: background 120ms;
+}
+
+.canvas-zoom-label:hover {
+  background: var(--sb--trigger-bg-hover, var(--color-slate-300));
+}

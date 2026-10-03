@@ -1,0 +1,5 @@
+/* Workspace-only Tailwind entry. Isolated prototypes do not import this file;
+ * a prototype that needs Tailwind must import it explicitly. */
+@import "tailwindcss" source(none);
+@source "../components/**/*.{js,jsx,ts,tsx}";
+@source "../library/**/*.{js,jsx,ts,tsx}";

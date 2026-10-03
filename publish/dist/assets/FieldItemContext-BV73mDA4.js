@@ -1,0 +1,1 @@
+var s=Object.defineProperty;var e=(t,n)=>s(t,"name",{value:n,configurable:!0});import{c as o}from"./vendor-react-PJCXJ5Vl.js";const c=o.createContext({disabled:!1});function a(){return o.useContext(c)}e(a,"useFieldItemContext");export{a as u};

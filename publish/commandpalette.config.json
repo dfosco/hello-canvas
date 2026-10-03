@@ -1,0 +1,160 @@
+{
+  "providers": [
+    "prototypes",
+    "flows",
+    "canvases",
+    "pages"
+  ],
+  "ranking": "frecency",
+  "sections": [
+    {
+      "id": "tools",
+      "title": "",
+      "source": "tools",
+      "toolIds": [
+        {
+          "id": "workspace",
+          "label": "Homepage"
+        },
+        {
+          "id": "theme",
+          "label": "Switch Theme"
+        },
+        {
+          "id": "knobs",
+          "label": "Knobs",
+          "closeOnSelect": true
+        },
+        {
+          "id": "hide-toolbars",
+          "label": "Hide Toolbars",
+          "closeOnSelect": true
+        }
+      ]
+    },
+    {
+      "id": "sep0",
+      "items": []
+    },
+    {
+      "id": "starred",
+      "title": "Starred",
+      "source": "starred"
+    },
+    {
+      "id": "sep1",
+      "items": []
+    },
+    {
+      "id": "tools2",
+      "title": "",
+      "source": "tools",
+      "toolIds": [
+        {
+          "id": "repository",
+          "label": "Storyboard repository"
+        },
+        {
+          "id": "docs",
+          "label": "Storyboard Docs"
+        },
+        {
+          "id": "devtools",
+          "label": "Devtools",
+          "meta": { "strokeWeight": 1.6, "scale": 1.1 },
+          "hideChildrenFromSearch": true
+        },
+        {
+          "id": "see-deployed-branch",
+          "label": "See deployed branch"
+        },
+        {
+          "id": "feature-flags",
+          "label": "Feature Flags",
+          "meta": { "strokeWeight": 1.6, "scale": 1.1 }
+        }
+      ]
+    },
+    {
+      "id": "sep2",
+      "items": []
+    },
+    {
+      "id": "create",
+      "title": "Create new",
+      "source": "create"
+    },
+    {
+      "id": "sep3b",
+      "items": []
+    },
+    {
+      "id": "create-widget",
+      "title": "Add widget to canvas",
+      "source": "create-widget"
+    },
+    {
+      "id": "sep3",
+      "items": []
+    },
+    {
+      "id": "prototypes",
+      "title": "Prototypes",
+      "source": "prototypes",
+      "meta": { "strokeWeight": 1.6, "scale": 1.1 }
+    },
+    {
+      "id": "sep4",
+      "items": []
+    },
+    {
+      "id": "canvases",
+      "title": "Canvas",
+      "source": "canvases",
+      "meta": { "strokeWeight": 1.6, "scale": 1.1 }
+    },
+    {
+      "id": "sep5",
+      "items": []
+    },
+    {
+      "id": "stories",
+      "title": "Components",
+      "source": "stories"
+    },
+    {
+      "id": "sep6",
+      "items": []
+    },
+    {
+      "id": "other-tools",
+      "title": "More Tools",
+      "source": "tool-subpages"
+    }
+  ],
+  "icons": {
+    "prototype": "prototype",
+    "canvas": "canvas",
+    "story": "iconoir/keyframe",
+    "component": "iconoir/keyframe",
+    "starred": "primer/star-fill",
+    "recent": "primer/clock",
+    "create": "iconoir/plus-circle",
+    "sticky-note": "sticky-note",
+    "markdown": "feather/file-text",
+    "file": "primer/file-code",
+    "command": "feather/zap",
+    "link": "feather/external-link",
+    "home": "primer/home-fill",
+    "theme": "primer/sun",
+    "terminal": "feather/terminal",
+    "repository": "primer/mark-github",
+    "docs": "primer/book",
+    "devtools": "iconoir/wrench",
+    "see-deployed-branch": "primer/globe",
+    "feature-flags": "iconoir/white-flag",
+    "agent": "agents",
+    "prompt": "primer/zap",
+    "fallback": "feather/hexagon"
+  }
+}

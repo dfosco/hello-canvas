@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+#
+# pre-push pipeline — runs checks and generators before pushing.
+#
+# Pipeline stages run in order. Each stage can:
+#   - Pass silently (exit 0)
+#   - Fail and block the push (exit 1) — all changes are reverted
+#   - Generate files that get auto-committed
+#
+# Add new stages by defining a function and adding it to STAGES.
+#
+# Installed by: storyboard setup / storyboard-scaffold
+#
+
+set -euo pipefail
+
+# ── Configuration ─────────────────────────────────────────────────
+# Ordered list of stages. Add new stages here.
+# Note: snapshot generation moved to CI (snapshots.yml workflow).
+STAGES=(
+)
+
+# ── Helpers ───────────────────────────────────────────────────────
+
+SNAPSHOT_SHA=""
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+DIM='\033[2m'
+BOLD='\033[1m'
+RESET='\033[0m'
+
+log()  { echo -e "${DIM}[pre-push]${RESET} $*"; }
+ok()   { echo -e "${DIM}[pre-push]${RESET} ${GREEN}✓${RESET} $*"; }
+fail() { echo -e "${DIM}[pre-push]${RESET} ${RED}✗${RESET} $*"; }
+
+save_snapshot() {
+  SNAPSHOT_SHA=$(git rev-parse HEAD)
+}
+
+revert_snapshot() {
+  if [ -n "$SNAPSHOT_SHA" ] && [ "$(git rev-parse HEAD)" != "$SNAPSHOT_SHA" ]; then
+    log "Reverting auto-committed changes..."
+    git reset --soft "$SNAPSHOT_SHA" 2>/dev/null || true
+  fi
+}
+
+auto_commit() {
+  local label="$1"
+  shift
+  local paths=("$@")
+
+  local changes=""
+  for p in "${paths[@]}"; do
+    changes+=$(git status --porcelain "$p" 2>/dev/null || true)
+  done
+
+  if [ -n "$changes" ]; then
+    git add "${paths[@]}" 2>/dev/null
+    git commit -m "chore: ${label}" --no-verify --allow-empty 2>/dev/null
+    ok "${label} (committed)"
+    return 0
+  fi
+  return 1
+}
+
+# ── Stages ────────────────────────────────────────────────────────
+
+stage_test() {
+  if [ ! -f "vitest.config.js" ] && [ ! -f "vitest.config.ts" ]; then return 0; fi
+  if ! command -v npx &>/dev/null; then return 0; fi
+
+  log "Running tests..."
+  if npx --no-install vitest run --reporter=dot 2>&1; then
+    ok "Tests passed"
+  else
+    fail "Tests failed — push blocked"
+    return 1
+  fi
+}
+
+stage_snapshots() {
+  local canvas_files
+  canvas_files=$(find src/canvas -name "*.canvas.jsonl" 2>/dev/null | head -1)
+  [ -z "$canvas_files" ] && return 0
+
+  if ! npx --no-install storyboard snapshots 2>&1; then
+    log "Snapshot generation skipped"
+    return 0
+  fi
+
+  auto_commit "update canvas snapshots" \
+    "assets/canvas/snapshots/" \
+    "assets/canvas/images/" \
+    "src/canvas/" \
+    || true
+}
+
+# ── Pipeline runner ───────────────────────────────────────────────
+
+main() {
+  save_snapshot
+
+  for stage in "${STAGES[@]-}"; do
+    [ -n "$stage" ] || continue
+    if ! "$stage"; then
+      revert_snapshot
+      fail "${BOLD}Push aborted${RESET} by ${stage}"
+      exit 1
+    fi
+  done
+
+  log "${GREEN}All stages passed${RESET}"
+}
+
+main

@@ -1,0 +1,23 @@
+{
+  "watch": [
+    {
+      "path": "src/prototypes",
+      "extensions": [".jsx", ".tsx", ".mdx"],
+      "type": "prototype"
+    },
+    {
+      "path": "src/canvas",
+      "extensions": [".canvas.jsonl"],
+      "type": "canvas"
+    }
+  ],
+  "exclude": {
+    "filePrefixes": ["_"],
+    "directories": ["node_modules", ".git", "dist", "images", ".worktrees", "worktrees"]
+  },
+  "debounceMs": 500,
+  "autocommit": {
+    "enabled": true,
+    "prefix": "[storyboard-autofix]"
+  }
+}

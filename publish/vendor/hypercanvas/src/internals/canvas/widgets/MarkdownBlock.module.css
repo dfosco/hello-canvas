@@ -1,0 +1,78 @@
+/*
+ * Layout-only styles for MarkdownBlock. Markdown typography is provided by
+ * the shared widgets/markdown/markdownContent.module.css and is applied
+ * automatically by <MarkdownView>.
+ */
+
+.block {
+  position: relative;
+  min-height: 80px;
+}
+
+.blockCollapsed {
+  max-height: 360px;
+  overflow: hidden;
+}
+
+.blockCollapsed .preview {
+  mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+}
+
+/* Marker class — MarkdownView composes this with its shared typography
+ * class. We keep an empty rule so the CSS-modules name is stable. */
+.preview {}
+
+/* ── Textarea editor (canvas) ─────────────────────────────────────── */
+
+.editor {
+  display: block;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 16px 20px;
+  border: none;
+  outline: none;
+  background: var(--color-background, #ffffff);
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-foreground, #1f2328);
+  resize: none;
+}
+
+/* ── Expanded editor (modal) ──────────────────────────────────────── */
+
+.expandedEditorWrap {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--color-background, #ffffff);
+}
+
+.expandedEditor {
+  display: block;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 32px 40px;
+  border: none;
+  outline: none;
+  resize: none;
+  background: var(--color-background, #ffffff);
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-foreground, #1f2328);
+  overflow: auto;
+}
+
+/* Marker class for the expanded preview wrapper. <MarkdownView>
+ * composes its size='large' typography over this. */
+.expandedPreview {}

@@ -84,5 +84,6 @@
     "prototypes/main.folder/main.folder.json",
     "templates/Application/Application.jsx",
     "templates/Application/application.module.css"
-  ]
+  ],
+  "generatedNotebookFiles": []
 }

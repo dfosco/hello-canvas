@@ -1,0 +1,1 @@
+var i=Object.defineProperty;var t=(r,n)=>i(r,"name",{value:n,configurable:!0});function f(r){if(r==null)return"";if(typeof r=="string")return r;try{return JSON.stringify(r)}catch{return String(r)}}t(f,"serializeValue");export{f as s};

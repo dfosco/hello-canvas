@@ -1,0 +1,1 @@
+var s=Object.defineProperty;var t=(o,n)=>s(o,"name",{value:n,configurable:!0});import{c as e}from"./vendor-react-PJCXJ5Vl.js";const r=e.createContext(void 0),C={disableStyleElements:!1};function x(){return e.useContext(r)??C}t(x,"useCSPContext");export{x as u};

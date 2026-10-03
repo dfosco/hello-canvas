@@ -1,0 +1,273 @@
+/* ── Loom-style prompt widget ── */
+
+.wrapper {
+  background: var(--color-background, #fff);
+  border: 1px solid var(--color-border, #d0d7de);
+  border-radius: 16px;
+  padding: 20px;
+  min-width: 200px;
+  font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08), 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+/* ── Header: avatar + textarea ── */
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-background-neutral-muted, #eaeef2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--color-foreground-muted, #636c76);
+}
+
+.avatarDone {
+  background: var(--color-background-success-muted, #dafbe1);
+  color: var(--color-foreground-success, #1a7f37);
+}
+
+.textarea {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--color-foreground, #1f2328);
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.5;
+  resize: none;
+  padding: 4px 0;
+  min-height: 24px;
+  field-sizing: content;
+}
+
+.textarea:focus {
+  outline: none;
+}
+
+.textarea::placeholder {
+  color: var(--color-foreground-muted, #636c76);
+}
+
+/* ── Toolbar: icons + submit ── */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 4px;
+}
+
+
+.submitBtn {
+  font-size: 12px;
+  padding: 4px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border, #d0d7de);
+  background: var(--color-background, #fff);
+  color: var(--color-foreground-muted, #636c76);
+  cursor: pointer;
+  white-space: nowrap;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: var(--color-background-neutral-muted, rgba(175, 184, 193, 0.2));
+  color: var(--color-foreground, #1f2328);
+}
+
+.submitBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Error ── */
+
+.errorText {
+  margin: 0 0 12px;
+  padding: 6px 10px;
+  background: var(--color-background-danger-muted, #ffebe9);
+  border-radius: 8px;
+  color: var(--color-foreground-danger, #cf222e);
+  font-size: 12px;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Pending state ── */
+
+.pendingArea {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pendingHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.pendingText {
+  font-size: 14px;
+  color: var(--color-foreground, #1f2328);
+  line-height: 1.5;
+  margin: 0;
+  padding-top: 4px;
+}
+
+.pendingFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pendingHint {
+  font-size: 12px;
+  color: var(--color-foreground-muted, #636c76);
+  margin: 0;
+}
+
+.cancelBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--color-foreground-accent, #0969da);
+  transition: background 0.15s;
+  position: relative;
+  width: 24px;
+  height: 24px;
+}
+
+.cancelBtn:hover {
+  background: var(--color-background-neutral-muted, rgba(175, 184, 193, 0.2));
+}
+
+.spinnerSvg {
+  animation: spin 1s linear infinite;
+  color: var(--color-foreground-accent, #0969da);
+}
+
+.stopIcon {
+  display: none;
+  position: absolute;
+  color: var(--color-foreground-danger, #cf222e);
+}
+
+.cancelBtn:hover .spinnerSvg {
+  display: none;
+}
+
+.cancelBtn:hover .stopIcon {
+  display: flex;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ── Done state ── */
+
+.doneArea {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.doneHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.doneText {
+  font-size: 14px;
+  color: var(--color-foreground, #1f2328);
+  line-height: 1.5;
+  margin: 0;
+  padding-top: 4px;
+}
+
+.resetBtn {
+  align-self: flex-end;
+  padding: 4px 14px;
+  background: transparent;
+  color: var(--color-foreground-accent, #0969da);
+  border: 1px solid var(--color-border, #d0d7de);
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.resetBtn:hover {
+  background: var(--color-background-muted, #f6f8fa);
+}
+
+/* ── Inline terminal output (flush to bottom edge) ── */
+
+.terminalArea {
+  margin: 16px -20px -20px;
+  border-top: 1px solid var(--color-border-muted, #d8dee4);
+  overflow: hidden;
+  border-radius: 0 0 16px 16px;
+}
+
+.terminalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 10px;
+  background: var(--color-background-muted, #f6f8fa);
+  border-bottom: 1px solid var(--color-border-muted, #d8dee4);
+}
+
+.terminalLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-foreground-muted, #636c76);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.terminalClose {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--color-foreground-muted, #636c76);
+  transition: background 0.15s;
+}
+
+.terminalClose:hover {
+  background: var(--color-background-neutral-muted, rgba(175, 184, 193, 0.2));
+  color: var(--color-foreground, #1f2328);
+}
+
+.terminalContainer {
+  height: 180px;
+  background: #0d1117;
+  overflow: auto;
+}

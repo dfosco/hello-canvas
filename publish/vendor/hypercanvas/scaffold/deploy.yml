@@ -1,0 +1,124 @@
+name: Deploy (main)
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: gh-pages-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Deploy to gh-pages (root)
+        run: |
+          set -e
+
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Clone gh-pages branch (or create it)
+          git fetch origin gh-pages:gh-pages 2>/dev/null || true
+          DEPLOY_DIR=$(mktemp -d)
+          if git show-ref --verify --quiet refs/heads/gh-pages; then
+            git worktree add "$DEPLOY_DIR" gh-pages
+          else
+            git worktree add --orphan "$DEPLOY_DIR" gh-pages
+            rm -rf "$DEPLOY_DIR"/*
+          fi
+
+          # Remove root-level files only (preserve branch--* folders)
+          cd "$DEPLOY_DIR"
+          find . -maxdepth 1 ! -name '.' ! -name '.git' ! -name 'branch--*' -exec rm -rf {} +
+
+          # Copy new build output (includes CNAME if customDomain is set)
+          cp -r "$GITHUB_WORKSPACE/dist/." .
+
+          # Ensure .nojekyll exists at root (GitHub Pages ignores _-prefixed dirs without it)
+          touch .nojekyll
+
+          # Commit and push
+          git add -A
+          git diff --cached --quiet && echo "No changes to deploy" && exit 0
+          git commit -m "Deploy main @ $(echo $GITHUB_SHA | head -c 7)"
+          git push origin gh-pages
+
+      - name: Generate branch manifest
+        run: |
+          set -e
+          # Remove stale worktrees from previous steps
+          git worktree list --porcelain | awk '/^worktree \/tmp/{print $2}' | while read wt; do
+            git worktree remove --force "$wt" 2>/dev/null || true
+          done
+          git fetch origin gh-pages:gh-pages 2>/dev/null || true
+          DEPLOY_DIR=$(mktemp -d)
+          git worktree add "$DEPLOY_DIR" gh-pages
+
+          cd "$DEPLOY_DIR"
+
+          # Build branches.json from branch--* folders
+          echo '[' > branches.json
+          FIRST=true
+          for dir in branch--*/; do
+            [ -d "$dir" ] || continue
+            FOLDER="${dir%/}"
+            # Extract branch name: strip "branch--" prefix
+            BRANCH="${FOLDER#branch--}"
+            if [ "$FIRST" = true ]; then
+              FIRST=false
+            else
+              echo ',' >> branches.json
+            fi
+            printf '  {"folder":"%s","branch":"%s"}' "$FOLDER" "$BRANCH" >> branches.json
+          done
+          echo '' >> branches.json
+          echo ']' >> branches.json
+
+          git add branches.json
+          git diff --cached --quiet && echo "Manifest unchanged" && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update branch manifest"
+          git push origin gh-pages
+
+      - name: Generate artifacts index
+        run: |
+          set -e
+          # Remove stale worktrees from previous steps
+          git worktree list --porcelain | awk '/^worktree \/tmp/{print $2}' | while read wt; do
+            git worktree remove --force "$wt" 2>/dev/null || true
+          done
+          git fetch origin gh-pages:gh-pages 2>/dev/null || true
+          DEPLOY_DIR=$(mktemp -d)
+          git worktree add "$DEPLOY_DIR" gh-pages
+
+          node "$GITHUB_WORKSPACE/.github/workflows/scripts/aggregate-artifacts.mjs" "$DEPLOY_DIR"
+
+          cd "$DEPLOY_DIR"
+          git add artifacts.index.json
+          git diff --cached --quiet && echo "Artifacts index unchanged" && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update artifacts index"
+          git push origin gh-pages

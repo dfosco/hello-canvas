@@ -1,0 +1,518 @@
+:root {
+  --term-bg: #181b22;
+}
+
+.container {
+  position: relative;
+  padding-bottom: 0;
+  border-radius: 16px;
+}
+
+/* Match selection outline border-radius to terminal's rounded corners */
+:global(.tc-drag-surface):has(.container) {
+  border-radius: 16px;
+}
+
+.titleBar {
+  position: absolute;
+  top: -28px;
+  left: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 11px;
+  color: #8b949e;
+  user-select: none;
+  white-space: nowrap;
+  z-index: 2;
+  cursor: grab;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.titleBar .typeLabel {
+  color: var(--color-foreground, #1f2328);
+}
+
+.titleBar .nameSeparator {
+  color: #6e7681;
+}
+
+.leaderCrown {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  line-height: 1;
+}
+
+.aliasInput {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-border-accent-emphasis, #0969da);
+  color: inherit;
+  font: inherit;
+  font-size: inherit;
+  padding: 0;
+  margin: 0;
+  outline: none;
+  width: 120px;
+  max-width: 200px;
+}
+
+[data-widget-selected] .titleBar,
+[data-widget-selected] .titleBar .typeLabel,
+[data-widget-selected] .titleBar .nameSeparator {
+  color: var(--color-border-accent-emphasis, #0969da);
+}
+
+.terminal {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--term-bg, #181b22);
+  border: 1px solid var(--color-border, #30363d);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.24);
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.xtermContainer {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  background: var(--term-bg, #181b22);
+  transition: opacity 0.3s ease;
+}
+
+/* ghostty-web / xterm.js container overrides */
+.xtermContainer :global(.xterm) {
+  width: 100%;
+  height: 100%;
+  background: var(--term-bg, #181b22);
+}
+
+.xtermContainer :global(.xterm) canvas {
+  background: var(--term-bg, #181b22);
+}
+
+/* Hide the native caret on ghostty-web's helper textarea —
+   without this it renders a visible blinking cursor at (0,0)
+   and triggers scrollIntoView on focus (scroll-to-top bug). */
+.xtermContainer :global(.xterm-helper-textarea),
+.xtermContainer textarea {
+  caret-color: transparent !important;
+  opacity: 0 !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+.xtermContainer :global(.xterm-viewport) {
+  overflow-y: auto;
+}
+
+.xtermContainer :global(.xterm-viewport::-webkit-scrollbar) {
+  width: 6px;
+}
+
+.xtermContainer :global(.xterm-viewport::-webkit-scrollbar-thumb) {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+.xtermContainer :global(.xterm-viewport::-webkit-scrollbar-track) {
+  background: transparent;
+}
+
+.loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8b949e;
+  font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--term-bg, #181b22);
+  z-index: 1;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  background-color: #333;
+  border-radius: 100%;
+  animation: sk-scaleout 1.0s infinite ease-in-out;
+}
+
+@keyframes sk-scaleout {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1.0);
+    opacity: 0;
+  }
+}
+
+.error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+  color: #f85149;
+  font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--term-bg, #181b22);
+  z-index: 1;
+}
+
+.mutedPrompt {
+  color: #484f58;
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Menlo, monospace;
+  font-size: 16px;
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ── Terminal Zzz Animation ── */
+
+.buddyZzz {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  margin-bottom: 16px;
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Menlo, monospace;
+  pointer-events: none;
+  user-select: none;
+}
+
+.z1 {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.6);
+  animation: zFloat 2.4s ease-in-out infinite;
+  animation-delay: 0s;
+  opacity: 0;
+}
+
+.z2 {
+  font-size: 22px;
+  color: rgba(255, 255, 255, 0.5);
+  animation: zFloat 2.4s ease-in-out infinite;
+  animation-delay: 0.8s;
+  opacity: 0;
+}
+
+.z3 {
+  font-size: 28px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  animation: zFloat 2.4s ease-in-out infinite;
+  animation-delay: 1.6s;
+  opacity: 0;
+}
+
+@keyframes zFloat {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  15% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-24px);
+  }
+}
+
+/* ── Session-ended badge + action ── */
+
+.sessionEndedBadge {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(110, 118, 129, 0.25);
+  color: #8b949e;
+  font-size: 12px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  letter-spacing: 0.01em;
+  pointer-events: none;
+  margin-bottom: 12px;
+}
+
+.sessionEndedAction {
+  color: #e6edf3;
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* ── Resource-limited overlay ── */
+
+.resourceIcon {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.resourceTitle {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #d29922;
+}
+
+.resourceMessage {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 12px;
+  color: #8b949e;
+  text-align: center;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.resourceCounts {
+  font-family: 'SF Mono', 'Fira Code', Menlo, monospace;
+  font-size: 11px;
+  color: #6e7681;
+}
+
+.resourceActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.resourceBtn {
+  all: unset;
+  cursor: pointer;
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #ffffff;
+  background: #da3633;
+  transition: background 100ms;
+}
+
+.resourceBtn:hover {
+  background: #f85149;
+}
+
+.resourceBtnSecondary {
+  all: unset;
+  cursor: pointer;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 12px;
+  color: #8b949e;
+  transition: color 100ms;
+}
+
+.resourceBtnSecondary:hover {
+  color: #e6edf3;
+}
+
+.resourceMuted {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 11px;
+  color: #6e7681;
+  text-align: center;
+  max-width: 240px;
+}
+
+/* Fullscreen expand */
+
+/* Drag hint tooltip — appears when user tries to drag the terminal body */
+.dragHint {
+  position: absolute;
+  bottom: -32px;
+  right: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: var(--color-background-inverse, #1f2328);
+  color: var(--color-foreground-on-inverse, #ffffff);
+  font-size: 12px;
+  font-weight: 500;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: dragHintIn 150ms ease;
+}
+
+.dragHintArrow {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+@keyframes dragHintIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.expandBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  background: var(--term-bg, #0d1117);
+  display: flex;
+  flex-direction: column;
+  animation: expandFadeIn 0.15s ease;
+}
+
+@keyframes expandFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.expandTopBar {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 12px;
+  background: #21262d;
+  border-bottom: 1px solid #30363d;
+  flex-shrink: 0;
+}
+
+.expandTitle {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #e6edf3;
+}
+
+.expandEmbedLabel {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 12px;
+  color: #8b949e;
+  margin-left: auto;
+  margin-right: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.expandClose {
+  all: unset;
+  cursor: pointer;
+  margin-left: auto;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  color: #8b949e;
+  font-size: 14px;
+  transition: background 100ms, color 100ms;
+}
+
+.expandClose:hover {
+  background: #30363d;
+  color: #e6edf3;
+}
+
+.expandEmbedLabel + .expandClose {
+  margin-left: 0;
+}
+
+.expandBody {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.expandTerminal {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--term-bg, #0d1117);
+}
+
+.expandTerminal :global(.xterm) {
+  height: 100%;
+}
+
+.expandSplit .expandTerminal {
+  flex: 1;
+  border-right: 1px solid #30363d;
+}
+
+.expandSplit .expandEmbed {
+  flex: 1;
+  min-width: 0;
+}
+
+.expandEmbed {
+  display: flex;
+}
+
+.expandIframe {
+  border: none;
+  width: 100%;
+  height: 100%;
+}
+
+/* Runtime context controls live in the shared widget actions menu. */
+.contextActions {
+  padding: 6px 10px;
+  color: var(--color-foreground, #1f2328);
+  font-size: 12px;
+}
+.contextOption {
+  all: unset;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.contextOption:hover, .contextOption:focus-visible { background: var(--color-background-neutral-muted, #eaeef2); }
+.contextOption:focus-visible { outline: 2px solid var(--borderColor-accent-emphasis, #0969da); }
+.contextOption:disabled { opacity: .5; cursor: default; }
+.contextCheck { display: inline-flex; width: 12px; flex-shrink: 0; }
+.contextPath { display: block; max-width: 320px; font-size: 11px; overflow-wrap: anywhere; opacity: .7; }
+.contextStatus { display: block; margin-top: 6px; }
+.contextRetry {
+  margin-top: 6px;
+  color: inherit;
+  background: none;
+  border: 1px solid var(--color-border-default, #d0d7de);
+  border-radius: 4px;
+  cursor: pointer;
+  font: inherit;
+}
+:global([data-sb-canvas-theme^='dark']) .contextActions { color: var(--color-foreground, #e6edf3); }
+:global([data-sb-canvas-theme^='dark']) .contextOption:hover,
+:global([data-sb-canvas-theme^='dark']) .contextOption:focus-visible { background: var(--color-background-neutral-muted, #272c33); }

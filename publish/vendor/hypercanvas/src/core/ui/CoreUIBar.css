@@ -1,0 +1,148 @@
+.toolbar-separator {
+  width: 1px;
+  height: 20px;
+  background: var(--sb--trigger-border, var(--color-slate-400));
+  opacity: 0.4;
+  flex-shrink: 0;
+}
+
+/* The Sites trigger is configured as always-visible so it remains available
+   on mobile; Hide Toolbars still suppresses it through the shared chrome flag. */
+html.storyboard-chrome-hidden [data-tool-id="running-sites"] {
+  display: none !important;
+}
+
+.default-button-dimmed {
+  opacity: 0.3;
+  transition: opacity 200ms;
+}
+
+.default-button-dimmed:hover,
+.default-button-dimmed:focus-within {
+  opacity: 1;
+}
+
+.tool-inactive {
+  opacity: 0.45;
+  pointer-events: none;
+}
+.tool-dimmed {
+  opacity: 0.3;
+  transition: opacity 200ms;
+}
+.tool-dimmed:hover,
+.tool-dimmed:focus-within {
+  opacity: 1;
+}
+[data-local-only] {
+  position: relative;
+}
+[data-local-only]::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 8px;
+  height: 8px;
+  background: hsl(212, 92%, 45%);
+  border-radius: 50%;
+  border: 2px solid var(--sb--sc-border-color, transparent);
+  box-sizing: content-box;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Collab bar / Agents Ready trigger ───────────────────────────── */
+
+[data-collab-bar] {
+  top: calc(12px + var(--sb-window-inset-top, 0px) + var(--sb-branch-bar-height, 0px));
+  right: 16px;
+}
+
+.agents-ready-btn {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 2.5px solid var(--sb--trigger-border, var(--color-slate-400));
+  background: var(--sb--trigger-bg, var(--color-slate-100));
+  color: var(--sb--trigger-text, var(--color-slate-600));
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  transition: background 120ms;
+}
+.agents-ready-btn:hover:not(:disabled) {
+  background: var(--sb--trigger-bg-hover, var(--color-slate-300));
+}
+.agents-ready-btn:disabled {
+  cursor: default;
+}
+.agents-ready-btn[data-ready] {
+  background: var(--color-background-success-emphasis, #1a7f37);
+  border-color: var(--color-background-success-emphasis, #1a7f37);
+  color: var(--color-foreground-on-emphasis, #ffffff);
+}
+.agents-ready-btn[data-ready]:hover {
+  background: var(--color-background-success-hover, #1a7f37cc);
+}
+.agents-ready-btn-label {
+  white-space: nowrap;
+}
+.agents-ready-btn-count {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  min-width: 1ch;
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: var(--sb--trigger-border, rgba(148, 163, 184, 0.35));
+  color: inherit;
+}
+.agents-ready-btn[data-ready] .agents-ready-btn-count {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.agents-ready-btn-working {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: var(--sb--trigger-border, rgba(148, 163, 184, 0.35));
+  color: inherit;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.agents-ready-btn[data-ready] .agents-ready-btn-working {
+  background: rgba(255, 255, 255, 0.22);
+}
+.agents-ready-btn-icon-spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  animation: sb-agents-spinner 0.85s linear infinite;
+  display: inline-block;
+  flex: 0 0 auto;
+}
+.agents-ready-btn-spinner {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  animation: sb-agents-spinner 0.85s linear infinite;
+  display: inline-block;
+}
+.agents-ready-btn-working-count {
+  line-height: 1;
+}
+@keyframes sb-agents-spinner {
+  to { transform: rotate(360deg); }
+}

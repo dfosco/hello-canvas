@@ -1,0 +1,463 @@
+/* WidgetChrome — universal hover toolbar for canvas widgets */
+
+.chromeContainer {
+  position: relative;
+}
+
+/* Connector anchor ports — positioned at widget edge centers */
+.anchorPort {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-background-accent-emphasis, #2f81f7);
+  border: 3px solid var(--color-background, #fff);
+  opacity: 0;
+  transition: opacity 0.15s ease, width 0.1s ease, height 0.1s ease, margin 0.1s ease;
+  cursor: crosshair;
+  z-index: 100;
+  pointer-events: auto;
+}
+
+/* Invisible expanded hit area — 15px padding around the visible dot */
+.anchorPort::before {
+  content: '';
+  position: absolute;
+  top: -15px;
+  left: -15px;
+  right: -15px;
+  bottom: -15px;
+}
+
+.chromeContainer:hover .anchorPort {
+  opacity: 0.6;
+}
+
+.anchorPort:hover {
+  opacity: 1;
+  width: 18px;
+  height: 18px;
+}
+
+.anchorPortTop {
+  top: -6px;
+  left: 50%;
+  margin-left: -6px;
+}
+.anchorPortTop:hover {
+  margin-left: -9px;
+  top: -9px;
+}
+
+.anchorPortBottom {
+  bottom: -6px;
+  left: 50%;
+  margin-left: -6px;
+}
+.anchorPortBottom:hover {
+  margin-left: -9px;
+  bottom: -9px;
+}
+
+.anchorPortLeft {
+  left: -6px;
+  top: 50%;
+  margin-top: -6px;
+}
+.anchorPortLeft:hover {
+  margin-top: -9px;
+  left: -9px;
+}
+
+.anchorPortRight {
+  right: -6px;
+  top: 50%;
+  margin-top: -6px;
+}
+.anchorPortRight:hover {
+  margin-top: -9px;
+  right: -9px;
+}
+
+.anchorPortDisabled {
+  background: var(--color-foreground-muted, #8b949e);
+  opacity: 0;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Widget slot — contains the actual widget; selection outline targets this */
+.widgetSlot {
+  position: relative;
+  border-radius: 4px;
+}
+
+/* Hide toolbar and connector anchors when a child widget is in crop mode */
+.chromeContainer:has([data-crop-active]) .toolbar,
+.chromeContainer:has([data-crop-active]) .anchorPort {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.widgetSlotSelected {
+  outline: 4px solid var(--color-background-accent-emphasis, #2f81f7);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.widgetSlotMultiSelected {
+  outline-style: solid;
+}
+
+/* Agent done — paint outline green whether or not the widget is selected.
+   Targets the inner widget slot via the chromeContainer's data attribute. */
+.chromeContainer[data-agent-status="done"] .widgetSlot {
+  outline: 8px solid var(--color-background-success-emphasis, #1a7f37);
+  outline-offset: 4px;
+  border-radius: 12px;
+}
+.chromeContainer[data-agent-status="done"] .widgetSlotSelected {
+  outline-color: var(--color-background-success-emphasis, #1a7f37);
+}
+
+/* Agent working — subtle pulsing blue outline so the widget visibly
+   distinguishes itself from idle and from `done`. */
+.chromeContainer[data-agent-status="working"] .widgetSlot {
+  outline: 4px solid var(--color-background-accent-emphasis, #0969da);
+  outline-offset: 2px;
+  border-radius: 4px;
+  animation: sb-agent-working-pulse 1.6s ease-in-out infinite;
+}
+.chromeContainer[data-agent-status="working"] .widgetSlotSelected {
+  outline-color: var(--color-background-accent-emphasis, #0969da);
+}
+@keyframes sb-agent-working-pulse {
+  0%, 100% { outline-color: var(--color-background-accent-emphasis, #0969da); }
+  50%      { outline-color: var(--color-background-accent-muted, #54aeff); }
+}
+
+/* Toolbar — absolutely positioned below the widget so it doesn't affect
+   the draggable box dimensions (tiny-canvas measures children for drag). */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 10px);
+}
+
+/* Invisible hit-area that bridges the 10px gap between the widget and the
+   toolbar. Keeps the parent .chromeContainer in :hover (and React mouseenter)
+   when the pointer crosses the padding, and — crucially — stops the pointer
+   from falling through to widgets stacked underneath, so the toolbar of an
+   overlapping widget on top stays interactive. */
+.toolbar::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: 10px;
+  pointer-events: auto;
+}
+
+/* Trigger dot — positioned in the toolbar, visible at rest */
+.triggerDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-border-muted, #d0d7de);
+  opacity: 0.5;
+  transition: opacity 120ms;
+}
+
+:global([data-sb-canvas-theme^='dark']) .triggerDot {
+  background: var(--color-border-muted, #373e47);
+  opacity: 0.6;
+}
+
+.triggerDotHidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Toolbar content — feature buttons + select handle */
+.toolbarContent {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms;
+}
+
+.toolbarContentVisible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Feature buttons — left-aligned group */
+.featureButtons {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+/* Individual feature button */
+.featureBtn {
+  all: unset;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  border: 1.6px solid var(--color-border-muted, #d0d7de);
+  background: var(--color-background, #ffffff);
+  color: var(--color-foreground-muted, #656d76);
+  font-size: 12px;
+  transition: background 100ms, color 100ms, border-color 100ms;
+}
+
+:global([data-sb-canvas-theme^='dark']) .featureBtn {
+  background: var(--color-background-muted, #161b22);
+  border-color: var(--color-border-muted, #373e47);
+  color: var(--color-foreground-muted, #8b949e);
+}
+
+.featureBtn:hover {
+  background: var(--color-background-neutral-muted, #eaeef2);
+  color: var(--color-foreground, #1f2328);
+  border-color: var(--color-border, #d0d7de);
+}
+
+:global([data-sb-canvas-theme^='dark']) .featureBtn:hover {
+  background: var(--color-background-neutral-muted, #272c33);
+  color: var(--color-foreground, #e6edf3);
+  border-color: var(--color-border, #484f58);
+}
+
+.featureBtnActive {
+  background: var(--color-background-accent-emphasis, #0969da);
+  border-color: var(--color-background-accent-emphasis, #0969da);
+  color: var(--color-foreground-on-emphasis, #ffffff);
+}
+
+:global([data-sb-canvas-theme^='dark']) .featureBtnActive {
+  background: var(--color-background-accent-emphasis, #388bfd);
+  border-color: var(--color-background-accent-emphasis, #388bfd);
+  color: var(--color-foreground-on-emphasis, #ffffff);
+}
+
+.featureBtnActive:hover {
+  background: var(--color-background-accent-emphasis, #0969da);
+  border-color: var(--color-background-accent-emphasis, #0969da);
+  color: var(--color-foreground-on-emphasis, #ffffff);
+  filter: brightness(1.1);
+}
+
+/* Select handle — right-aligned rounded rect */
+.selectHandle {
+  all: unset;
+  cursor: grab;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1.6px solid var(--color-border-muted, #d0d7de);
+  background: var(--color-background, #ffffff);
+  transition: background 100ms, border-color 100ms;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+:global([data-sb-canvas-theme^='dark']) .selectHandle {
+  background: var(--color-background-muted, #161b22);
+  border-color: var(--color-border-muted, #373e47);
+}
+
+.selectHandle:hover {
+  border-color: var(--color-background-accent-emphasis, #2f81f7);
+}
+
+.selectHandleActive,
+:global([data-sb-canvas-theme^='dark']) .selectHandleActive {
+  background: var(--color-background-accent-emphasis, #2f81f7);
+  border-color: var(--color-background-accent-emphasis, #2f81f7);
+}
+
+.selectHandleActive:hover,
+:global([data-sb-canvas-theme^='dark']) .selectHandleActive:hover {
+  background: var(--color-background-accent-emphasis, #388bfd);
+  border-color: var(--color-background-accent-emphasis, #388bfd);
+}
+
+/* Color picker feature */
+.colorPickerWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.colorDotInner {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: block;
+}
+
+.colorPopup {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: -4px;
+  display: flex;
+  gap: 5px;
+  padding: 6px 10px;
+  background: var(--color-background, #ffffff);
+  border-radius: 20px;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.08),
+    0 4px 12px rgba(0, 0, 0, 0.12);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms;
+  z-index: 10;
+  white-space: nowrap;
+}
+
+/* Invisible bridge from the trigger button to the popup so mouse
+   travel doesn't create a gap that closes the picker. */
+.colorPopup::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  height: 8px;
+}
+
+:global([data-sb-canvas-theme^='dark']) .colorPopup {
+  background: var(--color-background-muted, #161b22);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 4px 12px rgba(0, 0, 0, 0.45);
+}
+
+.colorPopupOpen {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.colorOption {
+  all: unset;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 100ms;
+}
+
+.colorOption:hover {
+  transform: scale(1.15);
+}
+
+.colorOptionActive {
+  border-color: currentColor;
+  box-shadow: 0 0 0 1px currentColor;
+}
+
+/* Overflow menu */
+.overflowWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.overflowMenu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  min-width: max-content;
+  padding: 4px;
+  background: var(--color-background, #ffffff);
+  border-radius: 10px;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.08),
+    0 4px 12px rgba(0, 0, 0, 0.12);
+  z-index: 10;
+}
+
+:global([data-sb-canvas-theme^='dark']) .overflowMenu {
+  background: var(--color-background-muted, #161b22);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 4px 12px rgba(0, 0, 0, 0.45);
+}
+
+.overflowItem {
+  all: unset;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--color-foreground, #1f2328);
+  border-radius: 6px;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+:global([data-sb-canvas-theme^='dark']) .overflowItem {
+  color: var(--color-foreground, #e6edf3);
+}
+
+.overflowItem:hover {
+  background: var(--color-background-neutral-muted, #eaeef2);
+}
+
+:global([data-sb-canvas-theme^='dark']) .overflowItem:hover {
+  background: var(--color-background-neutral-muted, #272c33);
+}
+
+.overflowItemDanger:hover {
+  background: var(--color-background-danger-muted, #ffebe9);
+  color: var(--color-foreground-danger, #d1242f);
+}
+
+:global([data-sb-canvas-theme^='dark']) .overflowItemDanger:hover {
+  background: var(--color-background-danger-muted, #490202);
+  color: var(--color-foreground-danger, #f85149);
+}
+
+/* Alt hint — muted label on the right side of a menu item */
+.altHint {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--color-foreground-muted, #656d76);
+  padding: 1px 6px;
+  border-radius: 4px;
+  transition: background 80ms, color 80ms;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+:global([data-sb-canvas-theme^='dark']) .altHint {
+  color: var(--color-foreground-muted, #8b949e);
+}
+
+.altHintActive {
+  background: var(--color-background-neutral-muted, #eaeef2);
+  color: var(--color-foreground, #1f2328);
+}
+
+:global([data-sb-canvas-theme^='dark']) .altHintActive {
+  background: var(--color-background-neutral-muted, #272c33);
+  color: var(--color-foreground, #e6edf3);
+}

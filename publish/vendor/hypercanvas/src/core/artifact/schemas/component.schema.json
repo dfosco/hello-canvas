@@ -1,0 +1,72 @@
+{
+  "$id": "artifact:component",
+  "type": "object",
+  "required": ["name"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Za-z0-9]+$|^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "maxLength": 64,
+      "description": "Component name (PascalCase or kebab-case)"
+    },
+    "directory": {
+      "type": "string",
+      "description": "Subdirectory inside src/components/"
+    },
+    "knobs": {
+      "$ref": "#/$defs/knobsArray",
+      "description": "Typed configuration knobs exposed by this component"
+    }
+  },
+  "$defs": {
+    "knobsArray": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/knobDef" }
+    },
+    "knobDef": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-zA-Z0-9]*$",
+          "not": {
+            "anyOf": [
+              { "enum": ["flow", "scene", "hide", "theme"] },
+              { "pattern": "^_" }
+            ]
+          },
+          "description": "Camel-case identifier used to build the URL hash key"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["text", "textarea", "number", "slider", "boolean", "select", "radio", "range", "date", "object", "string-array"]
+        },
+        "label": { "type": "string" },
+        "description": { "type": "string" },
+        "scope": {
+          "type": "string",
+          "description": "Optional route scope, such as /Branding"
+        },
+        "default": {},
+        "options": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Allowed values for select and radio knobs"
+        },
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "step": { "type": "number" },
+        "knobs": {
+          "$ref": "#/$defs/knobsArray",
+          "description": "Nested child knobs for object knobs"
+        },
+        "itemType": {
+          "type": "string",
+          "enum": ["text", "number"],
+          "description": "Item coercion type for string-array knobs"
+        }
+      }
+    }
+  }
+}

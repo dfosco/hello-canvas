@@ -1,0 +1,49 @@
+/**
+ * Shared styles for embed interaction overlays.
+ * Used by PrototypeEmbed, FigmaEmbed, and ComponentWidget.
+ *
+ * Layout-only styles. Colors come from Tailwind utility classes applied
+ * directly to the JSX (`bg-neutral-900 dark:bg-neutral-100`, etc.).
+ */
+
+.interactOverlay {
+  position: absolute;
+  inset: 0;
+  /* Sit above in-widget loading/snapshot layers (placeholder z-index: 2) —
+   * a dormant Prototype Frame renders its captured poster as the topmost
+   * content, and the "Click to interact" gate must stay reachable on top
+   * of it or the frame can never be admitted. */
+  z-index: 3;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 150ms ease;
+}
+
+.interactOverlay:hover {
+  background-color: rgba(0, 0, 0, 0.15);
+}
+
+.interactHint {
+  opacity: 0;
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+  color: #ffffff;
+  background-color: #25292e;
+}
+
+:global([data-sb-theme^="dark"]) .interactHint,
+:global([data-sb-canvas-theme^="dark"]) .interactHint,
+:global([data-sb-prototype-theme^="dark"]) .interactHint {
+  color: #25292e;
+  background-color: #ffffff;
+}
+
+.interactOverlay:hover .interactHint {
+  opacity: 1;
+}

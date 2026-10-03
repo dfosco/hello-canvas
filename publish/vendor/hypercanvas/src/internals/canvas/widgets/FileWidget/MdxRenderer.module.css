@@ -1,0 +1,81 @@
+.root {
+  overflow: auto;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.loading {
+  padding: 16px;
+  color: var(--color-foreground-muted);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  min-height: 40px;
+}
+
+.loading::after {
+  content: 'Compiling…';
+}
+
+.fallback {
+  padding: 16px;
+  color: var(--color-foreground-muted);
+  font-family: var(--font-sans);
+  font-size: 13px;
+}
+
+.errorCard {
+  margin: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-foreground-danger);
+  background: var(--color-background-muted);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-foreground);
+  overflow: auto;
+  max-width: 100%;
+}
+
+.errorTitle {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-foreground-danger);
+  margin-bottom: 6px;
+}
+
+.errorMessage {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--color-foreground);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.errorDetails {
+  margin-top: 8px;
+}
+
+.errorDetails summary {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: var(--color-foreground-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.errorSnippet {
+  margin: 6px 0 0;
+  padding: 8px;
+  background: var(--color-background-inset);
+  border: 1px solid var(--color-border-muted);
+  border-radius: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--color-foreground-muted);
+}

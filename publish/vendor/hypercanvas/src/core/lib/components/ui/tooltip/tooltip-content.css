@@ -1,0 +1,28 @@
+/*
+ * Self-contained tooltip styling.
+ *
+ * The tooltip popup portals to `document.body` — completely outside the
+ * storyboard root — so it is maximally exposed to host/consumer CSS
+ * (global resets, Primer base styles, etc.). Tailwind utilities live in
+ * `@layer utilities`, which loses the cascade to any *unlayered* host CSS,
+ * so relying on `px-2.5`/`py-1.5`/`bg-slate-700` alone leaves the tooltip
+ * with stripped padding and background in embedded/consumer contexts.
+ *
+ * These unlayered rules (specificity 0,1,0 via the data-slot attribute)
+ * pin the essential box styling so it survives regardless of host CSS.
+ */
+[data-slot="tooltip-content"] {
+  box-sizing: border-box;
+  padding-block: 0.375rem; /* py-1.5 */
+  padding-inline: 0.625rem; /* px-2.5 */
+  border-radius: 0.5rem; /* rounded-lg */
+  background-color: var(--color-slate-700, oklch(37.2% 0.044 257.287));
+  color: #fff;
+  font-size: 0.75rem; /* text-xs */
+  line-height: 1rem;
+  font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1); /* shadow-lg */
+  z-index: 10001;
+}

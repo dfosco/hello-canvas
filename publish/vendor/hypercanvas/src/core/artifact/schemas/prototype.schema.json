@@ -1,0 +1,115 @@
+{
+  "$id": "artifact:prototype",
+  "type": "object",
+  "required": ["name"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "maxLength": 64,
+      "description": "Kebab-case identifier (unique within scope)"
+    },
+    "title": {
+      "type": "string",
+      "description": "Human-readable display title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Short description"
+    },
+    "author": {
+      "oneOf": [
+        { "type": "string" },
+        { "type": "array", "items": { "type": "string" } }
+      ],
+      "description": "Author name(s)"
+    },
+    "folder": {
+      "type": "string",
+      "description": "Parent .folder directory"
+    },
+    "icon": {
+      "type": "string",
+      "description": "Emoji or icon identifier"
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Categorization tags"
+    },
+    "team": {
+      "type": "string",
+      "description": "Team name"
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "External URL — when present, prototype is external (no index.jsx generated)"
+    },
+    "flow": {
+      "type": "boolean",
+      "default": false,
+      "description": "Create a default flow file alongside"
+    },
+    "partial": {
+      "type": "string",
+      "description": "Template/recipe name"
+    },
+    "knobs": {
+      "$ref": "#/$defs/knobsArray",
+      "description": "Typed configuration knobs exposed by this prototype"
+    }
+  },
+  "$defs": {
+    "knobsArray": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/knobDef" }
+    },
+    "knobDef": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-zA-Z0-9]*$",
+          "not": {
+            "anyOf": [
+              { "enum": ["flow", "scene", "hide", "theme"] },
+              { "pattern": "^_" }
+            ]
+          },
+          "description": "Camel-case identifier used to build the URL hash key"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["text", "textarea", "number", "slider", "boolean", "select", "radio", "range", "date", "object", "string-array"]
+        },
+        "label": { "type": "string" },
+        "description": { "type": "string" },
+        "scope": {
+          "type": "string",
+          "description": "Optional route scope, such as /Branding"
+        },
+        "default": {},
+        "options": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Allowed values for select and radio knobs"
+        },
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "step": { "type": "number" },
+        "knobs": {
+          "$ref": "#/$defs/knobsArray",
+          "description": "Nested child knobs for object knobs"
+        },
+        "itemType": {
+          "type": "string",
+          "enum": ["text", "number"],
+          "description": "Item coercion type for string-array knobs"
+        }
+      }
+    }
+  },
+  "mutuallyExclusive": [["url", "flow"]]
+}

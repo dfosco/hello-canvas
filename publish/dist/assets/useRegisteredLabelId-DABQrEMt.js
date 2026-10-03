@@ -1,0 +1,1 @@
+var n=Object.defineProperty;var s=(u,e)=>n(u,"name",{value:e,configurable:!0});import{b as o,u as t}from"./useBaseUiId-CavJVjrK.js";function a(u,e){const r=o(u);return t(()=>(e(r),()=>{e(void 0)}),[r,e]),r}s(a,"useRegisteredLabelId");export{a as u};

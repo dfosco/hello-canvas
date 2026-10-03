@@ -1,0 +1,25 @@
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 28px;
+  color: var(--color-foreground-muted, #656d76);
+  background: var(--color-background-inset, #f6f8fa);
+  border: 1.5px dashed var(--color-border, #d0d7de);
+  border-radius: 14px;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 120ms, background 120ms, transform 120ms;
+}
+
+.dropzone:hover,
+.dropzoneActive {
+  color: var(--color-foreground, #24292f);
+  background: var(--color-background-accent-muted, #ddf4ff);
+  border-color: var(--color-foreground-accent, #0969da);
+}
+
+.dropzoneActive { transform: scale(1.01); }

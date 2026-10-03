@@ -1,0 +1,81 @@
+.imageWrapper {
+  min-width: unset;
+}
+
+.container {
+  position: relative;
+  overflow: hidden;
+  min-width: 100px;
+}
+
+.frame {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* When cropping, the image needs pointer events for the overlay */
+.container[data-crop-active] .image {
+  pointer-events: none;
+}
+
+/* Hide the widget toolbar when crop is active (replaced by crop bar) */
+.container[data-crop-active] {
+  overflow: visible;
+}
+
+/* Crop bar slot — positioned below the widget like the WidgetChrome toolbar */
+.cropBarSlot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 10px);
+  z-index: 20;
+}
+
+.privateBadge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  color: var(--color-foreground-on-emphasis, #fff);
+  background: var(--color-background-neutral-emphasis, rgba(0, 0, 0, 0.55));
+  pointer-events: none;
+}
+
+/* ── Expanded / split-screen image ───────────────────────────────── */
+
+.expandedImageContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  background: var(--color-background-inset, #f6f8fa);
+}
+
+.expandedImage {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 0;
+  user-select: none;
+}

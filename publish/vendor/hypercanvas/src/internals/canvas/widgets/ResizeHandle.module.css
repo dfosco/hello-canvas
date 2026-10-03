@@ -1,0 +1,29 @@
+.handle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 16px;
+  height: 16px;
+  cursor: nwse-resize;
+  background: linear-gradient(
+    135deg,
+    transparent 40%,
+    var(--color-border-muted, rgba(0, 0, 0, 0.15)) 40%,
+    var(--color-border-muted, rgba(0, 0, 0, 0.15)) 50%,
+    transparent 50%,
+    transparent 65%,
+    var(--color-border-muted, rgba(0, 0, 0, 0.15)) 65%,
+    var(--color-border-muted, rgba(0, 0, 0, 0.15)) 75%,
+    transparent 75%
+  );
+  opacity: 0;
+  transition: opacity 150ms;
+  z-index: 2;
+  border-radius: 0 0 6px 0;
+}
+
+/* Show on parent hover or direct hover */
+*:hover > .handle,
+.handle:hover {
+  opacity: 1;
+}

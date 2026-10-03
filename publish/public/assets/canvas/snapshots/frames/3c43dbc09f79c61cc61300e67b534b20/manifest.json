@@ -1,0 +1,28 @@
+{
+  "formatVersion": 1,
+  "sourceKey": "3c43dbc09f79c61cc61300e67b534b20",
+  "target": {
+    "kind": "prototype",
+    "src": "/SiloDashboard#view=utilization",
+    "zoom": 100,
+    "viewport": {
+      "width": 2320,
+      "height": 1363
+    }
+  },
+  "viewport": {
+    "width": 2320,
+    "height": 1363
+  },
+  "images": {
+    "light": {
+      "file": "bb3b6cbaf02d949e8ec90d4529e3812a-light.png",
+      "digest": "bb3b6cbaf02d949e8ec90d4529e3812a",
+      "bytes": 391693,
+      "width": 4640,
+      "height": 2726,
+      "updatedAt": "2026-10-02T20:47:23.559Z"
+    }
+  },
+  "updatedAt": "2026-10-02T20:47:23.559Z"
+}

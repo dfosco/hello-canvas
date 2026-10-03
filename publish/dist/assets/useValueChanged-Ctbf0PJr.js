@@ -1,0 +1,1 @@
+var c=Object.defineProperty;var s=(r,t)=>c(r,"name",{value:t,configurable:!0});import{c as n}from"./vendor-react-PJCXJ5Vl.js";import{u as a}from"./useBaseUiId-CavJVjrK.js";import{u}from"./useStableCallback-CFaNPKxr.js";function C(r,t){const e=n.useRef(r),o=u(t);a(()=>{e.current!==r&&o(e.current)},[r,o]),a(()=>{e.current=r},[r])}s(C,"useValueChanged");export{C as u};

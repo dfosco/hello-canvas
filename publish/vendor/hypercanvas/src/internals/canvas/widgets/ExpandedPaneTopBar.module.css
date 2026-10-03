@@ -1,0 +1,65 @@
+/* ── ExpandedPaneTopBar — dark per-pane title bar ─────────────────── */
+
+.bar {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 12px;
+  gap: 6px;
+  background: #21262d;
+  border-bottom: 1px solid #30363d;
+  flex-shrink: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  user-select: none;
+}
+
+.widgetIcon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8b949e;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  color: #8b949e;
+  margin-right: auto;
+}
+
+/* Action buttons — same shape/size as widget toolbar, forced dark mode */
+.actionBtn {
+  all: unset;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  border: 1.6px solid #373e47;
+  background: #161b22;
+  color: #8b949e;
+  font-size: 12px;
+  transition: background 100ms, color 100ms, border-color 100ms;
+}
+
+.actionBtn:hover {
+  background: #272c33;
+  color: #e6edf3;
+  border-color: #484f58;
+}
+
+.leaderCrown {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}

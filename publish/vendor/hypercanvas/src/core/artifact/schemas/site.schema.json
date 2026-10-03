@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Site",
+  "type": "object",
+  "required": ["name"],
+  "properties": {
+    "name": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$", "maxLength": 64 },
+    "title": { "type": "string" },
+    "description": { "type": "string" },
+    "productionBaseUrl": { "type": "string", "format": "uri" },
+    "developmentBaseUrl": { "type": "string", "format": "uri" },
+    "startCommand": { "type": "string" },
+    "route": { "type": "string" }
+  }
+}

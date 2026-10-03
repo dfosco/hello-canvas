@@ -1,0 +1,98 @@
+/* ArtifactForm — container + header/footer chrome around the BaseUiForm
+ * primitives. Visual goals: match the SimpleWorkspace aesthetic — white
+ * card on a neutral background, Mona Sans, 12px radii, soft borders. */
+
+.formShell {
+  max-width: 480px;
+  padding: 28px;
+  background: var(--color-background, #ffffff);
+  border: 1px solid var(--color-border, #d0d7de);
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.formShell[data-compact] {
+  max-width: 360px;
+  padding: 18px;
+  gap: 12px;
+  border-radius: 12px;
+}
+
+.formShell[data-bare] {
+  max-width: none;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* ─── Header ─── */
+
+.header {
+  margin: -4px 0 4px;
+}
+
+.title {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-foreground, #1a1a1a);
+  letter-spacing: -0.01em;
+}
+
+.formShell[data-compact] .title {
+  font-size: 16px;
+}
+
+.description {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-foreground-muted, #656d76);
+  line-height: 1.45;
+}
+
+/* ─── Type picker ─── */
+
+.typePicker {
+  margin: 4px 0 0;
+}
+
+/* ─── Field stack ─── */
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ─── Code field override (textarea variant) ─── */
+
+.codeField {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ─── Footer actions ─── */
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border-muted, #eaeef2);
+}
+
+/* ─── Advanced toggle ─── */
+
+.advancedToggle {
+  align-self: flex-start;
+  margin-top: 2px;
+  color: var(--color-foreground-muted, #656d76);
+  padding-left: 10px;
+  padding-right: 10px;
+}

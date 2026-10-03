@@ -1,0 +1,34 @@
+/**
+ * Standalone create-only page styling.
+ *
+ * The page is a fixed full-viewport overlay so it covers the chrome
+ * (BranchBar, FeatureFlagBanner, CoreUIBar toolbar) that
+ * StoryboardProvider mounts globally on every prototype route. A high
+ * z-index keeps it above the toolbar specifically.
+ *
+ * The `.card` wrapper deliberately mirrors `.form` in ArtifactForm.module.css
+ * so the card looks identical to the in-app dialog body.
+ */
+
+.page {
+  position: fixed;
+  inset: 0;
+  /* Sits above the BranchBar (10001), CoreUIBar toolbar (9999), and any
+   * other dev-overlay chrome StoryboardProvider mounts. The /create
+   * route is a focused creation surface — chrome would be a distraction. */
+  z-index: 2147483646;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2rem 1.5rem 4rem;
+  background: var(--color-background-muted, #f6f8fa);
+  overflow: auto;
+}
+
+.card {
+  width: 100%;
+  max-width: 480px;
+  /* Center horizontally; vertical alignment is flex-start so tall forms
+   * scroll naturally instead of clipping the top. */
+  margin: auto;
+}

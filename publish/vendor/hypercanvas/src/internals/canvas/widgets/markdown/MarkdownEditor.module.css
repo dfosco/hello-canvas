@@ -1,0 +1,11 @@
+/*
+ * Minimal placeholder styling — when the view is empty we render a
+ * <p class="placeholder">…</p> with the raw class name. Both consumer CSS
+ * (MarkdownBlock / FileWidget) also style :global(.placeholder), but we
+ * include a fallback here so the primitive is self-contained.
+ */
+.placeholder {
+  color: var(--color-foreground-muted, #656d76);
+  font-style: italic;
+  margin: 0;
+}

@@ -1,0 +1,323 @@
+.dialog {
+  width: min(720px, calc(100vw - 32px));
+  max-height: min(760px, calc(100vh - 32px));
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--color-border-muted);
+}
+
+.heading {
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  color: var(--color-foreground);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.subtitle {
+  margin: 5px 0 0;
+  color: var(--color-foreground-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.closeButton,
+.secondaryButton,
+.primaryButton,
+.dangerButton {
+  min-height: 32px;
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.closeButton {
+  flex: none;
+  color: var(--color-foreground-muted);
+  background: transparent;
+}
+
+.secondaryButton {
+  color: var(--color-foreground);
+  background: var(--color-background-muted);
+}
+
+.primaryButton {
+  color: var(--color-foreground-on-emphasis);
+  background: var(--color-background-accent-emphasis);
+  border-color: var(--color-background-accent-emphasis);
+}
+
+.dangerButton {
+  color: var(--color-foreground-danger);
+  background: var(--color-background-danger-muted);
+  border-color: var(--color-border-danger-muted);
+}
+
+.closeButton:hover,
+.secondaryButton:hover {
+  background: var(--color-background-neutral-muted);
+}
+
+.primaryButton:hover {
+  background: var(--color-background-accent-emphasis-hover);
+}
+
+.closeButton:focus-visible,
+.secondaryButton:focus-visible,
+.primaryButton:focus-visible,
+.dangerButton:focus-visible,
+.agentChoice:focus-within,
+.consent:focus-within {
+  outline: 2px solid var(--color-border-accent-emphasis);
+  outline-offset: 2px;
+}
+
+.secondaryButton:disabled,
+.primaryButton:disabled,
+.dangerButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.body {
+  overflow: auto;
+  min-height: 0;
+  padding: 20px 24px;
+}
+
+.section + .section {
+  margin-top: 20px;
+}
+
+.sectionTitle {
+  margin: 0 0 10px;
+  color: var(--color-foreground);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.summary,
+.notice,
+.error,
+.success {
+  margin: 0 0 16px;
+  border: 1px solid var(--color-border-muted);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.summary,
+.notice {
+  color: var(--color-foreground-muted);
+  background: var(--color-background-muted);
+}
+
+.error {
+  color: var(--color-foreground-danger);
+  background: var(--color-background-danger-muted);
+  border-color: var(--color-border-danger-muted);
+}
+
+.success {
+  color: var(--color-foreground-success);
+  background: var(--color-background-success-muted);
+  border-color: var(--color-border-success-muted);
+}
+
+.agentGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.agentChoice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  border: 1px solid var(--color-border-muted);
+  border-radius: 8px;
+  padding: 11px 12px;
+  background: var(--color-background);
+  cursor: pointer;
+}
+
+.agentChoice:has(input:checked) {
+  border-color: var(--color-border-accent-emphasis);
+  background: var(--color-background-accent-muted);
+}
+
+.agentChoice input,
+.consent input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--color-background-accent-emphasis);
+}
+
+.agentText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.agentName {
+  color: var(--color-foreground);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.agentStatus,
+.meta,
+.boundary {
+  color: var(--color-foreground-muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.stepList,
+.phaseList,
+.disclosureList {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step,
+.phase,
+.disclosure {
+  border: 1px solid var(--color-border-muted);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: var(--color-background);
+}
+
+.step,
+.phase {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--color-foreground);
+  font-size: 13px;
+}
+
+.tag {
+  flex: none;
+  border-radius: 999px;
+  padding: 2px 7px;
+  color: var(--color-foreground-muted);
+  background: var(--color-background-neutral-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.disclosure h4 {
+  margin: 0 0 5px;
+  color: var(--color-foreground);
+  font-size: 13px;
+}
+
+.disclosure p,
+.boundary {
+  margin: 5px 0 0;
+}
+
+.disclosure a {
+  color: var(--color-foreground-accent);
+  overflow-wrap: anywhere;
+}
+
+.boundary {
+  border-left: 3px solid var(--color-border-accent-emphasis);
+  padding: 8px 10px;
+  background: var(--color-background-accent-muted);
+}
+
+.consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 16px;
+  border: 1px solid var(--color-border-emphasis);
+  border-radius: 8px;
+  padding: 12px;
+  color: var(--color-foreground);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.output {
+  max-height: 180px;
+  overflow: auto;
+  margin: 0;
+  border: 1px solid var(--color-border-muted);
+  border-radius: 8px;
+  padding: 12px;
+  color: var(--color-foreground);
+  background: var(--color-background-inset);
+  font: 11px/1.5 var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 24px;
+  border-top: 1px solid var(--color-border-muted);
+  background: var(--color-background-muted);
+}
+
+@media (max-width: 560px) {
+  .dialog {
+    width: calc(100vw - 16px);
+    max-height: calc(100vh - 16px);
+  }
+
+  .header,
+  .body,
+  .footer {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .agentGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .footer {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .footer button {
+    width: 100%;
+  }
+}

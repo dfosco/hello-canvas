@@ -1,0 +1,76 @@
+{
+  "customDomain": "",
+  "repository": {
+    "owner": "",
+    "name": ""
+  },
+  "modes": {
+    "enabled": false
+  },
+  "comments": {
+    "discussions": {
+      "category": "Comments"
+    }
+  },
+  "plugins": {
+    "devtools": true
+  },
+  "workshop": {
+    "enabled": false,
+    "features": {
+      "createPrototype": true,
+      "createFlow": true,
+      "createCanvas": true
+    }
+  },
+  "featureFlags": {},
+  "canvas": {
+    "github": {
+      "embedBehavior": "link-preview",
+      "ghGuard": "copy"
+    },
+    "terminal": {
+      "resizable": false,
+      "defaultWidth": 800,
+      "defaultHeight": 450
+    },
+    "fileEditor": {
+      "theme": {
+        "light": null,
+        "dark": "oneDark"
+      }
+    }
+  },
+  "customerMode": {
+    "enabled": false,
+    "homepage": false,
+    "tools": "all",
+    "commandPalette": true,
+    "branchBar": true
+  },
+  "theming": {
+    "themes": {
+      "light": {
+        "label": "Light",
+        "attrs": {
+          "data-color-mode": "light",
+          "data-light-theme": "light"
+        }
+      },
+      "dark": {
+        "label": "Dark",
+        "attrs": {
+          "data-color-mode": "dark",
+          "data-dark-theme": "dark"
+        }
+      }
+    },
+    "surfaces": {
+      "prototype": { "label": "Prototype",  "sync": true  },
+      "canvas":    { "label": "Canvas",     "sync": true  },
+      "toolbar":   { "label": "Tools",      "sync": true  },
+      "codeBoxes": { "label": "Code boxes", "sync": true  }
+    },
+    "default": "system"
+  }
+}

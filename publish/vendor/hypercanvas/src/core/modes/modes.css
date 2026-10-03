@@ -1,0 +1,98 @@
+/**
+ * Base styles for the storyboard design-mode system.
+ *
+ * Each mode applies a `storyboard-mode-{name}` class on <html>.
+ * Use these classes to conditionally show/hide or restyle content per mode.
+ */
+
+:root {
+  --sb--mode-color: #fcfcfc;
+  --sb--color-orange: #dfb490;
+  --sb--color-green: #2a9d8f;
+  --sb--color-blue: #4a7fad;
+  --sb--color-purple: #7655a4;
+  --sb--color-dark: #2a2a2a;
+}
+
+html.storyboard-mode-present   { --sb--mode-color: var(--color-foreground-success); }
+html.storyboard-mode-plan      { --sb--mode-color: var(--sb--color-blue); }
+html.storyboard-mode-inspect   { --sb--mode-color: var(--color-foreground-accent); }
+html.storyboard-mode-prototype { --sb--mode-color: var(--color-background-inverse); }
+
+html.storyboard-mode-present,
+html.storyboard-mode-plan,
+html.storyboard-mode-prototype,
+html.storyboard-mode-inspect {
+  padding: 12px;
+  background-color: var(--sb--mode-color);
+  transition: background-color 0.2s ease, padding 0.2s ease;
+}
+
+html.storyboard-mode-prototype {
+  padding: 0;
+}
+
+html.storyboard-mode-present::before,
+html.storyboard-mode-plan::before,
+html.storyboard-mode-inspect::before {
+  content: '';
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  height: 12px;
+  background-color: var(--sb--mode-color);
+  z-index: 99999;
+  pointer-events: none;
+}
+
+html.storyboard-mode-present > body > #root,
+html.storyboard-mode-plan > body > #root,
+html.storyboard-mode-inspect > body > #root {
+  overflow-x: hidden;
+  overflow-y: hidden;
+  border-radius: var(--radius);
+  /* box-shadow: 0 0 80px 40px var(--sb--mode-color); */
+}
+
+/* Make body transparent so the html mode-color background
+   shows through the gap between #root and the side panel */
+html.storyboard-mode-present > body,
+html.storyboard-mode-plan > body,
+html.storyboard-mode-inspect > body {
+  background-color: transparent !important;
+}
+
+#root > * {
+  overflow-y: auto;
+}
+
+html.storyboard-mode-present > body > #root {
+  box-shadow: 0 0 7px 2px rgb(42 157 143 / 60%);
+}
+
+html.storyboard-mode-plan > body > #root {
+  box-shadow: 0 0 7px 2px rgb(74 127 173 / 60%);
+}
+
+html.storyboard-mode-inspect > body > #root {
+  box-shadow: 0 0 7px 2px rgb(118 85 164 / 60%);
+}
+
+/* Mode-aware trigger button hue — derived from collar color */
+html.storyboard-mode-present,
+html.storyboard-mode-plan,
+html.storyboard-mode-inspect {
+  --sb--trigger-bg: color-mix(in srgb, var(--sb--mode-color) 12%, white);
+  --sb--trigger-bg-hover: color-mix(in srgb, var(--sb--mode-color) 20%, white);
+  --sb--trigger-text: color-mix(in srgb, var(--sb--mode-color) 85%, black);
+  --sb--trigger-border: color-mix(in srgb, var(--sb--mode-color) 45%, white);
+}
+
+/* Dark trigger tokens — applied when toolbar follows a dark theme */
+:root[data-sb-toolbar-theme^="dark"] {
+  --sb--trigger-bg: #21262d;
+  --sb--trigger-bg-hover: #30363d;
+  --sb--trigger-text: #e6edf3;
+  --sb--trigger-border: #30363d;
+}

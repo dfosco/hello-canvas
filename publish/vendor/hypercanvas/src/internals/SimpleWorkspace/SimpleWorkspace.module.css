@@ -1,0 +1,377 @@
+/* SimpleWorkspace — minimal "old index" layout: title + tabs + cards */
+
+.page {
+  min-height: calc(100vh - var(--sb-branch-bar-height, 0px));
+  background: var(--color-background, #fff);
+  font-family: 'Mona Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--color-foreground, #1a1a1a);
+  padding: 48px 24px 80px;
+  box-sizing: border-box;
+}
+
+.inner {
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+/* ─── Header ─── */
+
+.header {
+  margin-bottom: 24px;
+}
+
+.headerTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.title {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1.1;
+  margin: 0;
+  color: var(--color-foreground, #1a1a1a);
+}
+
+.subtitle {
+  font-size: 15px;
+  color: var(--color-foreground-muted, #656d76);
+  margin: 6px 0 0;
+}
+
+/* ─── Create button ─── */
+
+.createBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px;
+  background: var(--color-background-emphasis, #1a1a1a);
+  color: var(--color-foreground-on-emphasis, #fff);
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.createBtn:hover {
+  background: var(--color-background-emphasis, #333);
+}
+
+.createDropdownPositioner {
+  z-index: 200;
+}
+
+.createDropdown {
+  background: var(--color-background, #fff);
+  border: 1px solid var(--color-border, #e5e5e5);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+  padding: 16px;
+  width: 380px;
+  max-width: 90vw;
+  font-family: 'Mona Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* ─── Tabs ─── */
+
+.tabs {
+  display: inline-flex;
+  background: var(--color-background-inset, #f6f8fa);
+  border-radius: 999px;
+  padding: 4px;
+  gap: 2px;
+}
+
+.tab {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--color-foreground-muted, #656d76);
+  padding: 6px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.tab:hover {
+  color: var(--color-foreground, #1a1a1a);
+}
+
+.tabActive {
+  composes: tab;
+  background: var(--color-background, #fff);
+  color: var(--color-foreground, #1a1a1a);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+/* ─── List ─── */
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ─── Folder card (compact strip, non-interactive section header) ─── */
+
+.folderSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  background: var(--color-background-inset, #f6f8fa);
+  border-radius: 12px;
+}
+
+.folderItems {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.folderCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  color: inherit;
+}
+
+.folderIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-foreground-accent, #0969da);
+  flex-shrink: 0;
+}
+
+.folderName {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: var(--color-foreground, #1a1a1a);
+}
+
+.folderDesc {
+  font-size: 14px;
+  color: var(--color-foreground-muted, #656d76);
+}
+
+/* ─── Artifact card ─── */
+
+.card {
+  display: block;
+  padding: 18px 20px;
+  border: 1px solid var(--color-border, #d0d7de);
+  border-radius: 10px;
+  background: var(--color-background, #fff);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+
+.card,
+.card * {
+  text-decoration: none;
+}
+
+.card:hover {
+  border-color: var(--color-foreground-muted, #8c959f);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  text-decoration: none;
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cardTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ─── Private/draft badge (eye-off) ─── */
+
+.privateBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--color-background-inset, #f6f8fa);
+  color: var(--color-foreground-muted, #656d76);
+  flex-shrink: 0;
+}
+
+.cardPrivate {
+  background: var(--color-background-inset, #fbfbfb);
+}
+
+.folderCardPrivate {
+  opacity: 0.85;
+}
+
+.cardTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-foreground, #1a1a1a);
+  line-height: 1.2;
+}
+
+.cardChevron {
+  color: var(--color-foreground-muted, #656d76);
+  flex-shrink: 0;
+}
+
+.cardDescription {
+  font-size: 14px;
+  color: var(--color-foreground-muted, #656d76);
+  line-height: 1.4;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.cardAuthorList {
+  font-size: 13px;
+  color: var(--color-foreground-muted, #656d76);
+}
+
+/* ─── Avatars ─── */
+
+.avatarStack {
+  display: inline-flex;
+  align-items: center;
+}
+
+.avatarStack > * + * {
+  margin-left: -6px;
+}
+
+.avatarImg {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-background-muted, #eaeef2);
+  border: 2px solid var(--color-background, #fff);
+  object-fit: cover;
+  display: block;
+}
+
+/* ─── Footer "Show all" ─── */
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 32px;
+}
+
+.controls {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+
+.controlLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-foreground-muted, #555);
+  cursor: pointer;
+  user-select: none;
+}
+
+.controlCheckbox {
+  accent-color: var(--color-foreground, #1a1a1a);
+  cursor: pointer;
+}
+
+.folderCardButton {
+  appearance: none;
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.12s;
+}
+
+.folderCardButton:hover {
+  background: var(--color-background, #fff);
+}
+
+.folderChevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-foreground-muted, #656d76);
+  flex-shrink: 0;
+  transition: transform 0.12s ease;
+}
+
+.folderChevronExpanded {
+  composes: folderChevron;
+  transform: rotate(90deg);
+}
+
+.expandBtn {
+  appearance: none;
+  border: 1px solid var(--color-border, #d0d7de);
+  background: var(--color-background, #fff);
+  color: var(--color-foreground-muted, #555);
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.2;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+
+.expandBtn:hover {
+  background: var(--color-background-inset, #f6f8fa);
+  color: var(--color-foreground, #1a1a1a);
+  border-color: var(--color-foreground-muted, #8c959f);
+  text-decoration: none;
+}
+
+/* ─── Empty state ─── */
+
+.empty {
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--color-foreground-muted, #656d76);
+  font-size: 15px;
+  border: 1px dashed var(--color-border, #d0d7de);
+  border-radius: 10px;
+}

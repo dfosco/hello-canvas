@@ -1,0 +1,13 @@
+{
+  "$comment": "Mascot animation rendered above the Vite dev banner. Each entry in `frames` is either a string (uses frameDurationMs as the default delay) or a [filename, delayMs] tuple for per-frame timing. After loops finish, settleFrame is left on screen with the dev URL beside it.",
+  "frames": [
+    ["frame-01-peek-left.txt", 600],
+    ["frame-03-peek-right.txt", 600],
+    ["frame-04-eyes-open.txt", 400],
+    ["frame-05-eyes-closed.txt", 200],
+    ["frame-06-eyes-open.txt", 400]
+  ],
+  "loops": 1,
+  "settleFrame": "frame-06-eyes-open.txt",
+  "enabled": true
+}

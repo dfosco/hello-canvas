@@ -1,0 +1,57 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/packages/**/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/build
+/dist
+
+# misc
+.DS_Store
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.playwright-profile
+
+# Compiled UI bundle (built before publish, not tracked in git)
+packages/core/dist/storyboard-ui.*
+
+.clips
+
+# Agent Browser
+agent-browser.json
+
+# <!-- runtime-state --start-->
+# Storyboard runtime state + private tilde-prefixed files.
+# Kept in sync by storyboard-scaffold — edit `packages/storyboard/scaffold/gitignore` in storyboard-core.
+.storyboard/
+src/canvas/images/~*
+assets/canvas/images/~*
+assets/canvas/images/drafts/
+assets/canvas/snapshots/~*
+assets/.storyboard-public/terminal-snapshots/~*
+src/canvas/**/drafts/
+src/prototypes/**/drafts/
+_*.md
+.sync-target
+.worktrees
+.claude/agents/
+worktrees
+
+# <!-- runtime-state --end-->
+
+# Integration test results (ephemeral local artifacts)
+test-results/

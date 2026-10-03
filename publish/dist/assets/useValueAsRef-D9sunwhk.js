@@ -1,0 +1,1 @@
+var r=Object.defineProperty;var n=(e,t)=>r(e,"name",{value:t,configurable:!0});import{a as s,u as f}from"./useBaseUiId-CavJVjrK.js";function a(e){const t=s(u,e).current;return t.next=e,f(t.effect),t}n(a,"useValueAsRef");function u(e){const t={current:e,next:e,effect:n(()=>{t.current=t.next},"effect")};return t}n(u,"createLatestRef");export{a as u};

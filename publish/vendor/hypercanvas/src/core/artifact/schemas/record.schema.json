@@ -1,0 +1,34 @@
+{
+  "$id": "artifact:record",
+  "type": "object",
+  "required": ["name"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "maxLength": 64,
+      "description": "Record name (kebab-case)"
+    },
+    "prototype": {
+      "type": "string",
+      "description": "Prototype to scope this record to (optional)"
+    },
+    "folder": {
+      "type": "string",
+      "description": "Parent folder or prototype scope"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "type": "string" }
+        },
+        "additionalProperties": true
+      },
+      "default": [],
+      "description": "Initial record entries (each must have an id)"
+    }
+  }
+}

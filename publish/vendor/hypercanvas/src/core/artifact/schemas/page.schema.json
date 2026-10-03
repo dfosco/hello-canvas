@@ -1,0 +1,24 @@
+{
+  "$id": "artifact:page",
+  "type": "object",
+  "required": ["prototype", "path"],
+  "properties": {
+    "prototype": {
+      "type": "string",
+      "description": "Target prototype name"
+    },
+    "path": {
+      "type": "string",
+      "pattern": "^[a-z0-9/\\[\\]_-]+$",
+      "description": "Page path (e.g. settings/general or [id])"
+    },
+    "folder": {
+      "type": "string",
+      "description": "Parent .folder directory"
+    },
+    "template": {
+      "type": "string",
+      "description": "Page template name"
+    }
+  }
+}

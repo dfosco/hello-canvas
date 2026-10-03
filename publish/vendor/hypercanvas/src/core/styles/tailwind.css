@@ -1,0 +1,265 @@
+@import "tailwindcss" source(none);
+@import "tw-animate-css";
+@import "./themes.generated.css";
+@source "../**/*.{jsx,js,ts}";
+/* Widget internals live outside core/ — PrototypeEmbed, StoryWidget, StorySetWidget, etc.
+ * style their chrome with Tailwind utilities that must be scanned here too. */
+@source "../../internals/**/*.{jsx,js,ts,tsx}";
+
+@font-face {
+  font-family: "Hubot Sans";
+  src:
+    url("../../../assets/fonts/HubotSans/Hubot-Sans.woff2") format("woff2 supports variations"),
+    url("../../../assets/fonts/HubotSans/Hubot-Sans.woff2") format("woff2-variations");
+  font-weight: 200 900;
+  font-stretch: 75% 125%;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Mona Sans";
+  src:
+    url("../../../assets/fonts/MonaSans/MonaSans.woff2") format("woff2 supports variations"),
+    url("../../../assets/fonts/MonaSans/MonaSans.woff2") format("woff2-variations");
+  font-weight: 200 900;
+  font-stretch: 75% 125%;
+  font-display: swap;
+}
+
+/*
+ * Storyboard color token Single Source of Truth.
+ *
+ * All semantic color variables live here. Two naming families coexist:
+ *
+ *   1. shadcn-style (`--color-*`)              — used by Tailwind utilities
+ *      (`bg-background`, `text-foreground`) and shadcn primitives.
+ *   2. Storyboard chrome (`--color-background-*`, `--color-foreground-*`,
+ *      `--color-border-*`, `--color-overlay-*`, `--shadow-*`)
+ *      — used by every workspace / canvas / widget CSS module.
+ *
+ * Light values live on `:root` (via `@theme`). Dark overrides live on
+ * `[data-sb-theme^="dark"]` and every per-surface dark attribute
+ * (`data-sb-canvas-theme`, `data-sb-prototype-theme`, etc.). The same
+ * selector list drives the `dark:` Tailwind variant (`themes.generated.css`).
+ *
+ * Concrete hex values are GitHub Primer palette values, kept verbatim
+ * so the visual identity is unchanged after dropping `@primer/primitives`.
+ */
+@theme {
+  --color-background: #ffffff;
+  --color-background-muted: #f6f8fa;
+  --color-background-inset: #f6f8fa;
+  --color-background-emphasis: #25292e;
+  --color-background-inverse: #25292e;
+  --color-background-neutral-muted: #818b981f;
+  --color-background-neutral-emphasis: #59636e;
+  --color-background-accent-muted: #ddf4ff;
+  --color-background-accent-emphasis: #0969da;
+  --color-background-accent-emphasis-hover: #0860c7;
+  --color-background-danger-muted: #ffebe9;
+  --color-background-danger-emphasis: #cf222e;
+  --color-background-success-muted: #dafbe1;
+  --color-background-success-emphasis: #1f883d;
+  --color-background-success-hover: #1a7f37;
+  --color-background-attention-muted: #fff8c5;
+  --color-background-done-muted: #fbefff;
+  --color-background-done-emphasis: #8250df;
+  --color-background-open-emphasis: #1f883d;
+  --color-background-closed-emphasis: #cf222e;
+
+  --color-foreground: #1f2328;
+  --color-foreground-muted: #59636e;
+  --color-foreground-hover: #000000;
+  --color-foreground-accent: #0969da;
+  --color-foreground-danger: #d1242f;
+  --color-foreground-success: #1a7f37;
+  --color-foreground-attention: #9a6700;
+  --color-foreground-on-emphasis: #ffffff;
+  --color-foreground-on-inverse: #ffffff;
+
+  --color-border: #d1d9e0;
+  --color-border-muted: #d1d9e0b3;
+  --color-border-emphasis: #818b98;
+  --color-border-accent-emphasis: #0969da;
+  --color-border-accent-muted: #54aeff66;
+  --color-border-danger-emphasis: #cf222e;
+  --color-border-danger-muted: #ff818266;
+  --color-border-success-muted: #4ac26b66;
+  --color-border-attention-muted: #d4a72c66;
+
+  --color-overlay-backdrop: #c8d1da66;
+
+  --shadow-resting: 0px 1px 1px 0px #1f23280f, 0px 1px 3px 0px #1f23280f;
+  --shadow-floating: 0px 0px 0px 1px #d1d9e080, 0px 6px 12px -3px #25292e0a, 0px 6px 18px 0px #25292e1f;
+
+  /* shadcn primitives (Tailwind utility-friendly aliases) */
+  --color-card: var(--color-background);
+  --color-card-foreground: var(--color-foreground);
+  --color-popover: var(--color-background);
+  --color-popover-foreground: var(--color-foreground);
+  --color-primary: #1f2328;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--color-background-muted);
+  --color-secondary-foreground: var(--color-foreground);
+  --color-muted: var(--color-background-muted);
+  --color-muted-foreground: var(--color-foreground-muted);
+  --color-accent: var(--color-background-accent-muted);
+  --color-accent-foreground: var(--color-foreground-accent);
+  --color-destructive: var(--color-background-danger-emphasis);
+  --color-destructive-foreground: #ffffff;
+  --color-input: var(--color-border);
+  --color-ring: var(--color-background-accent-emphasis);
+  --color-success: var(--color-background-success-emphasis);
+  --color-success-foreground: #ffffff;
+
+  --radius: 0.5rem;
+  --font-sans: "Hubot Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+}
+
+@layer base {
+  [data-sb-theme^="dark"],
+  [data-sb-canvas-theme^="dark"],
+  [data-sb-prototype-theme^="dark"],
+  [data-sb-toolbar-theme^="dark"],
+  [data-sb-codeboxes-theme^="dark"],
+  [data-sb-code-theme^="dark"] {
+    --color-background: #0d1117;
+    --color-background-muted: #151b23;
+    --color-background-inset: #010409;
+    --color-background-emphasis: #3d444d;
+    --color-background-inverse: #ffffff;
+    --color-background-neutral-muted: #656c7633;
+    --color-background-neutral-emphasis: #656c76;
+    --color-background-accent-muted: #388bfd1a;
+    --color-background-accent-emphasis: #1f6feb;
+    --color-background-accent-emphasis-hover: #388bfd;
+    --color-background-danger-muted: #f851491a;
+    --color-background-danger-emphasis: #da3633;
+    --color-background-success-muted: #2ea04326;
+    --color-background-success-emphasis: #238636;
+    --color-background-success-hover: #2ea043;
+    --color-background-attention-muted: #bb800926;
+    --color-background-done-muted: #ab7df81a;
+    --color-background-done-emphasis: #8957e5;
+    --color-background-open-emphasis: #238636;
+    --color-background-closed-emphasis: #da3633;
+
+    --color-foreground: #f0f6fc;
+    --color-foreground-muted: #9198a1;
+    --color-foreground-hover: #ffffff;
+    --color-foreground-accent: #4493f8;
+    --color-foreground-danger: #f85149;
+    --color-foreground-success: #3fb950;
+    --color-foreground-attention: #d29922;
+    --color-foreground-on-emphasis: #ffffff;
+    --color-foreground-on-inverse: #010409;
+
+    --color-border: #3d444d;
+    --color-border-muted: #3d444db3;
+    --color-border-emphasis: #656c76;
+    --color-border-accent-emphasis: #1f6feb;
+    --color-border-accent-muted: #388bfd66;
+    --color-border-danger-emphasis: #da3633;
+    --color-border-danger-muted: #f8514966;
+    --color-border-success-muted: #2ea04366;
+    --color-border-attention-muted: #bb800966;
+
+    --color-overlay-backdrop: #21283066;
+
+    --shadow-resting: 0px 1px 1px 0px #01040999, 0px 1px 3px 0px #01040999;
+    --shadow-floating: 0px 0px 0px 1px #3d444d, 0px 6px 12px -3px #01040966, 0px 6px 18px 0px #01040966;
+
+    --color-primary: #f0f6fc;
+    --color-primary-foreground: #0d1117;
+    --color-ring: var(--color-background-accent-emphasis);
+  }
+}
+@custom-variant data-open {
+	&:where([data-state="open"]), &:where([data-open]:not([data-open="false"])) {
+		@slot;
+  }
+}
+@custom-variant data-closed {
+	&:where([data-state="closed"]), &:where([data-closed]:not([data-closed="false"])) {
+		@slot;
+  }
+}
+@custom-variant data-checked {
+	&:where([data-state="checked"]), &:where([data-checked]:not([data-checked="false"])) {
+		@slot;
+  }
+}
+@custom-variant data-unchecked {
+	&:where([data-state="unchecked"]), &:where([data-unchecked]:not([data-unchecked="false"])) {
+		@slot;
+  }
+}
+@custom-variant data-selected {
+	&:where([data-selected]) {
+		@slot;
+  }
+}
+@custom-variant data-disabled {
+	&:where([data-disabled="true"]), &:where([data-disabled]:not([data-disabled="false"])) {
+		@slot;
+  }
+}
+@custom-variant data-active {
+	&:where([data-state="active"]), &:where([data-active]:not([data-active="false"])) {
+		@slot;
+  }
+}
+@custom-variant data-horizontal {
+	&:where([data-orientation="horizontal"]) {
+		@slot;
+  }
+}
+@custom-variant data-vertical {
+	&:where([data-orientation="vertical"]) {
+		@slot;
+  }
+}
+@utility no-scrollbar {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+	&::-webkit-scrollbar {
+		display: none;
+  }
+}
+
+/* Superellipse corners via the CSS Houdini Paint API.
+ * Only Chromium browsers ship paint() today — Firefox and Safari fall back
+ * to a regular border-radius via the @supports query below. Override the
+ * fallback radius per-element with --sb--smooth-corners-fallback if needed. */
+@utility smooth-corners {
+  border-radius: var(--sb--smooth-corners-fallback, 0.75rem);
+
+  @supports (mask-image: paint(smooth-corners)) {
+    border-radius: 0;
+    mask-image: paint(smooth-corners);
+    -webkit-mask-image: paint(smooth-corners);
+  }
+}
+
+@layer base {
+  :root {
+    --sb--smooth-corners: 4;
+    --sb--radius-md: var(--radius-md);
+  }
+}
+
+/*
+ * Prevent unlayered CSS framework resets (e.g. Primer's `button { border-radius: 0 }`)
+ * from overriding layered Tailwind utilities on storyboard UI elements.
+ * `revert-layer` falls back to the value from the cascade layers (Tailwind utilities).
+ */
+[data-slot="button"] {
+  border-radius: revert-layer;
+  font-weight: revert-layer;
+}
+
+[data-slot="panel-content"] select,
+[data-slot="panel-content"] input {
+  border-radius: revert-layer;
+}

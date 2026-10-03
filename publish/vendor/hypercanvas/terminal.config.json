@@ -1,0 +1,80 @@
+{
+  "$schema": "./terminal.schema.json",
+  "$comment": "Defaults for terminal widgets and canvas agents. Users can override at the project root by copying this file from .storyboard/scaffold/terminal.config.json. Leaf-level merge: only the specific keys you set are overridden, everything else inherits the library defaults — so future agent additions or readinessSignal tweaks reach you automatically.",
+  "terminal": {
+    "resizable": true,
+    "defaultWidth": 1000,
+    "defaultHeight": 800,
+    "fontSize": 14,
+    "fontFamily": "'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace",
+    "prompt": "❯ ",
+    "startupCommand": null,
+    "defaultStartupSequence": null
+  },
+  "agents": {
+    "copilot": {
+      "label": "Copilot CLI",
+      "default": true,
+      "icon": "primer/copilot",
+      "startupCommand": "copilot --agent terminal-agent --autopilot",
+      "resumeCommand": "copilot --resume={id} --agent terminal-agent --autopilot",
+      "resumeLastCommand": "copilot --continue --agent terminal-agent --autopilot",
+      "sessionIdEnv": "COPILOT_AGENT_SESSION_ID",
+      "postStartup": null,
+      "resizable": true
+    },
+    "claude": {
+      "label": "Claude Code",
+      "icon": "claude",
+      "startupCommand": "claude --agent terminal-agent --dangerously-skip-permissions",
+      "resumeCommand": "claude --resume {id} --agent terminal-agent --dangerously-skip-permissions",
+      "resumeLastCommand": "claude --continue --agent terminal-agent --dangerously-skip-permissions",
+      "sessionIdEnv": "CLAUDE_SESSION_ID",
+      "sessionStateGlob": "~/.claude/projects/*/{id}.jsonl",
+      "readinessSignal": "bypass permissions",
+      "resizable": true
+    },
+    "codex": {
+      "label": "Codex CLI",
+      "icon": "codex",
+      "startupCommand": "codex --dangerously-bypass-approvals-and-sandbox",
+      "resumeCommand": "codex resume {id} --dangerously-bypass-approvals-and-sandbox",
+      "resumeLastCommand": "codex resume --last --dangerously-bypass-approvals-and-sandbox",
+      "sessionIdEnv": "CODEX_SESSION_ID",
+      "sessionStateGlob": "~/.codex/sessions/**/rollout-*-{id}.jsonl",
+      "contextAdapter": {
+        "type": "codex-queue",
+        "command": "codex",
+        "timeoutMs": 15000
+      },
+      "configFiles": [".codex/config.toml"],
+      "readinessSignal": "YOLO mode",
+      "resizable": true
+    },
+    "opencode": {
+      "label": "OpenCode",
+      "startupCommand": "opencode",
+      "resumeCommand": null,
+      "resumeLastCommand": null,
+      "readinessSignal": null,
+      "resizable": true
+    }
+  },
+  "showAgentsInAddMenu": false,
+  "hotPool": {
+    "enabled": false,
+    "verbose": false,
+    "default_pool_size": 1,
+    "default_max_pool_size": 3,
+    "load_balancer": true,
+    "load_balancer_cooldown_mins": 10,
+    "pools": {
+      "terminal": { "pool_size": 1 },
+      "copilot": { "pool_size": 1 },
+      "claude": { "pool_size": 1 },
+      "codex": { "pool_size": 0 },
+      "opencode": { "pool_size": 0 },
+      "prompt": { "pool_size": 1 }
+    }
+  }
+}

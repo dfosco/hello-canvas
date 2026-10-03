@@ -1,0 +1,60 @@
+/**
+ * Highlight overlay for knobs that opted in via `knobMeta: { highlight: true }`.
+ *
+ * The installer (`installKnobsHighlight()` in `highlight.js`) walks all
+ * `[data-knob-id]` elements on the page when the overlay activates
+ * (toolbar Knobs panel open in the top frame, OR `?sb_knobs=1` in the
+ * iframe URL for canvas embeds with a connected Knobs widget). For
+ * each element whose knob exists on the current prototype AND has
+ * `knobMeta.highlight: true`, it stamps:
+ *
+ *   data-knob-highlight=""          ← the CSS gate (installer-owned)
+ *   data-knob-label="<label>"       ← pulled from def.label (or humanized id)
+ *   style="--sb-knob-color: #hex"   ← from knobMeta.color (default blue)
+ *
+ * **CSS keys off `[data-knob-highlight]`, NOT `[data-knob-id]`.** That
+ * way authors can keep `data-knob-id` on JSX permanently (it's also
+ * used by hooks/tests), and the overlay only paints when the installer
+ * has confirmed the knob is real and opted in. When the panel closes
+ * — or when the author removes `highlight: true` — the installer
+ * removes the gate and everything goes silent.
+ *
+ * The ring is a `::after` pseudo (independent `border-radius` from the
+ * host's; `outline` can't, `box-shadow` can't independently). Panel
+ * surface excluded via `:not([data-knobs-panel] *)` so the panel's own
+ * Field rows don't get painted as if they were page content.
+ */
+
+html[data-sb-knobs-active] [data-knob-highlight]:not([data-knobs-panel] *) {
+  position: relative;
+}
+
+html[data-sb-knobs-active] [data-knob-highlight]:not([data-knobs-panel] *)::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border: 2px solid var(--sb-knob-color, #0969da);
+  border-radius: 6px;
+  pointer-events: none;
+  z-index: 2147483646;
+}
+
+html[data-sb-knobs-active] [data-knob-highlight]:not([data-knobs-panel] *)::before {
+  content: attr(data-knob-label);
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translateY(-100%) translateY(-8px);
+  background: var(--sb-knob-color, #0969da);
+  color: #ffffff;
+  padding: 2px 8px;
+  font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  border-radius: 4px 4px 4px 0;
+  pointer-events: none;
+  z-index: 2147483647;
+  white-space: nowrap;
+}

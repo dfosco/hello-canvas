@@ -1,0 +1,38 @@
+[data-trigger-button] {
+  display: inline-flex;
+  position: relative;
+}
+[data-trigger-button] [data-slot="button-wrapper"] {
+  --sb--sc-border-color: var(--sb--trigger-border, var(--color-slate-400));
+  --sb--sc-border-width: var(--sb--trigger-border-width, 3px);
+}
+/* Accent-colored border/gap on focus — follows the superellipse shape */
+[data-trigger-button] [data-slot="button-wrapper"]:has([data-slot="button"]:focus-visible) {
+  --sb--sc-border-color: hsl(212 92% 45%);
+}
+[data-trigger-button] [data-slot="button"] {
+  background-color: var(--sb--trigger-bg, var(--color-slate-100));
+  color: var(--sb--trigger-text, var(--color-slate-600));
+}
+[data-trigger-button] [data-slot="button"]:hover,
+[data-trigger-button] [data-slot="button"]:focus-visible,
+[data-trigger-button] [data-slot="button"][aria-expanded="true"],
+[data-trigger-button][data-active] [data-slot="button"] {
+  background-color: var(--sb--trigger-bg-hover, var(--color-slate-300));
+}
+
+/* Inactive: disabled-looking, no interaction */
+[data-trigger-button][data-inactive] {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/* Dimmed: reduced visibility, interactive on hover/focus */
+[data-trigger-button][data-dimmed] {
+  opacity: 0.3;
+  transition: opacity 200ms;
+}
+[data-trigger-button][data-dimmed]:hover,
+[data-trigger-button][data-dimmed]:focus-within {
+  opacity: 1;
+}

@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "branch": "main",
+  "deployBranch": "main",
+  "folder": "",
+  "sha": "61bb51aa240ed0b57e99dc11486669409cd96095",
+  "generatedAt": "2026-10-03T01:17:42Z",
+  "basePath": "/hello-canvas/",
+  "prototypes": [
+    {
+      "id": "LooplineSignup",
+      "dirName": "LooplineSignup",
+      "title": "Loopline Signup",
+      "description": "Sign up flow for the Loopline customer feedback startup",
+      "folder": "main",
+      "isExternal": false,
+      "externalUrl": null,
+      "route": "/LooplineSignup?flow=LooplineSignup%2Fsuccess",
+      "isPrivate": false,
+      "crossBranch": true,
+      "lastModified": null
+    },
+    {
+      "id": "SiloDashboard",
+      "dirName": "SiloDashboard",
+      "title": "Silo Cloud Dashboard",
+      "description": "Cloud silo utilization dashboard",
+      "folder": "main",
+      "isExternal": false,
+      "externalUrl": null,
+      "route": "/SiloDashboard?flow=SiloDashboard%2Fdefault",
+      "isPrivate": false,
+      "crossBranch": true,
+      "lastModified": null
+    }
+  ],
+  "canvases": [
+    {
+      "id": "component-showcase",
+      "name": "Base UI Showcase",
+      "folder": null,
+      "route": "/canvas/component-showcase",
+      "isPrivate": false,
+      "crossBranch": true,
+      "group": null,
+      "pages": null,
+      "lastModified": null
+    },
+    {
+      "id": "storyboard-demo",
+      "name": "Storyboard Demo",
+      "folder": null,
+      "route": "/canvas/storyboard-demo",
+      "isPrivate": false,
+      "crossBranch": true,
+      "group": null,
+      "pages": null,
+      "lastModified": null
+    }
+  ],
+  "folders": [
+    {
+      "name": "main",
+      "title": "Main",
+      "isPrivate": false
+    }
+  ]
+}

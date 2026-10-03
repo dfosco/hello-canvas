@@ -1,0 +1,83 @@
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--term-bg, #181b22);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+/* ── Faded snapshot background ── */
+
+.snapshotContent {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  padding: 16px;
+  font-family: 'Ghostty', 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #e6edf3;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.snapshotPre {
+  margin: 0;
+  white-space: pre;
+  display: inline-block;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  transform-origin: top left;
+}
+
+/* ── Status + action layer ── */
+
+.statusLayer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  pointer-events: none;
+}
+
+/* Matches interactHint from embedOverlay — solid pill button, always visible */
+.actionButton {
+  color: var(--color-foreground-on-inverse, #fff);
+  background-color: var(--color-background-inverse, #21262d);
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+/* Transparent badge — no opaque bg so snapshot text stays readable */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #8b949e;
+  font-size: 12px;
+  padding: 4px 0;
+  letter-spacing: 0.01em;
+}
+
+/* ── Orbit spinner ── */
+
+.orbitSpinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid transparent;
+  border-top-color: #8b949e;
+  border-radius: 50%;
+  animation: orbitSpin 1s linear infinite;
+}
+
+@keyframes orbitSpin {
+  to { transform: rotate(360deg); }
+}

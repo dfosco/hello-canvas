@@ -1,0 +1,462 @@
+.embed {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-background, #ffffff);
+  border: 3px solid var(--color-border, #d0d7de);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-foreground-muted, #656d76);
+  background: var(--color-background-muted, #f6f8fa);
+  border-bottom: 1px solid var(--color-border-muted, #d8dee4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: none;
+}
+
+.iframeContainer {
+  position: relative;
+  width: 100%;
+  /* Parent container is `flex flex-col` with the titlebar as a
+   * `flex-shrink-0` row above us. Grow to fill all remaining vertical
+   * space — no magic number to keep in sync with the titlebar's
+   * actual rendered height. */
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--color-background-muted, #f6f8fa);
+  color: var(--color-foreground-muted, #656d76);
+  text-align: center;
+  z-index: 2;
+}
+
+/* Persistent Frame snapshot: fills the placeholder while the live
+ * document has not loaded yet (dormant, activating, or reloading). */
+.snapshotPoster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.placeholderLabel {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-border-muted, #d0d7de);
+  border-top-color: var(--color-foreground-accent, #2f81f7);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.iframe {
+  border: none;
+  display: block;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Prototype selection card — mirrors the Site Frame picker ─────── */
+
+.pickerArea {
+  display: grid;
+  flex: 1;
+  min-height: 0;
+  place-items: center;
+  padding: 16px;
+  overflow: auto;
+}
+
+.picker {
+  width: min(100%, 320px);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 4px;
+  border-radius: 10px;
+  background: var(--color-background, #fff);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .08), 0 4px 12px rgba(0, 0, 0, .12);
+}
+
+.pickerHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 10px 5px;
+  color: var(--color-foreground-muted, #656d76);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.pickerClose {
+  all: unset;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  color: var(--color-foreground-muted, #656d76);
+  font-size: 11px;
+}
+
+.pickerClose:hover {
+  background: var(--color-background-neutral-muted, #eaeef2);
+  color: var(--color-foreground, #1f2328);
+}
+
+.pickerItem {
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 6px;
+  color: var(--color-foreground, #1f2328);
+  cursor: pointer;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.pickerItem:hover, .pickerItem:focus-visible,
+.pickerItemSelected, .pickerItemSelected:hover {
+  background: var(--color-background-neutral-muted, #eaeef2);
+}
+
+.pickerItem:focus-visible, .pickerItemSelected:focus-visible {
+  outline: 2px solid var(--color-border-accent-emphasis, #0969da);
+}
+
+.pickerItem small, .pickerItemSelected small, .pickerMessage {
+  color: var(--color-foreground-muted, #656d76);
+  font-size: 11px;
+}
+
+.pickerMessage {
+  padding: 8px 10px;
+}
+
+.pickerItem small, .pickerItemSelected small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:global([data-sb-canvas-theme^='dark']) .picker {
+  background: var(--color-background-muted, #161b22);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .08), 0 4px 12px rgba(0, 0, 0, .45);
+}
+
+:global([data-sb-canvas-theme^='dark']) .pickerItem:hover,
+:global([data-sb-canvas-theme^='dark']) .pickerItem:focus-visible,
+:global([data-sb-canvas-theme^='dark']) .pickerItemSelected,
+:global([data-sb-canvas-theme^='dark']) .pickerItemSelected:hover {
+  background: var(--color-background-neutral-muted, #272c33);
+}
+
+.resizeHandle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 16px;
+  height: 16px;
+  cursor: nwse-resize;
+  background: linear-gradient(
+    135deg,
+    transparent 40%,
+    var(--color-border-muted, rgba(0, 0, 0, 0.15)) 40%,
+    var(--color-border-muted, rgba(0, 0, 0, 0.15)) 50%,
+    transparent 50%,
+    transparent 65%,
+    var(--color-border-muted, rgba(0, 0, 0, 0.15)) 65%,
+    var(--color-border-muted, rgba(0, 0, 0, 0.15)) 75%,
+    transparent 75%
+  );
+  opacity: 0;
+  transition: opacity 150ms;
+  z-index: 2;
+}
+
+.embed:hover ~ .resizeHandle,
+.resizeHandle:hover {
+  opacity: 1;
+}
+
+.zoomBar {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  border-radius: 10px;
+  border: 1.5px solid var(--trigger-border, var(--color-border-muted, #d0d7de));
+  background: var(--trigger-bg, var(--color-background-muted, #f6f8fa));
+  opacity: 0;
+  transition: opacity 150ms;
+  z-index: 3;
+}
+
+.embed:hover .zoomBar {
+  opacity: 1;
+}
+
+.zoomBtn {
+  all: unset;
+  cursor: pointer;
+  width: 36px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--trigger-text, var(--color-foreground, #1f2328));
+  transition: background 120ms;
+}
+
+.zoomBtn:first-child {
+  border-radius: 7px 0 0 7px;
+}
+
+.zoomBtn:last-child {
+  border-radius: 0 7px 7px 0;
+}
+
+.zoomBtn:hover:not(:disabled) {
+  background: var(--trigger-bg-hover, var(--color-background-neutral-muted, #eaeef2));
+}
+
+.zoomBtn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.zoomLabel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  height: 32px;
+  padding: 0 4px;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--trigger-text, var(--color-foreground, #1f2328));
+  border-left: 1.5px solid var(--trigger-border, var(--color-border-muted, #d0d7de));
+  border-right: 1.5px solid var(--trigger-border, var(--color-border-muted, #d0d7de));
+  user-select: none;
+}
+
+/* Expand modal — fullscreen overlay for expanded iframe */
+.expandBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: expandFadeIn 0.15s ease;
+}
+
+@keyframes expandFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.expandContainer {
+  width: 90vw;
+  height: 90vh;
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--color-background, #ffffff);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
+  animation: expandScaleIn 0.2s ease;
+}
+
+@keyframes expandScaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.expandIframe {
+  border: none;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.expandClose {
+  all: unset;
+  cursor: pointer;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #ffffff;
+  font-size: 16px;
+  z-index: 1;
+  transition: background 100ms;
+  backdrop-filter: blur(4px);
+}
+
+.expandClose:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+/* ── Split-screen layout ──────────────────────────────────────────── */
+
+.expandContainerSplit {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  background: var(--color-background, #ffffff);
+}
+
+.expandContainerSplit .expandIframe {
+  border: none;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.expandSplitBody {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: expandScaleIn 0.2s ease;
+}
+
+.expandSplitPanes {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.expandSplitLeft {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  border-right: 1px solid var(--color-border-muted, #d8dee4);
+}
+
+.expandSplitRight {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.expandSecondary {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background: var(--color-background, #ffffff);
+}
+
+.expandSecondary iframe {
+  border: none;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.expandTerminal {
+  width: 100%;
+  height: 100%;
+  background: #0d1117;
+}
+
+.expandMarkdownContent {
+  padding: 32px 40px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--color-foreground, #1f2328);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.expandMarkdownContent * { pointer-events: auto; }
+.expandMarkdownContent a { color: var(--color-foreground-accent, #0969da); text-decoration: none; }
+.expandMarkdownContent a:hover { text-decoration: underline; }
+.expandMarkdownContent img { max-width: 100%; height: auto; border-radius: 6px; margin: 8px 0; display: block; }
+
+.expandGithubCard {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-background, #ffffff);
+}
+
+.expandGithubHeader {
+  padding: 16px 24px;
+  font-size: 18px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--color-border-muted, #d8dee4);
+}
+
+.expandGithubBody {
+  flex: 1;
+  overflow: auto;
+  padding: 24px;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.expandGithubBody * { pointer-events: auto; }
+.expandGithubBody a { color: var(--color-foreground-accent, #0969da); }
+
+.expandLinkCard {
+  padding: 32px 40px;
+}
+
+.expandLinkTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 8px;
+}

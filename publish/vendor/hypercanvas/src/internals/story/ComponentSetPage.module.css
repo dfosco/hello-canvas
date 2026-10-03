@@ -1,0 +1,142 @@
+/* ComponentSetPage — grid layout for all exports of a story.
+ *
+ * Each cell is an independently-sized framed card (white bg, border, radius,
+ * padding) holding a label and a centered content stage. Rows flow naturally —
+ * no snap-to-max sizing, so a tall cell doesn't force its neighbors to grow. */
+
+/* Fill the iframe / viewport with the muted background so resizing the
+ * widget never reveals the underlying white page. */
+:global(html),
+:global(body) {
+  background: var(--color-background-muted, #f6f8fa);
+  min-height: 100%;
+}
+
+.grid {
+  background: var(--color-background-muted, #f6f8fa);
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Density controls column floor only — rows always size to content. */
+.grid[data-density="compact"] { --cell-min-w: 240px; --cell-min-h: 220px; }
+.grid[data-density="comfy"]   { --cell-min-w: 320px; --cell-min-h: 280px; }
+.grid[data-density="roomy"]   { --cell-min-w: 420px; --cell-min-h: 340px; }
+
+/* Auto (default): wrap cells to their natural content width.
+ * Flexbox is used so each cell can expand horizontally to fit wide content
+ * (e.g. terminal mocks) instead of being clipped to a shared 1fr column. */
+.grid[data-layout="auto"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+}
+
+.grid[data-layout="auto"] .cell {
+  flex: 1 1 auto;
+  min-width: var(--cell-min-w, 320px);
+}
+
+/* Wide / horizontal: single row, equal-width columns, rows size to content. */
+.grid[data-layout="wide"],
+.grid[data-layout="horizontal"] {
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(var(--cell-min-w, 320px), 1fr);
+  grid-template-rows: min-content;
+}
+
+/* Tall / vertical: single column. */
+.grid[data-layout="tall"],
+.grid[data-layout="vertical"] {
+  grid-template-columns: 1fr;
+  grid-auto-rows: min-content;
+}
+
+.cell {
+  background: var(--color-background, #ffffff);
+  border: 1px solid var(--color-border, #d0d7de);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: var(--cell-min-h, 280px);
+  position: relative;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.cell[data-selected] {
+  border-color: var(--color-foreground-accent, #0969da);
+  box-shadow: 0 0 0 1px var(--color-foreground-accent, #0969da);
+}
+
+.cellLabel {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-foreground-muted, #59636e);
+  cursor: pointer;
+  user-select: none;
+  transition: color 100ms ease;
+  flex-shrink: 0;
+}
+
+.cellLabel:hover {
+  color: var(--color-foreground, #1f2328);
+}
+
+.cellLabel[data-selected] {
+  color: var(--color-foreground-accent, #0969da);
+}
+
+.cellRadio {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border, #d0d7de);
+  flex-shrink: 0;
+  transition: border-color 100ms ease, background 100ms ease;
+}
+
+.cellRadio[data-selected] {
+  border-color: var(--color-foreground-accent, #0969da);
+  background: var(--color-foreground-accent, #0969da);
+}
+
+.cellContent {
+  flex: 1 1 auto;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  position: relative;
+}
+
+.error {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 1rem;
+  color: var(--color-foreground-danger, #cf222e);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  color: var(--color-foreground-muted, #656d76);
+  font-size: 0.875rem;
+}

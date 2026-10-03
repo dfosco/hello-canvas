@@ -1,0 +1,218 @@
+.container {
+  position: relative;
+  overflow: hidden;
+  min-width: 100px;
+  min-height: 60px;
+  background: var(--color-background, #ffffff);
+  border: 3px solid var(--color-border, #d0d7de);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-foreground-muted, #656d76);
+  background: var(--color-background-muted, #f6f8fa);
+  border-bottom: 1px solid var(--color-border-muted, #d8dee4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: none;
+}
+
+.headerIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.headerTitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.content {
+  position: relative;
+  width: 100%;
+  /* Flex-grow pattern: assumes the parent container is `flex flex-col`
+   * with a `flex-shrink-0` titlebar above. No magic offset to sync. */
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+.placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--color-background-muted, #f6f8fa);
+  color: var(--color-foreground-muted, #656d76);
+  text-align: center;
+  z-index: 2;
+}
+
+.placeholderLabel {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-border-muted, #d0d7de);
+  border-top-color: var(--color-foreground-accent, #2f81f7);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.iframe {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: none;
+  z-index: 1;
+}
+
+.snapshotImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top left;
+  display: block;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+}
+
+.codeView {
+  display: flex;
+  flex-direction: column;
+  /* Flex-grow pattern — see .content above. */
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.codeHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-foreground-muted, #656d76);
+  background: var(--color-background-inset, #eff2f5);
+  border-bottom: 1px solid var(--color-border-muted, #d8dee4);
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.codeLabel {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+.codeCloseBtn {
+  all: unset;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  font-size: 14px;
+  color: var(--color-foreground-muted, #656d76);
+}
+
+.codeCloseBtn:hover {
+  background: var(--color-background-neutral-muted, #eaeef2);
+  color: var(--color-foreground, #1f2328);
+}
+
+.codeBlock {
+  flex: 1;
+  margin: 0;
+  overflow: auto;
+  user-select: text;
+  cursor: text;
+}
+
+/* Style the highlighted pre from the inspector highlighter.
+   padding uses !important to override the inline padding:0 from codeToHtml. */
+.codeBlock pre {
+  margin: 0;
+  padding: 8px !important;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.6;
+  tab-size: 2;
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
+/* Fallback when no highlighted HTML (plain pre/code) */
+.codeBlock > code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.6;
+  white-space: pre;
+  tab-size: 2;
+}
+
+.codeLoading {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--color-foreground-muted, #656d76);
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  color: var(--color-foreground-danger, #cf222e);
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.errorIcon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.errorText {
+  word-break: break-word;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  color: var(--color-foreground-muted, #656d76);
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+}
