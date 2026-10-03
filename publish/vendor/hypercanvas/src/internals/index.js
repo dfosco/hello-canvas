@@ -42,6 +42,7 @@ export { FormContext } from './context/FormContext.js'
 
 // Workspace dashboard
 export { default as Workspace } from './Workspace.jsx'
+export { default as NotebookShell, openNotebookSidebar, lastVisitedPageStorageKey } from './NotebookShell/NotebookShell.jsx'
 // Deprecated alias — use Workspace instead
 export { default as Viewfinder } from './Workspace.jsx'
 

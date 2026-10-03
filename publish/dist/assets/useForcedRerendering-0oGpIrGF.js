@@ -1,1 +1,0 @@
-var a=Object.defineProperty;var t=(e,s)=>a(e,"name",{value:s,configurable:!0});import{c as r}from"./vendor-react-PJCXJ5Vl.js";function n(){const[,e]=r.useState({});return r.useCallback(()=>{e({})},[])}t(n,"useForcedRerendering");export{n as u};

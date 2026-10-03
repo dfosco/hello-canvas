@@ -133,7 +133,15 @@ export function createArtifactRoutes({ root, sendJson, deleteSite }) {
         notifyArtifactChange(root, result.files, 'unlink')
         sendJson(res, 200, result)
       } else {
-        sendJson(res, result.error?.includes('not found') ? 404 : 400, { error: result.error })
+        const status = result.code === 'CONFIRMATION_REQUIRED' ? 409
+          : result.error?.includes('not found') ? 404
+            : result.code === 'UNSUPPORTED_CANVAS_LOCATION' ? 409 : 400
+        sendJson(res, status, {
+          error: result.error,
+          ...(result.code ? { code: result.code } : {}),
+          ...(result.affectedFiles ? { affectedFiles: result.affectedFiles } : {}),
+          ...(result.preservedProjectRoot ? { preservedProjectRoot: result.preservedProjectRoot } : {}),
+        })
       }
       return
     }

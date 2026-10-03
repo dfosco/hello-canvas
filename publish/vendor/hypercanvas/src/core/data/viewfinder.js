@@ -277,7 +277,7 @@ export function buildPrototypeIndex(knownRoutes = []) {
       // in the dropdown). Without this swap, the workspace card would
       // inherit the title + privacy of whichever page happened to come
       // first in iteration order.
-      const incomingIsPrivate = !!data._isPrivate || canvasId.split('/').includes('drafts')
+      const incomingIsPrivate = !!data._isPrivate
       if (existing.isPrivate && !incomingIsPrivate) {
         existing.name = meta?.title || data.title || canvasId
         existing.dirName = canvasId
@@ -293,11 +293,9 @@ export function buildPrototypeIndex(knownRoutes = []) {
       continue
     }
 
-    // Canvas is "private" when its parsed data carries _isPrivate (from the
-    // data plugin) or — fallback — when its canonical ID contains a `drafts`
-    // path segment.
-    const isPrivate = data._isPrivate
-      || canvasId.split('/').includes('drafts')
+    // Preserve explicit legacy privacy metadata. Directory names no longer
+    // have privacy semantics.
+    const isPrivate = Boolean(data._isPrivate)
     const entry = {
       name: meta?.title || data.title || canvasId,
       dirName: canvasId,

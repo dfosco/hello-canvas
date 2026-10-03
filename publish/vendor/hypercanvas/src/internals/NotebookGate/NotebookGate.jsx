@@ -22,6 +22,7 @@ export default function NotebookGate() {
   const browserCoreMode = typeof window !== 'undefined' && window.__HYPERCANVAS_CORE_MODE__ === true
   const enabledRef = useRef(
     typeof window !== 'undefined'
+      && import.meta.env.VITE_NOTEBOOK_PUBLISHED !== '1'
       && (isTauriAvailable() || browserCoreMode)
       && !new URLSearchParams(window.location.search).has('_sb_embed'),
   )

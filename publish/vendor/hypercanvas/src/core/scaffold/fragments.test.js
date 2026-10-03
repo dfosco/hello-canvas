@@ -15,7 +15,7 @@ function mkLookup(entries) {
   }
 }
 
-const RUNTIME_BODY = '.storyboard/\nsrc/canvas/**/drafts/\n'
+const RUNTIME_BODY = '.storyboard/\n'
 
 const CLIENT_GITIGNORE = `# top of file
 /node_modules
@@ -34,7 +34,6 @@ const LIBRARY_GITIGNORE = `# packages/storyboard/scaffold/gitignore
 
 # <!-- runtime-state --start-->
 .storyboard/
-src/canvas/**/drafts/
 # <!-- runtime-state --end-->
 
 # trailing library comment
@@ -308,7 +307,7 @@ describe('stripLibraryMarkers', () => {
     expect(out.text).not.toMatch(/--start--/)
     expect(out.text).not.toMatch(/--end--/)
     expect(out.text).toContain('.storyboard/')
-    expect(out.text).toContain('src/canvas/**/drafts/')
+    expect(out.text).not.toContain('drafts/')
     expect(out.text).toContain('# trailing library comment')
   })
 

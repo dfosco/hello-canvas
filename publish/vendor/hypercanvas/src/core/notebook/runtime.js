@@ -231,6 +231,17 @@ export function createNotebookRuntime(options = {}) {
       : { active: false, root: null, notebook: null, generation }
   }
 
+  function refreshNotebook() {
+    if (!active) return status()
+    // Layout/catalog writes happen without switching scope, so keep the
+    // generation stable while replacing the captured snapshot. Do not notify
+    // Notebook-switch listeners: they own lifecycle work for a different
+    // event, such as rebinding terminal sessions or Paseo services.
+    const notebook = inspectNotebook(active.root)
+    active = Object.freeze({ ...active, notebook })
+    return status()
+  }
+
   function requireNotebookRoot() {
     if (!active) throw runtimeError('NO_ACTIVE_NOTEBOOK', 'No Notebook is active.')
     return active.root
@@ -295,6 +306,7 @@ export function createNotebookRuntime(options = {}) {
     close,
     recent,
     status,
+    refreshNotebook,
     requireNotebookRoot,
     resolve,
     read,

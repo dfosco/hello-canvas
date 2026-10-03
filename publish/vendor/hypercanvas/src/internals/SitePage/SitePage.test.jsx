@@ -40,7 +40,7 @@ it('loads a deep-linked Site route at a branch-prefixed Core URL without adding 
   const frame = await screen.findByTitle('My Site')
   expect(frame.tagName).toBe('IFRAME')
   expect(frame.getAttribute('src')).toBe('/branch--test/_storyboard/site/my-site/preview/guide?mode=full#intro')
-  expect(view.getByRole('heading', { name: 'My Site' })).toBeTruthy()
+  expect(view.container.querySelector('main > header')).toBeNull()
   expect(view.queryByRole('status')).toBeNull()
   expect(view.queryByRole('navigation', { name: 'Site tools' })).toBeNull()
   expect(view.queryByRole('button', { name: 'Stop Site' })).toBeNull()
@@ -48,23 +48,20 @@ it('loads a deep-linked Site route at a branch-prefixed Core URL without adding 
   expect(view.queryByRole('button', { name: 'Rebind directory' })).toBeNull()
 })
 
-it('navigates the toolbar Home link to the branch-prefixed homepage', async () => {
+it('omits the Site-specific top bar without changing the Site route', async () => {
   vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, json: async () => ({ site: {
     id: 'my-site', title: 'My Site', binding: { status: 'stopped' },
   } }) })))
-  render(<MemoryRouter initialEntries={['/branch--test/sites/my-site/']}>
+  const view = render(<MemoryRouter initialEntries={['/branch--test/sites/my-site/']}>
     <CurrentLocation />
     <Routes>
       <Route path="/branch--test/sites/:siteId/*" element={<SitePage basePath="/branch--test/" />} />
-      <Route path="/branch--test/" element={<h1>Homepage</h1>} />
     </Routes>
   </MemoryRouter>)
 
-  const homeLink = screen.getByRole('link', { name: 'Go to homepage' })
-  expect(homeLink.getAttribute('href')).toBe('/branch--test/')
-  fireEvent.click(homeLink)
-  expect(await screen.findByRole('heading', { name: 'Homepage' })).toBeTruthy()
-  expect(screen.getByTestId('current-location').textContent).toBe('/branch--test/')
+  await screen.findByText('Site is stopped')
+  expect(view.container.querySelector('main > header')).toBeNull()
+  expect(screen.getByTestId('current-location').textContent).toBe('/branch--test/sites/my-site/')
 })
 
 it('keeps editor query parameters out of the Site iframe URL', async () => {
@@ -107,7 +104,7 @@ it('updates a branch-prefixed Core URL when the embedded Site changes route', as
 
   routeBridge.onRouteChange('explore?mode=grid#top')
 
-  expect((await screen.findByTestId('current-location')).textContent).toBe('/branch--test/sites/my-site/explore?mode=grid#top')
+  await waitFor(() => expect(screen.getByTestId('current-location').textContent).toBe('/branch--test/sites/my-site/explore?mode=grid#top'))
 })
 
 it('opens terminal output from the URL, synchronizes its state, and supports resizing', async () => {
@@ -133,12 +130,16 @@ it('opens terminal output from the URL, synchronizes its state, and supports res
   expect(view.getByLabelText('Site terminal output')).toBeTruthy()
   fireEvent(document, new CustomEvent('storyboard:site-terminal-toggle', { detail: { siteId: 'my-site' } }))
   await waitFor(() => expect(view.queryByLabelText('Site terminal output')).toBeNull())
+  expect(document.documentElement.dataset.siteTerminalOpen).toBeUndefined()
+  expect(document.documentElement.style.getPropertyValue('--site-terminal-toolbar-offset')).toBe('')
   expect(terminalStates.at(-1)).toEqual({ siteId: 'my-site', open: false })
   fireEvent(document, new CustomEvent('storyboard:site-terminal-toggle', { detail: { siteId: 'my-site' } }))
   expect(await view.findByLabelText('Site terminal output')).toBeTruthy()
 
   const separator = view.getByRole('separator', { name: 'Resize terminal output' })
   const output = view.getByLabelText('Site terminal output')
+  await waitFor(() => expect(document.documentElement.dataset.siteTerminalOpen).toBe('true'))
+  expect(document.documentElement.style.getPropertyValue('--site-terminal-toolbar-offset')).toBe('244px')
   const pageChildren = Array.from(view.container.querySelector('main').children)
   expect(pageChildren.indexOf(frame)).toBeLessThan(pageChildren.indexOf(separator))
   expect(pageChildren.indexOf(separator)).toBeLessThan(pageChildren.indexOf(output))
@@ -159,13 +160,14 @@ it('opens terminal output from the URL, synchronizes its state, and supports res
   document.removeEventListener('storyboard:site-terminal-state', onTerminalState)
 })
 
-it('shows the stopped status without restoring toolbar actions', async () => {
+it('shows the stopped state without rendering a Site top bar', async () => {
   vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, json: async () => ({ site: {
     id: 'my-site', title: 'My Site', binding: { status: 'stopped' },
   } }) })))
   render(<MemoryRouter initialEntries={['/sites?id=my-site']}><SitePage /></MemoryRouter>)
   expect(await screen.findByText('Site is stopped')).toBeTruthy()
-  expect(screen.getByRole('status').textContent).toBe('stopped')
+  expect(screen.queryByRole('banner')).toBeNull()
+  expect(screen.queryByRole('status')).toBeNull()
   expect(screen.queryByRole('button', { name: 'Start Site' })).toBeNull()
 })
 
@@ -190,12 +192,12 @@ it('shows the missing-folder status without toolbar recovery actions', async () 
   vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, json: async () => ({ site: { id: 'gone', title: 'Gone', missing: true, binding: { status: 'stopped', root: '/missing' } } }) })))
   render(<MemoryRouter initialEntries={['/sites?id=gone']}><SitePage /></MemoryRouter>)
   expect(await screen.findByText('Site folder is missing')).toBeTruthy()
-  expect(screen.getByRole('status').textContent).toBe('Folder missing')
+  expect(screen.queryByRole('status')).toBeNull()
   expect(screen.queryByRole('button', { name: 'Rebind directory' })).toBeNull()
   expect(screen.queryByRole('button', { name: 'Start Site' })).toBeNull()
 })
 
-it('returns to the branch-prefixed Sites workspace when the viewed Site is removed', async () => {
+it('returns to the branch-prefixed Notebook entry when the viewed Site is removed', async () => {
   vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, json: async () => ({ site: {
     id: 'my-site', title: 'My Site', binding: { status: 'stopped' },
   } }) })))
@@ -203,15 +205,15 @@ it('returns to the branch-prefixed Sites workspace when the viewed Site is remov
     <CurrentLocation />
     <Routes>
       <Route path="/branch--test/sites/:siteId/*" element={<SitePage basePath="/branch--test/" />} />
-      <Route path="/branch--test/workspace" element={<h1>Workspace Sites</h1>} />
+      <Route path="/branch--test/" element={<h1>Notebook entry</h1>} />
     </Routes>
   </MemoryRouter>)
   await screen.findByText('Site is stopped')
   fireEvent(document, new CustomEvent('storyboard:site-removed', { detail: { siteId: 'other-site' } }))
   expect(screen.getByTestId('current-location').textContent).toBe('/branch--test/sites/my-site/')
   fireEvent(document, new CustomEvent('storyboard:site-removed', { detail: { siteId: 'my-site' } }))
-  expect(await screen.findByText('Workspace Sites')).toBeTruthy()
-  expect(screen.getByTestId('current-location').textContent).toBe('/branch--test/workspace?section=sites')
+  expect(await screen.findByText('Notebook entry')).toBeTruthy()
+  expect(screen.getByTestId('current-location').textContent).toBe('/branch--test/')
 })
 
 it('starts a stopped managed Site automatically when opened', async () => {
@@ -247,7 +249,7 @@ it('shows the starting state while the automatic start runs', async () => {
     } }) }))
   render(<MemoryRouter initialEntries={['/sites?id=my-site']}><SitePage /></MemoryRouter>)
   expect(await screen.findByText('Site is starting')).toBeTruthy()
-  expect(screen.getByRole('status').textContent).toBe('starting')
+  expect(screen.queryByRole('status')).toBeNull()
 })
 
 it('surfaces an automatic start failure once, with the terminal output open', async () => {

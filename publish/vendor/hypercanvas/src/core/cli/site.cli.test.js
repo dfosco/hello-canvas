@@ -70,7 +70,7 @@ describe('Site CLI CRUD', () => {
 
     expect(runSiteCli(root, ['list']).sites).toMatchObject([{ binding: { status: 'running', running: true } }])
     expect(runSiteCli(root, ['status', 'docs'])).toMatchObject({ status: 'running', running: true })
-    expect(runSiteCli(root, ['remove', 'docs'])).toMatchObject({ success: true, deleted: 'docs', files: ['.storyboard/sites.config.json'] })
+    expect(runSiteCli(root, ['remove', 'docs', '--confirmed'])).toMatchObject({ success: true, deleted: 'docs', files: ['.storyboard/sites.config.json'] })
     expect(new SiteStore(root).get('docs')).toBeNull()
   })
 })

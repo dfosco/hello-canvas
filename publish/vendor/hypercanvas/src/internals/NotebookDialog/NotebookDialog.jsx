@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { FileDirectoryIcon, XIcon } from '@primer/octicons-react'
 import DropZone from '../DropZone/DropZone.jsx'
 import DirectoryPicker, { validateDirectory } from '../DirectoryPicker/DirectoryPicker.jsx'
-import { openNotebookPath, selectNotebookDirectory } from '../../core/notebook/browserBridge.js'
+import { useFeatureFlag } from '../hooks/useFeatureFlag.js'
+import { coreRequestJson, openNotebookPath, selectNotebookDirectory } from '../../core/notebook/browserBridge.js'
 import css from './NotebookDialog.module.css'
 
 function devlog(message, details = {}) {
@@ -41,11 +42,16 @@ function selectionFromPath(folderPath) {
 }
 
 /** Modal entry point for opening a user-owned, content-only Notebook folder. */
-export default function NotebookDialog({ open, onOpenChange }) {
+export default function NotebookDialog({ open, onOpenChange, variant = 'add' }) {
   const closeRef = useRef(null)
   const [selection, setSelection] = useState(null)
   const [error, setError] = useState(null)
   const [opening, setOpening] = useState(false)
+  const [mode, setMode] = useState(variant)
+  const [notebooks, setNotebooks] = useState([])
+  const [switcherError, setSwitcherError] = useState(null)
+  const [openingPath, setOpeningPath] = useState(null)
+  const folderDropEnabled = useFeatureFlag('notebook-folder-drop')
   const closeDialog = useCallback(() => {
     setSelection(null)
     setError(null)
@@ -55,6 +61,7 @@ export default function NotebookDialog({ open, onOpenChange }) {
 
   useEffect(() => {
     if (!open) return undefined
+    setMode(variant)
     closeRef.current?.focus()
     const handleKeyDown = event => {
       if (event.key === 'Escape') closeDialog()
@@ -66,9 +73,82 @@ export default function NotebookDialog({ open, onOpenChange }) {
       document.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('storyboard:notebook-opened', handleOpened)
     }
-  }, [open, closeDialog])
+  }, [open, closeDialog, variant])
+
+  useEffect(() => {
+    if (!open || mode !== 'switcher') return undefined
+    const controller = new AbortController()
+    coreRequestJson('/_storyboard/notebook-runtime/recent', { cache: 'no-store', signal: controller.signal })
+      .then(data => {
+        if (controller.signal.aborted) return
+        setNotebooks((Array.isArray(data?.notebooks) ? data.notebooks : []).map(entry => ({
+          name: entry?.title || String(entry?.root || '').split(/[\\/]/).filter(Boolean).pop() || 'Notebook',
+          path: entry?.root,
+          available: entry?.available !== false,
+        })).filter(entry => typeof entry.path === 'string'))
+        setSwitcherError(null)
+      })
+      .catch(failure => {
+        if (!controller.signal.aborted) setSwitcherError(failure?.message || 'Could not load recent Notebooks.')
+      })
+    return () => controller.abort()
+  }, [open, mode])
 
   if (!open) return null
+
+  async function switchNotebook(notebook) {
+    if (!notebook?.path || notebook.available === false) return
+    setOpeningPath(notebook.path)
+    setSwitcherError(null)
+    try {
+      await openNotebookPath(notebook.path)
+      closeDialog()
+    } catch (failure) {
+      setSwitcherError(failure?.message || 'The Notebook could not be opened.')
+    } finally {
+      setOpeningPath(null)
+    }
+  }
+
+  if (mode === 'switcher') {
+    return (
+      <div className={css.backdrop} role="presentation" onMouseDown={event => event.target === event.currentTarget && closeDialog()}>
+        <section className={css.dialog} role="dialog" aria-modal="true" aria-labelledby="notebook-switcher-title">
+          <header className={css.header}>
+            <div>
+              <p className={css.eyebrow}>Notebook</p>
+              <h2 id="notebook-switcher-title">Switch notebook</h2>
+              <p className={css.description}>Open a recent Notebook or add another folder.</p>
+            </div>
+            <button ref={closeRef} className={css.closeButton} type="button" aria-label="Close" onClick={closeDialog}>
+              <XIcon size={18} />
+            </button>
+          </header>
+          <div className={css.notebookList}>
+            {notebooks.length === 0
+              ? <p className={css.description}>{switcherError || 'No recent Notebooks yet.'}</p>
+              : notebooks.map(notebook => (
+                <button
+                  key={notebook.path}
+                  className={css.notebookRow}
+                  type="button"
+                  disabled={openingPath === notebook.path || notebook.available === false}
+                  onClick={() => switchNotebook(notebook)}
+                >
+                  <span>{notebook.name}</span>
+                  {notebook.available === false && <span>Folder missing</span>}
+                  {openingPath === notebook.path && <span>Opening…</span>}
+                </button>
+              ))}
+          </div>
+          {switcherError && notebooks.length > 0 && <p className={css.error} role="alert">{switcherError}</p>}
+          <footer className={css.footer}>
+            <button className={css.primaryButton} type="button" onClick={() => setMode('add')}>Add notebook</button>
+          </footer>
+        </section>
+      </div>
+    )
+  }
 
   function acceptSelection(next) {
     setError(null)
@@ -170,7 +250,7 @@ export default function NotebookDialog({ open, onOpenChange }) {
           </button>
         </header>
 
-        <DropZone
+        {folderDropEnabled && <DropZone
           as="button"
           type="button"
           className={css.dropzone}
@@ -185,7 +265,7 @@ export default function NotebookDialog({ open, onOpenChange }) {
               <span>or click to choose a folder from your computer</span>
             </>
           )}
-        </DropZone>
+        </DropZone>}
         {selection && (
           <div className={css.selection}>
             <FileDirectoryIcon size={18} />

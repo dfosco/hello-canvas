@@ -213,8 +213,8 @@
 /**
  * @typedef {Record<string, RouteTarget>} RoutesConfig
  *   Map of route path → {@link RouteTarget}. The index path `"/"` controls
- *   which page renders at the site root. Default: `{ "/": "home" }`
- *   (behavior-preserving — today's SimpleWorkspace landing).
+ *   `/` is owned by the Notebook entry resolver. Legacy targets remain
+ *   readable by older clients.
  */
 
 /**
@@ -267,7 +267,7 @@
  * @property {HotPoolConfig} [hotPool]
  * @property {CommandPaletteConfig} [commandPalette]
  * @property {CustomerModeConfig} [customerMode]
- * @property {RoutesConfig} [routes] — map of route path → target page. Controls which page renders at each path; `"/"` sets the index. Default `{ "/": "home" }`.
+ * @property {RoutesConfig} [routes] — legacy route map. The Notebook entry resolver owns `/`.
  * @property {PagesConfig} [pages] — per-surface presentation props (title, subtitle, logo, tab toggles) for the `home` and `workspace` surfaces. Customers configure surfaces here instead of editing library JSX.
  * @property {ThemesConfig} [theming]
  * @property {Record<string, object>} [widgets] — Custom widget metadata (server-side). Maps widget type string → definition (label, icon, chrome, interaction, connectors, features, props). Consumer entries override built-in widget metadata for collision detection, default sizes, prompt-exec config, etc. Browser-side widget components are registered separately via `mountStoryboardCore({ widgets })`. See `DOCS/custom-widgets.md`.
@@ -373,7 +373,7 @@ export const configDefaults = {
     },
   },
   commandPalette: {
-    providers: ['prototypes', 'flows', 'canvases', 'pages'],
+    providers: [],
     ranking: 'frecency',
     sections: [],
   },
@@ -398,7 +398,7 @@ export const configDefaults = {
   // per-env object `{ dev, prod, default }` resolved by resolveRouteTarget.
   // Example consumer override: { "/": { "dev": "workspace", "prod": "home" } }.
   routes: {
-    '/': 'home',
+    '/': 'notebook',
   },
   // Per-surface presentation props, keyed by surface name. The library
   // workspace pages spread these so customers never edit the JSX. Defaults

@@ -1,3 +1,10 @@
 {
-  "sites": []
+  "sites": [
+    {
+      "id": "d6",
+      "title": "D6",
+      "description": "Portfolio for Daniel Fosco",
+      "productionUrl": "https://danielfos.co/"
+    }
+  ]
 }

@@ -36,7 +36,7 @@ describe('configSchema', () => {
       })
       expect(c.featureFlags.browserSessionHandoff).toBe(false)
       expect(c.featureFlags.usePaseoApp).toBe(true)
-      expect(c.commandPalette.providers).toEqual(['prototypes', 'flows', 'canvases', 'pages'])
+      expect(c.commandPalette.providers).toEqual([])
       expect(c.commandPalette.ranking).toBe('frecency')
       expect(c.customerMode.enabled).toBe(false)
       expect(c.customerMode.homepage).toBe(false)
@@ -101,9 +101,9 @@ describe('configSchema', () => {
   })
 
   describe('routes + pages defaults', () => {
-    it('defaults routes["/"] to "home" (behavior-preserving)', () => {
+    it('reserves routes["/"] for the Notebook entry resolver', () => {
       const c = getConfig({})
-      expect(c.routes).toEqual({ '/': 'home' })
+      expect(c.routes).toEqual({ '/': 'notebook' })
     })
 
     it('defaults the home surface props to today’s values', () => {

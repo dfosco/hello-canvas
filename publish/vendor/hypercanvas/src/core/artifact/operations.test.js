@@ -5,7 +5,7 @@ import path from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import { createArtifact, deleteArtifact, editArtifact } from './operations.js'
 import { createArtifactRoutes } from './routes.js'
-import { initializeNotebook } from '../notebook/notebook.js'
+import { initializeNotebook, inspectNotebook } from '../notebook/notebook.js'
 import { SiteStore } from '../site/site.js'
 
 const roots = []
@@ -30,6 +30,36 @@ describe('Notebook artifact ownership', () => {
     expect(createArtifact('canvas', { name: 'owned-canvas', title: 'Owned' }, root).success).toBe(true)
     expect(fs.existsSync(path.join(root, 'canvas/owned-canvas.canvas.jsonl'))).toBe(true)
     expect(fs.existsSync(path.join(root, 'src'))).toBe(false)
+  })
+
+  it('creates pages at the Notebook root, places them in virtual sections, and confirms page deletion', () => {
+    const root = notebook('Pages')
+    const canvas = createArtifact('canvas', { name: 'overview', title: 'Overview', folder: 'Research' }, root)
+    const prototype = createArtifact('prototype', { name: 'portal', title: 'Portal', folder: 'Research' }, root)
+    expect(canvas.success).toBe(true)
+    expect(prototype.success).toBe(true)
+    expect(fs.existsSync(path.join(root, 'canvas', 'overview.canvas.jsonl'))).toBe(true)
+    expect(fs.existsSync(path.join(root, 'canvas', 'Research'))).toBe(false)
+    expect(fs.existsSync(path.join(root, 'prototypes', 'portal', 'portal.prototype.json'))).toBe(true)
+    expect(fs.existsSync(path.join(root, 'prototypes', 'Research.folder'))).toBe(false)
+
+    const state = inspectNotebook(root)
+    const section = state.manifest.navigation.files.sections[0]
+    expect(section.title).toBe('Research')
+    expect(section.pageIds).toEqual([canvas.pageId, prototype.pageId])
+    expect(state.pages.map(page => page.type)).toEqual(['canvas', 'prototype'])
+
+    const oldId = canvas.pageId
+    editArtifact('canvas', 'overview', { title: 'Updated Overview' }, root)
+    expect(inspectNotebook(root).pages.find(page => page.id === oldId).title).toBe('Updated Overview')
+    const preview = deleteArtifact('canvas', 'overview', {}, root)
+    expect(preview).toMatchObject({ success: false, code: 'CONFIRMATION_REQUIRED', affectedFiles: ['canvas/overview.canvas.jsonl'] })
+    const deleted = deleteArtifact('canvas', 'overview', { confirmedFiles: preview.affectedFiles }, root)
+    expect(deleted.success).toBe(true)
+    const remaining = inspectNotebook(root)
+    expect(remaining.manifest.pages.map(page => page.id)).toEqual([prototype.pageId])
+    expect(remaining.manifest.navigation.files.flatOrder).toEqual([prototype.pageId])
+    expect(remaining.manifest.navigation.files.sections[0].pageIds).toEqual([prototype.pageId])
   })
 })
 

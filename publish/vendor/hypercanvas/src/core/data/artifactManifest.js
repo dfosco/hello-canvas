@@ -60,8 +60,8 @@ function artifactMeta(item) {
   return item?.meta || item?._canvasMeta || {}
 }
 
-function isPrivateArtifact(item, id) {
-  return Boolean(item?.isPrivate ?? item?._isPrivate) || String(id || '').split('/').includes('drafts')
+function isPrivateArtifact() {
+  return false
 }
 
 function isCrossBranchEnabled(item) {

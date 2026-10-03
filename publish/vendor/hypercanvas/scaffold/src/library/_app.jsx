@@ -7,6 +7,7 @@ import { Outlet } from 'react-router-dom'
 import StoryboardProvider from '@dfosco/hypercanvas/context'
 import { AppErrorBoundary } from '@dfosco/hypercanvas/error-boundary'
 import NotebookGate from '@dfosco/hypercanvas/notebook-gate'
+import NotebookShell from '@dfosco/hypercanvas/notebook-shell'
 import './_app.module.css'
 import '@dfosco/hypercanvas/canvas/style.css'
 
@@ -30,12 +31,14 @@ function PageLoading() {
 
 export default function App() {
   return (
-    <StoryboardProvider>
-      <NotebookGate />
-      <Suspense fallback={<PageLoading />}>
-        <Outlet />
-      </Suspense>
-    </StoryboardProvider>
+    <NotebookShell>
+      <StoryboardProvider>
+        <NotebookGate />
+        <Suspense fallback={<PageLoading />}>
+          <Outlet />
+        </Suspense>
+      </StoryboardProvider>
+    </NotebookShell>
   )
 }
 

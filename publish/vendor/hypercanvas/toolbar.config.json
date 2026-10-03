@@ -206,10 +206,12 @@
       "hideInCommandPalette": [".*"]
     },
     "workspace": {
-      "label": "Go to workspace",
+      "label": "Open notebook sidebar",
       "icon": "primer/home-fill",
       "render": "link",
       "surface": "command-palette",
+      "handler": "core:workspace",
+      "inlineAction": "open-notebook-sidebar",
       "modes": ["*"],
       "prod": true,
       "url": "/"
@@ -332,7 +334,6 @@
       "render": "button",
       "surface": "command-toolbar",
       "handler": "core:running-sites",
-      "sidepanel": "sites",
       "modes": ["*"],
       "prod": true,
       "alwaysVisible": true,

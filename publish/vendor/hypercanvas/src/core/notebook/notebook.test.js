@@ -42,10 +42,19 @@ describe('initializeNotebook', () => {
 
     expect(result.status).toBe('valid')
     expect(result.manifest).toMatchObject({
-      formatVersion: 1,
+      formatVersion: 2,
       id: 'notebook-empty',
       title: 'Empty Notebook',
       pages: [],
+      navigation: {
+        mode: 'type',
+        sectionsEnabled: true,
+        type: {
+          groups: ['prototype', 'canvas', 'site'],
+          order: { prototype: [], canvas: [], site: [] },
+        },
+        files: { flatOrder: [], entries: [], sections: [] },
+      },
     })
     expect(fs.existsSync(paths.canvases)).toBe(true)
     expect(fs.existsSync(paths.prototypes)).toBe(true)
@@ -152,6 +161,30 @@ describe('initializeNotebook', () => {
     expect(fs.existsSync(path.join(root, NOTEBOOK_DIRECTORIES.prototypes))).toBe(true)
     expect(fs.existsSync(path.join(root, NOTEBOOK_DIRECTORIES.assets))).toBe(true)
   })
+
+  it('discovers external pages and persists them without replacing saved layout', () => {
+    const root = tempRoot()
+    initializeNotebook(root, { id: 'discovery', title: 'Discovery' })
+    const canvasPath = path.join(root, 'canvas', 'board.canvas.jsonl')
+    fs.writeFileSync(canvasPath, '{"event":"canvas_created","title":"Board"}\n')
+    const prototypeDir = path.join(root, 'prototypes', 'legacy.folder', 'checkout')
+    fs.mkdirSync(prototypeDir, { recursive: true })
+    fs.writeFileSync(path.join(prototypeDir, 'checkout.prototype.json'), '{"meta":{"title":"Checkout"}}\n')
+    fs.writeFileSync(path.join(prototypeDir, 'index.jsx'), 'export default function Checkout() { return null }\n')
+    new SiteStore(root).upsert({ id: 'docs', title: 'Docs' })
+
+    const discovered = inspectNotebook(root)
+    expect(discovered.needsPageRegistration).toBe(true)
+    expect(discovered.pages.map(page => page.type)).toEqual(['canvas', 'prototype', 'site'])
+    expect(discovered.pages.map(page => page.title)).toEqual(['Board', 'Checkout', 'Docs'])
+    const discoveredIds = discovered.pages.map(page => page.id)
+    const persisted = initializeNotebook(root)
+
+    expect(persisted.needsPageRegistration).toBe(false)
+    expect(persisted.pages.map(page => page.id)).toEqual(discoveredIds)
+    expect(persisted.manifest.navigation.files.flatOrder).toEqual(discoveredIds)
+    expect(persisted.manifest.pages[1].path).toBe('prototypes/legacy.folder/checkout')
+  })
 })
 
 describe('inspectNotebook', () => {
@@ -182,6 +215,17 @@ describe('inspectNotebook', () => {
     expect(result.pages.find(entry => entry.id === 'canvas-secondary').available).toBe(true)
   })
 
+  it('uses an externally changed Canvas title in the registered page catalog', () => {
+    const root = copyFixture('rename-delete-notebook')
+    const canvasPath = path.join(root, 'canvas', 'overview.canvas.jsonl')
+    const event = JSON.parse(fs.readFileSync(canvasPath, 'utf8'))
+    event.title = 'External rename'
+    fs.writeFileSync(canvasPath, `${JSON.stringify(event)}\n`)
+
+    const result = inspectNotebook(root)
+    expect(result.pages.find(page => page.id === 'canvas-overview').title).toBe('External rename')
+  })
+
   it('reports a deleted prototype folder without hiding other pages', () => {
     const root = copyFixture('rename-delete-notebook')
     fs.rmSync(path.join(root, 'prototypes', 'landing'), { recursive: true })
@@ -192,6 +236,120 @@ describe('inspectNotebook', () => {
     expect(page.available).toBe(false)
     expect(page.diagnostics.map(item => item.code)).toContain('MISSING_PAGE_PAYLOAD')
     expect(result.pages.find(entry => entry.id === 'prototype-secondary').available).toBe(true)
+  })
+
+  it('migrates v1 IDs and paths once and registers Site descriptors', () => {
+    const root = tempRoot()
+    fs.mkdirSync(path.join(root, 'canvas'), { recursive: true })
+    fs.mkdirSync(path.join(root, 'prototypes', 'main.folder', 'landing'), { recursive: true })
+    fs.writeFileSync(path.join(root, 'canvas', 'overview.canvas.jsonl'), '{}\n')
+    const legacy = {
+      formatVersion: 1,
+      id: 'legacy-notebook',
+      title: 'Legacy Notebook',
+      pages: [
+        { id: 'canvas-existing', type: 'canvas', title: 'Overview', path: 'canvas/overview.canvas.jsonl' },
+        { id: 'proto-existing', type: 'prototype', title: 'Landing', path: 'prototypes/main.folder/landing' },
+      ],
+    }
+    fs.writeFileSync(path.join(root, NOTEBOOK_MANIFEST_FILE), `${JSON.stringify(legacy, null, 2)}\n`)
+    new SiteStore(root).upsert({
+      id: 'docs',
+      title: 'Docs',
+      deployments: { production: { baseUrl: 'https://docs.example.test' } },
+    })
+
+    const inspected = inspectNotebook(root)
+    expect(inspected.status).toBe('valid')
+    expect(inspected.needsMigration).toBe(true)
+    expect(inspected.manifest.formatVersion).toBe(2)
+    expect(inspected.pages.map(page => page.id)).toEqual(['canvas-existing', 'proto-existing', expect.stringMatching(/^site-/)])
+    expect(inspected.pages[0]).toMatchObject({ path: 'canvas/overview.canvas.jsonl', available: true })
+    expect(inspected.pages[2]).toMatchObject({ type: 'site', siteId: 'docs', title: 'Docs', productionUrl: 'https://docs.example.test/' })
+    expect(JSON.parse(fs.readFileSync(path.join(root, NOTEBOOK_MANIFEST_FILE), 'utf8')).formatVersion).toBe(1)
+
+    const migrated = initializeNotebook(root)
+    const migratedContents = fs.readFileSync(path.join(root, NOTEBOOK_MANIFEST_FILE), 'utf8')
+    expect(migrated.status).toBe('valid')
+    expect(migrated.manifest.formatVersion).toBe(2)
+    expect(migrated.needsMigration).toBe(false)
+    expect(fs.existsSync(path.join(root, '.storyboard', 'migrations', 'hypercanvas.notebook.v1.json'))).toBe(true)
+    initializeNotebook(root)
+    expect(fs.readFileSync(path.join(root, NOTEBOOK_MANIFEST_FILE), 'utf8')).toBe(migratedContents)
+  })
+
+  it('keeps draft route collisions in the catalog as unavailable diagnostic pages', () => {
+    const root = tempRoot()
+    fs.mkdirSync(path.join(root, 'canvas', 'drafts'), { recursive: true })
+    fs.writeFileSync(path.join(root, 'canvas', 'guide.canvas.jsonl'), '{}\n')
+    fs.writeFileSync(path.join(root, 'canvas', 'drafts', 'guide.canvas.jsonl'), '{}\n')
+    fs.writeFileSync(path.join(root, NOTEBOOK_MANIFEST_FILE), JSON.stringify({
+      formatVersion: 1,
+      id: 'collision-notebook',
+      title: 'Collision Notebook',
+      pages: [
+        { id: 'guide', type: 'canvas', title: 'Guide', path: 'canvas/guide.canvas.jsonl' },
+        { id: 'draft-guide', type: 'canvas', title: 'Draft guide', path: 'canvas/drafts/guide.canvas.jsonl' },
+      ],
+    }))
+
+    const result = inspectNotebook(root)
+    expect(result.status).toBe('valid')
+    expect(result.pages.map(page => page.route)).toEqual(['/canvas/guide', '/canvas/guide'])
+    expect(result.pages.every(page => page.available === false)).toBe(true)
+    expect(result.pages.every(page => page.diagnostics.some(item => item.code === 'PAGE_ROUTE_CONFLICT'))).toBe(true)
+  })
+
+  it('keeps conflicting Prototype data scopes visible and unavailable', () => {
+    const root = tempRoot()
+    const prototypePaths = ['prototypes/landing', 'prototypes/drafts/landing']
+    for (const relative of prototypePaths) {
+      const directory = path.join(root, relative)
+      fs.mkdirSync(directory, { recursive: true })
+      fs.writeFileSync(path.join(directory, 'index.jsx'), 'export default function Landing() { return null }\n')
+      fs.writeFileSync(path.join(directory, 'default.object.json'), JSON.stringify({ source: relative }))
+    }
+    initializeNotebook(root, { id: 'data-scope-collision', title: 'Data scope collision' })
+
+    const result = inspectNotebook(root)
+    const prototypes = result.pages.filter(page => page.type === 'prototype')
+
+    expect(result.status).toBe('valid')
+    expect(prototypes).toHaveLength(2)
+    expect(prototypes.every(page => !page.available)).toBe(true)
+    expect(prototypes.every(page => page.diagnostics.some(item => item.code === 'PROTOTYPE_DATA_SCOPE_CONFLICT'))).toBe(true)
+  })
+
+  it('reports custom Git exclusions that can omit registered draft-path content', () => {
+    const root = copyFixture('mixed-notebook')
+    fs.writeFileSync(path.join(root, '.gitignore'), 'custom/**/drafts/**\n')
+
+    const result = inspectNotebook(root)
+
+    expect(result.status).toBe('valid')
+    expect(result.diagnostics).toContainEqual(expect.objectContaining({
+      code: 'CUSTOM_DRAFT_EXCLUSION',
+      path: '.gitignore:1',
+    }))
+  })
+
+  it('keeps Prototype-contained Canvas entries visible but unavailable', () => {
+    const root = tempRoot()
+    fs.mkdirSync(path.join(root, 'prototypes', 'landing'), { recursive: true })
+    const legacyCanvasPath = path.join(root, 'prototypes', 'landing', 'notes.canvas.jsonl')
+    fs.writeFileSync(legacyCanvasPath, '{}\n')
+    fs.writeFileSync(path.join(root, NOTEBOOK_MANIFEST_FILE), JSON.stringify({
+      formatVersion: 2,
+      id: 'nested-canvas',
+      title: 'Nested Canvas',
+      pages: [{ id: 'legacy-canvas', type: 'canvas', title: 'Notes', path: 'prototypes/landing/notes.canvas.jsonl' }],
+    }))
+
+    const result = inspectNotebook(root)
+    expect(result.status).toBe('valid')
+    expect(result.pages[0].available).toBe(false)
+    expect(result.pages[0].diagnostics.map(item => item.code)).toContain('UNSUPPORTED_CANVAS_LOCATION')
+    expect(fs.existsSync(legacyCanvasPath)).toBe(true)
   })
 
   it('preserves identity when a payload is renamed and the manifest is updated', () => {

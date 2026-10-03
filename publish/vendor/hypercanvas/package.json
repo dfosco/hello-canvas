@@ -1,6 +1,6 @@
 {
     "name": "@dfosco/hypercanvas",
-    "version": "0.30.0",
+    "version": "0.31.0-beta.1",
     "type": "module",
     "license": "MIT",
     "description": "Storyboard prototyping framework — core engine, React integration, and canvas",
@@ -46,6 +46,7 @@
         "./core/mountStoryboardCore": "./src/core/mountStoryboardCore.js",
         "./publish": "./src/core/notebook/publishing.js",
         "./notebook/publishing": "./src/core/notebook/publishing.js",
+        "./notebook/browserBridge": "./src/core/notebook/browserBridge.js",
         "./canvas": {
             "import": "./dist/tiny-canvas.js",
             "types": "./src/canvas/index.d.ts"
@@ -65,6 +66,9 @@
         "./site-page": "./src/internals/SitePage/SitePage.jsx",
         "./error-boundary": "./src/internals/PrototypeErrorBoundary.jsx",
         "./notebook-gate": "./src/internals/NotebookGate/NotebookGate.jsx",
+        "./notebook-shell": "./src/internals/NotebookShell/NotebookShell.jsx",
+        "./notebook-agent-page": "./src/internals/NotebookAgentPage/NotebookAgentPage.jsx",
+        "./notebook-entry": "./src/internals/NotebookEntry/NotebookEntry.jsx",
         "./hooks/useFeatureFlag": "./src/internals/hooks/useFeatureFlag.js",
         "./config": "./src/core/stores/configSchema.js",
         "./storyboard.config.json": "./storyboard.config.json",

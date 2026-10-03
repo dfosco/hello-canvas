@@ -1,0 +1,36 @@
+{
+  "formatVersion": 1,
+  "sourceKey": "893d1d21cfcd4677b5391b2b9991b0d8",
+  "target": {
+    "kind": "site",
+    "siteId": "d6",
+    "route": "",
+    "viewport": {
+      "width": 1368,
+      "height": 731
+    }
+  },
+  "viewport": {
+    "width": 1368,
+    "height": 731
+  },
+  "images": {
+    "light": {
+      "file": "76224a098c06a9c127d6ddb03cc73096-light.png",
+      "digest": "76224a098c06a9c127d6ddb03cc73096",
+      "bytes": 313731,
+      "width": 2736,
+      "height": 1462,
+      "updatedAt": "2026-10-03T19:33:20.298Z"
+    },
+    "dark": {
+      "file": "76224a098c06a9c127d6ddb03cc73096-dark.png",
+      "digest": "76224a098c06a9c127d6ddb03cc73096",
+      "bytes": 313731,
+      "width": 2736,
+      "height": 1462,
+      "updatedAt": "2026-10-03T19:33:20.299Z"
+    }
+  },
+  "updatedAt": "2026-10-03T19:33:20.299Z"
+}

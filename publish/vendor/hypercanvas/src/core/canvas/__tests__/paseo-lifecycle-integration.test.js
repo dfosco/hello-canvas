@@ -205,11 +205,13 @@ describe('Paseo daemon lifecycle integration contract', () => {
       const runningTerminals = await connection.daemon.listTerminals(undefined, undefined, { workspaceId })
       expect(runningTerminals.terminals).toEqual(expect.arrayContaining([
         expect.objectContaining({
-          cwd: siteRoot,
+          cwd: notebookRoot,
           workspaceId,
           name: 'hypercanvas:site:docs',
         }),
       ]))
+      expect(runningTerminals.terminals.find(terminal => terminal.name === 'hypercanvas:site:docs')?.title)
+        .toContain('External Site')
       expect((await connection.client.workspaces.list({})).entries.map(workspace => workspace.id)).toEqual([workspaceId])
       expect(store.getBinding('docs')).toMatchObject({ workspaceId, root: siteRoot })
       expect(await (await fetch(url)).text()).toBe('SITE_TERMINAL_READY')

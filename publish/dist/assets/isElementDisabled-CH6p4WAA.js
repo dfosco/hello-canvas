@@ -1,1 +1,0 @@
-var r=Object.defineProperty;var i=(t,a)=>r(t,"name",{value:a,configurable:!0});function u(t){return t==null||t.hasAttribute("disabled")||t.getAttribute("aria-disabled")==="true"}i(u,"isElementDisabled");export{u as i};

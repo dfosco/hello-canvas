@@ -241,7 +241,7 @@ export default function notebookRuntimePlugin({
             updateNotebookWatcher()
             const base = server?.config?.base || '/'
             restartScheduled = true
-            sendJson(response, 200, { ...nextStatus, redirect: `${base}workspace`, restarting: true })
+            sendJson(response, 200, { ...nextStatus, redirect: base, restarting: true })
             // Stateful services capture Notebook-local stores and execution
             // roots at startup. The client waits for this restart before it
             // requests lazy workspace modules from the new Vite graph.
@@ -264,7 +264,7 @@ export default function notebookRuntimePlugin({
             allowActiveNotebook()
             updateNotebookWatcher()
             restartScheduled = true
-            sendJson(response, 200, { ...nextStatus, redirect: `${server?.config?.base || '/'}workspace`, restarting: true })
+            sendJson(response, 200, { ...nextStatus, redirect: server?.config?.base || '/', restarting: true })
             setTimeout(async () => {
               try { await restart({ manual: true }) } finally { restartScheduled = false }
             }, 0).unref?.()

@@ -85,7 +85,7 @@ describe('buildArtifactManifest', () => {
     })
   })
 
-  it('omits private prototypes, canvases, and folders', () => {
+  it('publishes every registered artifact regardless of legacy drafts markers', () => {
     const manifest = buildArtifactManifest({
       env,
       discovery: {
@@ -104,9 +104,12 @@ describe('buildArtifactManifest', () => {
       },
     })
 
-    expect(manifest.prototypes.map((item) => item.id)).toEqual(['PublicPrototype'])
-    expect(manifest.canvases.map((item) => item.id)).toEqual(['public'])
-    expect(manifest.folders.map((item) => item.name)).toEqual(['public'])
+    expect(manifest.prototypes.map((item) => item.id)).toEqual(['PublicPrototype', 'SecretPrototype'])
+    expect(manifest.canvases.map((item) => item.id)).toEqual(['public', 'secret'])
+    expect(manifest.folders.map((item) => item.name)).toEqual(['public', 'secret'])
+    expect(manifest.prototypes.every(item => !item.isPrivate)).toBe(true)
+    expect(manifest.canvases.every(item => !item.isPrivate)).toBe(true)
+    expect(manifest.folders.every(item => !item.isPrivate)).toBe(true)
   })
 
   it('omits prototypes and canvases with meta.crossBranch set to false', () => {

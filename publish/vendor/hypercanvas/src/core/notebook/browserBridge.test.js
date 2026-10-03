@@ -45,13 +45,13 @@ describe('browser Core picker bridge', () => {
     window.__STORYBOARD_BASE_PATH__ = '/branch--feature/'
 
     expect(browserAgentSessionUrl({ agentId: 'agent-123', widgetId: 'chat-widget', canvasId: 'demo' }))
-      .toBe('/branch--feature/workspace?panel=agent&agentId=agent-123&widgetId=chat-widget&canvasId=demo')
+      .toBe('/branch--feature/notebook/agent/agent-123?widgetId=chat-widget&canvasId=demo')
     expect(browserAgentSessionUrl({ agentId: '' })).toBeNull()
   })
 
-  it('resumes a same-origin branch workspace redirect until the destination document loads', () => {
+  it('resumes a same-origin branch Notebook entry redirect until the destination document loads', () => {
     const values = new Map([[PENDING_NOTEBOOK_REDIRECT_KEY, JSON.stringify({
-      url: '/branch--feature/workspace',
+      url: '/branch--feature/',
       expiresAt: 2000,
     })]])
     const storage = {
@@ -59,21 +59,21 @@ describe('browser Core picker bridge', () => {
       removeItem: key => values.delete(key),
     }
     const location = {
-      href: 'http://localhost/branch--feature/',
+      href: 'http://localhost/branch--feature/canvas/current',
       origin: 'http://localhost',
-      pathname: '/branch--feature/',
+      pathname: '/branch--feature/canvas/current',
       search: '',
       hash: '',
     }
     const navigate = vi.fn()
 
     expect(resumePendingNotebookRedirect({ storage, location, navigate, now: 1000 })).toBe(true)
-    expect(navigate).toHaveBeenCalledWith('/branch--feature/workspace')
+    expect(navigate).toHaveBeenCalledWith('/branch--feature/')
     expect(storage.getItem(PENDING_NOTEBOOK_REDIRECT_KEY)).not.toBeNull()
 
     expect(resumePendingNotebookRedirect({
       storage,
-      location: { ...location, pathname: '/branch--feature/workspace' },
+      location: { ...location, pathname: '/branch--feature/' },
       navigate,
       now: 1500,
     })).toBe(false)
@@ -96,7 +96,7 @@ describe('browser Core picker bridge', () => {
     expect(navigate).not.toHaveBeenCalled()
     expect(storage.getItem(PENDING_NOTEBOOK_REDIRECT_KEY)).toBeNull()
 
-    values.set(PENDING_NOTEBOOK_REDIRECT_KEY, JSON.stringify({ url: '/workspace', expiresAt: 1000 }))
+    values.set(PENDING_NOTEBOOK_REDIRECT_KEY, JSON.stringify({ url: '/', expiresAt: 1000 }))
     expect(resumePendingNotebookRedirect({ storage, location, navigate, now: 1000 })).toBe(false)
     expect(storage.getItem(PENDING_NOTEBOOK_REDIRECT_KEY)).toBeNull()
   })

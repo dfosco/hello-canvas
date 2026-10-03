@@ -26,9 +26,7 @@ describe('Notebook path aliases in published sites', () => {
       manifest: { id: 'alias-test', title: 'Alias test' },
     }, [], new Map(), [])
 
-    expect(files['vite.config.js']).toContain("'@': fileURLToPath(new URL('./', import.meta.url))")
-    expect(files['src/generated/hypercanvas.js']).not.toMatch(/<\/?[A-Z][^>]*>/)
-    expect(files['src/generated/hypercanvas.js']).toContain('() => setValue(defaultValue)')
+    expect(files['vite.config.js']).toContain("'@': fileURLToPath(new URL('./notebook-content/', import.meta.url))")
   })
 
   it('uses a Notebook package lock version for imported dependencies outside Hypercanvas', () => {

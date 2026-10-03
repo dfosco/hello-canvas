@@ -307,7 +307,7 @@ describe('StoryboardProvider', () => {
     expect(screen.getByTestId('ctx')).toHaveTextContent('Global Default')
   })
 
-  it('shows a simple 404 for unknown canvas routes with an index link', () => {
+  it('shows a simple 404 for unknown canvas routes with a sidebar recovery action', () => {
     mockUseLocation.mockReturnValue({ pathname: '/canvas/unknown-board', search: '', hash: '' })
 
     render(
@@ -317,7 +317,7 @@ describe('StoryboardProvider', () => {
     )
 
     expect(screen.getByText('Canvas not found')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /go to index page/i })).toHaveAttribute('href', '/')
+    expect(screen.getByRole('button', { name: /open notebook sidebar/i })).toBeInTheDocument()
   })
 
   it('strips dev-domain prefix in local dev (Caddy proxy) so canvas routes resolve', () => {

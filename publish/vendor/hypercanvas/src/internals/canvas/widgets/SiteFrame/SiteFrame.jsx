@@ -16,6 +16,31 @@ import styles from './SiteFrame.module.css'
 const DEFAULT_SIZE = { width: 800, height: 600 }
 const START_TIMEOUT_MS = 30000
 
+function publishedAssetUrl(file) {
+  const base = import.meta.env.BASE_URL || '/'
+  return (base.endsWith('/') ? base : base + '/') + String(file || '').replace(/^\/+/, '')
+}
+
+function publishedDescriptor(widgetId, siteId, route) {
+  const pages = window.__HYPERCANVAS_NOTEBOOK_PUBLICATION__?.pages
+  if (!Array.isArray(pages)) return null
+  const base = new URL(import.meta.env.BASE_URL || '/', window.location.origin).pathname.replace(/\/+$/, '')
+  const currentPath = window.location.pathname.startsWith(base + '/')
+    ? window.location.pathname.slice(base.length)
+    : window.location.pathname
+  const current = currentPath.replace(/\/+$/, '') || '/'
+  const page = pages
+    .filter(item => {
+      if (!item?.route) return false
+      const pageRoute = String(item.route).replace(/\/+$/, '') || '/'
+      return current === pageRoute || (pageRoute !== '/' && current.startsWith(pageRoute + '/'))
+    })
+    .sort((left, right) => String(right.route || '').length - String(left.route || '').length)[0]
+  const frames = page?.siteFrames
+  if (!frames || typeof frames !== 'object') return null
+  return frames[widgetId] || Object.values(frames).find(item => item?.siteId === siteId && (item?.route || '') === route) || null
+}
+
 const SiteFrame = forwardRef(function SiteFrame({ id: widgetId, props: widgetProps, selected = false, onUpdate, resizable }, ref) {
   const props = widgetProps || {}
   const siteId = typeof props.siteId === 'string' ? props.siteId : ''
@@ -29,6 +54,7 @@ const SiteFrame = forwardRef(function SiteFrame({ id: widgetId, props: widgetPro
   // Published notebooks run without the local Core runtime: Site Frames are
   // permanently static poster-plus-production-link views there.
   const published = typeof window === 'undefined' || window.__SB_LOCAL_DEV__ !== true
+  const exportedFrame = published ? publishedDescriptor(widgetId, siteId, route) : null
   const [error, setError] = useState('')
   const [siteList, setSiteList] = useState(null)
   // Local dev renders the external interact gate (WidgetChrome); activating it
@@ -60,20 +86,25 @@ const SiteFrame = forwardRef(function SiteFrame({ id: widgetId, props: widgetPro
   })
   const generatedPoster = frameSnapshot?.light?.dataUrl || frameSnapshot?.dark?.dataUrl || ''
   const generatedPosterDark = frameSnapshot?.dark?.dataUrl || ''
-  const poster = published
-    ? resolveBasePathAsset(manualSnapshot, import.meta.env?.BASE_URL || '/')
-    : manualSnapshot || generatedPoster
-  const posterDark = published
-    ? resolveBasePathAsset(manualSnapshotDark, import.meta.env?.BASE_URL || '/')
-    : manualSnapshotDark || generatedPosterDark
+  const poster = published && exportedFrame?.snapshot
+    ? publishedAssetUrl(exportedFrame.snapshot)
+    : published
+      ? resolveBasePathAsset(manualSnapshot, import.meta.env?.BASE_URL || '/')
+      : (manualSnapshot || generatedPoster)
+  const posterDark = published && exportedFrame?.snapshotDark
+    ? publishedAssetUrl(exportedFrame.snapshotDark)
+    : published
+      ? resolveBasePathAsset(manualSnapshotDark, import.meta.env?.BASE_URL || '/')
+      : (manualSnapshotDark || generatedPosterDark)
   const frameSrc = useMemo(() => (
     siteId && !published
       ? sitePreviewPath(import.meta.env.BASE_URL || '/', siteId, normalizeSiteRoute(route))
       : ''
   ), [published, route, siteId])
-  const openUrl = published && typeof props.openUrl === 'string' ? props.openUrl : ''
+  const openUrl = published ? (exportedFrame?.openUrl || (typeof props.openUrl === 'string' ? props.openUrl : '')) : ''
   const descriptorError = frameSnapshot?.status === 'error' ? (frameSnapshot.error?.message || 'Preview unavailable') : ''
-  const shownError = error || descriptorError
+  const publishedError = exportedFrame?.available === false ? (exportedFrame.diagnostics?.[0]?.message || 'Site Frame unavailable') : ''
+  const shownError = error || publishedError || descriptorError
   const pending = !poster && !shownError && !startingSite && Boolean(siteId) && frameSnapshot?.status === 'missing'
   const stalePreview = !manualSnapshot && frameSnapshot?.stale === true
 
@@ -285,7 +316,8 @@ const SiteFrame = forwardRef(function SiteFrame({ id: widgetId, props: widgetPro
               {posterNode}
             </a>
           ) : poster ? posterNode :
-            <div className={styles.empty}>Preview unavailable</div>
+            openUrl ? <a className={styles.publishedLink} href={openUrl} target="_blank" rel="noopener noreferrer">Open production site</a>
+              : <div className={styles.empty}>{shownError || 'Preview unavailable'}</div>
         ) : (
           <div ref={viewportRef} className={styles.viewport}>
             {posterNode && (!admitted || loadedSrc !== frameSrc || startingSite) ? posterNode : null}

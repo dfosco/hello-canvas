@@ -16,6 +16,7 @@ export default function CreateArtifactForm({
   type,
   basePath,
   onClose,
+  initialValues: providedInitialValues = null,
   hideHeader = true,
 }) {
   const schemaKey = resolveSchemaKey(type)
@@ -24,6 +25,7 @@ export default function CreateArtifactForm({
 
   const [prototypes, setPrototypes] = useState([])
   const [partials, setPartials] = useState([])
+  const [sections, setSections] = useState([])
   const [ghLogin, setGhLogin] = useState(null)
 
   // In picker mode we don't yet know the schema, so load everything that
@@ -42,6 +44,19 @@ export default function CreateArtifactForm({
     if (isPicker) return true
     return fixedSchema?.fields.some(f => f.name === 'author') || false
   }, [isPicker, fixedSchema])
+
+  const needsSections = useMemo(() => fixedSchema?.fields.some(f => f.dynamic === 'sections') || false, [fixedSchema])
+
+  useEffect(() => {
+    if (!needsSections) return
+    const apiBase = (basePath || '/').replace(/\/+$/, '')
+    fetch(`${apiBase}/_storyboard/notebook/navigation`)
+      .then(response => response.ok ? response.json() : null)
+      .then(data => setSections(Array.isArray(data?.navigation?.files?.sections)
+        ? data.navigation.files.sections.map(section => ({ value: section.id, label: section.title }))
+        : []))
+      .catch(() => {})
+  }, [needsSections, basePath])
 
   useEffect(() => {
     if (!needsPrototypes) return
@@ -82,10 +97,10 @@ export default function CreateArtifactForm({
   }, [needsAuthor, basePath])
 
   // Late-arriving gh login is merged into empty fields inside ArtifactForm.
-  const initialValues = useMemo(() => {
-    if (!needsAuthor || !ghLogin) return undefined
-    return { author: ghLogin }
-  }, [needsAuthor, ghLogin])
+  const initialValues = useMemo(() => ({
+    ...(providedInitialValues || {}),
+    ...(needsAuthor && ghLogin && !providedInitialValues?.author ? { author: ghLogin } : {}),
+  }), [ghLogin, needsAuthor, providedInitialValues])
 
   if (!isPicker && !fixedSchema) return null
 
@@ -111,10 +126,11 @@ export default function CreateArtifactForm({
       } else if (typeof val === 'string') {
         const trimmed = val.trim()
         if (trimmed) payload[field.name] = trimmed
-      } else if (val != null) {
+      } else if (val != null && val !== '') {
         payload[field.name] = val
       }
     }
+    if (providedInitialValues?.insertAfterPageId) payload.insertAfterPageId = providedInitialValues.insertAfterPageId
 
     const res = await fetch(endpoint, {
       method: 'POST',
@@ -140,7 +156,7 @@ export default function CreateArtifactForm({
       type={isPicker ? undefined : schemaKey}
       onSubmit={handleSubmit}
       onCancel={onClose}
-      dynamicOptions={{ prototypes, partials }}
+      dynamicOptions={{ prototypes, partials, sections }}
       initialValues={initialValues}
       hideHeader={hideHeader}
     />

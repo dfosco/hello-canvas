@@ -1,23 +1,85 @@
-/**
- * Publish-time preparation for Frame snapshots.
- *
- * Published Site Frames are static: a portable poster image plus a link to
- * the Site's configured production URL. This module enumerates every
- * `site-frame` widget across the canvases being published, resolves its
- * persisted snapshot from the Notebook-owned store, and produces the published
- * frame data plus advisory warnings for unavailable previews/production URLs.
- * Incomplete frames must not prevent the rest of a Notebook from publishing.
- *
- * Prototype Frames keep their live bundled routes in publications; their
- * snapshot assets travel under `assets/canvas/snapshots/` (copied with the
- * Notebook's assets directory) and initial posters resolve through
- * `props.snapshot` when provided.
- */
+/** Build static Site page and Site Frame descriptors for Notebook exports. */
 
 import { frameSnapshotSourceKey, normalizeFrameSnapshotTarget } from '../canvas/frameSnapshotContract.js'
 import { readFrameSnapshot } from '../canvas/frameSnapshotStore.js'
 import { resolveProductionSiteUrl } from '../site/publish.js'
 import { SiteStore } from '../site/site.js'
+
+function unavailable(message, code = 'SITE_PUBLICATION_UNAVAILABLE') {
+  return { available: false, unavailable: true, diagnostics: [{ code, message }] }
+}
+
+function productionEntry(site) {
+  const deployment = site?.deployments?.[site?.defaultDeployment]
+  return deployment?.baseUrl || null
+}
+
+function snapshotPath(sourceKey, variant) {
+  return `assets/canvas/snapshots/frames/${sourceKey}/${variant.file}`
+}
+
+async function snapshotFor(notebookRoot, target) {
+  const sourceKey = frameSnapshotSourceKey(target)
+  const descriptor = await readFrameSnapshot(notebookRoot, sourceKey)
+  return { sourceKey, descriptor }
+}
+
+async function publishedSiteTarget({ notebookRoot, store, siteId, route, title, viewport }) {
+  const site = store.get(siteId)
+  if (!site) return { ...unavailable(`Site "${siteId}" is not registered in this Notebook.`, 'MISSING_SITE_DESCRIPTOR'), siteId, title, route }
+  let openUrl
+  try {
+    openUrl = resolveProductionSiteUrl(productionEntry(site), route)
+  } catch (error) {
+    return { ...unavailable(error.message, error.code || 'SITE_PRODUCTION_URL_INVALID'), siteId, title: title || site.title || siteId, route }
+  }
+
+  const target = normalizeFrameSnapshotTarget({ kind: 'site', siteId, route, viewport })
+  const { sourceKey, descriptor } = await snapshotFor(notebookRoot, target)
+  const light = descriptor.light
+  const dark = descriptor.dark
+  const fallback = light || dark
+  return {
+    siteId,
+    title: title || site.title || siteId,
+    route,
+    openUrl,
+    available: true,
+    unavailable: false,
+    status: fallback ? 'snapshot' : 'link-only',
+    snapshot: light ? snapshotPath(sourceKey, light) : null,
+    snapshotDark: dark ? snapshotPath(sourceKey, dark) : null,
+    stale: Boolean(fallback?.stale),
+    sourceKey,
+    viewport: target.viewport,
+  }
+}
+
+/** Site pages always represent the local home route, independent of navigation. */
+export async function preparePublishedSitePages({ notebookRoot, pages }) {
+  const store = new SiteStore(notebookRoot)
+  const result = new Map()
+  for (const page of pages || []) {
+    if (page?.type !== 'site') continue
+    const published = await publishedSiteTarget({
+      notebookRoot,
+      store,
+      siteId: page.siteId,
+      route: '',
+      title: page.title,
+    })
+    result.set(page.id, {
+      ...page,
+      available: page.available !== false && published.available,
+      diagnostics: [...(page.diagnostics || []), ...(published.diagnostics || [])],
+      productionUrl: published.openUrl || null,
+      snapshot: published.snapshot || null,
+      snapshotDark: published.snapshotDark || null,
+      publicationStatus: published.status || 'unavailable',
+    })
+  }
+  return result
+}
 
 function frameWarning(canvas, widget, code, message) {
   return { canvas: canvas.id, widgetId: widget.id, title: widget.props?.title || '', code, message }

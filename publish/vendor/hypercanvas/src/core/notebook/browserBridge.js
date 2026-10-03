@@ -5,7 +5,15 @@ export function isBrowserCoreMode() {
 }
 
 export const PENDING_NOTEBOOK_REDIRECT_KEY = 'hypercanvas.pendingNotebookRedirect'
+export const NOTEBOOK_SIDEBAR_EVENT = 'storyboard:open-notebook-sidebar'
 const NOTEBOOK_REDIRECT_TTL_MS = 2 * 60 * 1000
+
+/** Open and focus the shared Notebook navigation without changing the route. */
+export function openNotebookSidebar({ focusType = null } = {}) {
+  if (typeof window === 'undefined') return false
+  window.dispatchEvent(new CustomEvent(NOTEBOOK_SIDEBAR_EVENT, { detail: { focusType } }))
+  return true
+}
 
 export function resumePendingNotebookRedirect({ storage, location, navigate, now = Date.now() } = {}) {
   const browserWindow = typeof window !== 'undefined' ? window : null
@@ -63,10 +71,11 @@ export function coreApiPath(pathname) {
 
 export function browserAgentSessionUrl({ agentId, widgetId, canvasId } = {}) {
   if (typeof agentId !== 'string' || !agentId.trim()) return null
-  const params = new URLSearchParams({ panel: 'agent', agentId: agentId.trim() })
+  const params = new URLSearchParams()
   if (widgetId) params.set('widgetId', String(widgetId))
   if (canvasId) params.set('canvasId', String(canvasId))
-  return coreApiPath(`/workspace?${params.toString()}`)
+  const query = params.toString()
+  return coreApiPath(`/notebook/agent/${encodeURIComponent(agentId.trim())}${query ? `?${query}` : ''}`)
 }
 
 async function requestJson(pathname, options = {}) {
@@ -106,7 +115,7 @@ export async function openNotebookPath(root) {
   const injectedOpener = globalThis.__STORYBOARD_OPEN_NOTEBOOK__
   if (typeof injectedOpener === 'function') return injectedOpener(root)
 
-  const fallbackRedirect = coreApiPath('/workspace')
+  const fallbackRedirect = coreApiPath('/')
   const savePendingRedirect = url => {
     try {
       const target = new URL(url, window.location.href)

@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import Dialog from '../Dialog.jsx'
-import Icon from '../Icon.jsx'
 import SiteForm from '../SiteForm/SiteForm.jsx'
 import { storyboardWs } from '../storyboard-ws.js'
 import { sitePreviewPath } from '../../core/site/contract.js'
 import { notifySiteStarted } from '../../core/site/siteEvents.js'
 import { formatSiteTerminalOutput } from '../../core/site/terminal-output.js'
 import { observeSiteFrameRoute, siteViewerPath } from '../siteFrameRouteBridge.js'
+import { captureFrameSnapshotApi } from '../canvas/widgets/useFrameSnapshot.js'
 import css from './SitePage.module.css'
 
 const MIN_TERMINAL_OUTPUT_HEIGHT = 96
@@ -25,8 +25,43 @@ function clampTerminalOutputHeight(height) {
   return Math.min(getMaxTerminalOutputHeight(), Math.max(MIN_TERMINAL_OUTPUT_HEIGHT, height))
 }
 
+function PublishedSitePage() {
+  const { siteId = '' } = useParams()
+  const pages = window.__HYPERCANVAS_NOTEBOOK_PUBLICATION__?.pages
+  const page = Array.isArray(pages) ? pages.find(item => item.type === 'site' && item.siteId === siteId) : null
+  const base = import.meta.env.BASE_URL || '/'
+  const assetUrl = asset => (base.endsWith('/') ? base : base + '/') + String(asset || '').replace(/^\/+/, '')
+
+  if (!page?.available || !page.productionUrl) {
+    const diagnostic = page?.diagnostics?.[0]
+    return <main className={css.sitePublished}>
+      <h1>{page?.title || siteId || 'Site'}</h1>
+      <p role="status">This Site is unavailable in the publication.</p>
+      {diagnostic ? <p><code>{diagnostic.code}</code> {diagnostic.message}</p> : null}
+    </main>
+  }
+
+  const poster = page.snapshot || page.snapshotDark
+  return <main className={css.sitePublished}>
+    <h1>{page.title || siteId}</h1>
+    {poster ? <a className={css.sitePoster} href={page.productionUrl} target="_blank" rel="noopener noreferrer">
+      <picture>
+        {page.snapshot && page.snapshotDark ? <source media="(prefers-color-scheme: dark)" srcSet={assetUrl(page.snapshotDark)} /> : null}
+        <img src={assetUrl(poster)} alt={`${page.title || siteId} home page`} />
+      </picture>
+    </a> : null}
+    <p><a className={css.productionLink} href={page.productionUrl} target="_blank" rel="noopener noreferrer">Open production site</a></p>
+  </main>
+}
+
 /** App-owned shell around a managed Site; the external document stays in its iframe. */
-export default function SitePage({ basePath = '/' }) {
+export default function SitePage(props) {
+  return import.meta.env.VITE_NOTEBOOK_PUBLISHED === '1'
+    ? <PublishedSitePage />
+    : <AuthoringSitePage {...props} />
+}
+
+function AuthoringSitePage({ basePath = '/' }) {
   const [params, setParams] = useSearchParams()
   const { siteId, '*': siteRoute } = useParams()
   const location = useLocation()
@@ -44,6 +79,7 @@ export default function SitePage({ basePath = '/' }) {
   const editing = params.get('edit') === 'true' ? 'edit' : params.get('rebind') === 'true' ? 'rebind' : null
   const [reloadToken, setReloadToken] = useState(0)
   const [autoStarting, setAutoStarting] = useState(false)
+  const [posterError, setPosterError] = useState('')
   const autoStartAttempted = useRef(null)
   const [terminalOutput, setTerminalOutput] = useState([])
   const [terminalPreference, setTerminalPreference] = useState(() => ({ key: terminalPreferenceKey, open: terminalQuery }))
@@ -54,6 +90,21 @@ export default function SitePage({ basePath = '/' }) {
   const frameRouteCleanup = useRef(null)
   const base = basePath.replace(/\/+$/, '')
   const current = site?.id === id ? site : null
+  const posterTarget = useMemo(() => ({ kind: 'site', siteId: id, route: '' }), [id])
+
+  useEffect(() => {
+    const root = document.documentElement
+    if (!showTerminalOutput) return undefined
+
+    root.dataset.siteTerminalOpen = 'true'
+    root.style.setProperty('--site-terminal-toolbar-offset', `${terminalOutputHeight + 24}px`)
+    return () => {
+      if (root.dataset.siteTerminalOpen === 'true') {
+        delete root.dataset.siteTerminalOpen
+        root.style.removeProperty('--site-terminal-toolbar-offset')
+      }
+    }
+  }, [showTerminalOutput, terminalOutputHeight])
 
   useEffect(() => {
     const clampToViewport = () => setTerminalOutputHeight(height => clampTerminalOutputHeight(height))
@@ -181,8 +232,7 @@ export default function SitePage({ basePath = '/' }) {
   useEffect(() => {
     const removed = event => {
       if (event.detail?.siteId !== id) return
-      const base = basePath.replace(/\/+$/, '')
-      navigate(`${base}/workspace?section=sites`)
+      navigate(basePath)
     }
     document.addEventListener('storyboard:site-removed', removed)
     return () => document.removeEventListener('storyboard:site-removed', removed)
@@ -230,7 +280,12 @@ export default function SitePage({ basePath = '/' }) {
         navigate(siteViewerPath(basePath, id, nextRoute), { replace })
       },
     })
-  }, [basePath, id, navigate, route])
+    // Site pages own one portable home-route poster. Capture on authoring
+    // view after the Site is running; publication only consumes this image.
+    captureFrameSnapshotApi(posterTarget, { theme: 'both', force: true })
+      .then(() => setPosterError(''))
+      .catch(cause => setPosterError(cause?.message || 'Site preview capture failed. The last successful poster is still available.'))
+  }, [basePath, id, navigate, posterTarget, route])
 
   useEffect(() => () => frameRouteCleanup.current?.(), [])
   function closeEditor() {
@@ -271,17 +326,7 @@ export default function SitePage({ basePath = '/' }) {
 
   return (
     <main className={css.page}>
-      <header className={css.toolbar}>
-        <div className={css.siteIdentity}>
-          <Link to={basePath} className={css.homeLink} aria-label="Go to homepage">
-            <Icon name="home" size={16} color="#fff" />
-          </Link>
-          <h1>{current?.title || id || 'Site'}</h1>
-          {current && (current.missing || current.binding?.status !== 'running') && <span className={current.missing ? css.statusMissing : css.status} role="status">
-            {current.missing ? 'Folder missing' : starting ? 'starting' : current.binding?.status || 'Stopped'}
-          </span>}
-        </div>
-      </header>
+      {posterError && <p className={css.error} role="status">{posterError}</p>}
       {runningUrl ? <iframe ref={frameRef} key={reloadToken} className={css.frame} title={current.title || id} src={runningUrl} onLoad={handleFrameLoad} /> : (
         <section className={css.empty}>
           <h2>{current?.missing ? 'Site folder is missing' : !current ? 'Site unavailable' : starting ? 'Site is starting' : current.binding?.status === 'error' ? 'Site failed to start' : 'Site is stopped'}</h2>

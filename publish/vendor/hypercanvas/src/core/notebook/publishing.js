@@ -102,7 +102,11 @@ function remoteMarkerIdentity(contents) {
     if (marker?.kind === 'hypercanvas-publication' && marker?.notebook?.id) {
       return { id: marker.notebook.id }
     }
-    if (marker?.formatVersion === NOTEBOOK_FORMAT_VERSION && typeof marker?.id === 'string' && marker.id) {
+    if (Number.isInteger(marker?.formatVersion)
+      && marker.formatVersion >= 1
+      && marker.formatVersion <= NOTEBOOK_FORMAT_VERSION
+      && typeof marker?.id === 'string'
+      && marker.id) {
       return { id: marker.id }
     }
   } catch { /* absent or invalid marker */ }

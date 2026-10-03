@@ -27,6 +27,7 @@ const BUILTIN_DEFAULTS = {
   'configuration-auto-reload': LIVE_SOURCE_DEFAULT,
   'prototype-auto-reload': LIVE_SOURCE_DEFAULT,
   'agents-ready': false,
+  'notebook-folder-drop': false,
   // Experimental canvas widgets — hidden from creation surfaces until enabled.
   'prompt-widget': false,
   'agent-chat-widget': false,

@@ -69,7 +69,12 @@ export default function SiteForm({ basePath = '/', site = null, initialValues = 
         productionBaseUrl,
         startCommand: command.trim() || 'npm run dev',
       }
-      const createBody = { root, ...values }
+      const createBody = {
+        root,
+        ...values,
+        ...(initialValues.sectionId ? { sectionId: initialValues.sectionId } : {}),
+        ...(initialValues.insertAfterPageId ? { insertAfterPageId: initialValues.insertAfterPageId } : {}),
+      }
       const response = await fetch(`${base}/_storyboard/site/${site ? `${encodeURIComponent(site.id)}/metadata` : 'create'}`, {
         method: mode === 'edit' ? 'PATCH' : 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(mode === 'edit'

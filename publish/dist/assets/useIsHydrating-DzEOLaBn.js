@@ -1,0 +1,1 @@
+var e=Object.defineProperty;var r=(t,n)=>e(t,"name",{value:n,configurable:!0});import{a2 as s,a3 as u}from"./index-Bk9tLA3w.js";function o(){return u}r(o,"subscribe");function a(){return!1}r(a,"getSnapshot");function i(){return!0}r(i,"getServerSnapshot");function p(){return s.useSyncExternalStore(o,a,i)}r(p,"useIsHydrating");export{p as u};

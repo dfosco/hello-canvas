@@ -1,11 +1,4 @@
 .page { position: relative; display: flex; flex-direction: column; width: 100%; height: 100dvh; background: var(--bgColor-default, #0d1117); color: var(--fgColor-default, #f0f0f0); }
-.toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 52px; padding: 8px 16px; border-bottom: 1px solid var(--borderColor-default, #30363d); background: var(--bgColor-muted, #161b22); }
-:global(html.storyboard-chrome-hidden) .toolbar { display: none; }
-.siteIdentity { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.homeLink { display: flex; flex-shrink: 0; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: var(--color-background-emphasis, #313131); color: var(--color-foreground-on-emphasis, #fff); text-decoration: none; transform: rotate(-1deg); }
-.siteIdentity h1 { margin: 0; overflow: hidden; font-size: 15px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
-.status, .statusMissing { padding: 3px 8px; border-radius: 999px; background: var(--bgColor-neutral-muted, #30363d); color: var(--fgColor-muted, #8b949e); font-size: 11px; white-space: nowrap; }
-.statusMissing { background: var(--bgColor-danger-muted, #490202); color: var(--fgColor-danger, #ff7b72); }
 .frame { flex: 1 1 0; min-height: 0; width: 100%; border: 0; background: white; }
 .terminalResizeHandle { position: relative; z-index: 1; flex: 0 0 8px; height: 8px; cursor: row-resize; touch-action: none; }
 :global(html.storyboard-chrome-hidden) .terminalResizeHandle,
@@ -19,3 +12,9 @@
 .empty h2 { margin: 0; }
 .empty p { max-width: 460px; margin: 0; color: var(--fgColor-muted, #8b949e); text-align: center; }
 .error { position: fixed; right: 20px; bottom: 76px; z-index: 1100; padding: 8px 12px; border-radius: 8px; background: var(--bgColor-default, #222); color: var(--fgColor-danger, #f44); }
+.sitePublished { min-height: 100%; box-sizing: border-box; padding: 32px; background: var(--bgColor-default, #0d1117); color: var(--fgColor-default, #f0f0f0); }
+.sitePublished h1 { max-width: 1000px; margin: 0 auto 24px; font-size: 22px; }
+.sitePublished p { max-width: 1000px; margin: 16px auto; }
+.sitePoster, .sitePoster picture, .sitePoster img { display: block; max-width: 1200px; width: 100%; margin: auto; }
+.productionLink { display: inline-block; padding: 9px 12px; border-radius: 6px; background: var(--bgColor-accent-emphasis, #0969da); color: var(--fgColor-onEmphasis, #fff); text-decoration: none; }
+@media (max-width: 600px) { .sitePublished { padding: 20px; } }

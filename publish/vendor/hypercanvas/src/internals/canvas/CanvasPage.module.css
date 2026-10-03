@@ -74,6 +74,8 @@
 /* Selection outline is now handled by WidgetChrome.module.css (.widgetSlotSelected) */
 
 .canvasLogo {
+  padding: 0;
+  border: 0;
   width: 32px;
   height: 32px;
   background: var(--color-background-emphasis, #313131);
@@ -85,6 +87,7 @@
   flex-shrink: 0;
   text-decoration: none;
   transform: rotate(-1deg);
+  cursor: pointer;
 }
 
 .canvasTitle {

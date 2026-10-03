@@ -28,3 +28,11 @@
 .homeLink {
   color: var(--color-foreground-accent, #4493f8);
 }
+
+.homeLink {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}

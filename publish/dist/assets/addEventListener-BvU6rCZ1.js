@@ -1,1 +1,0 @@
-var v=Object.defineProperty;var t=(e,n)=>v(e,"name",{value:n,configurable:!0});function E(e,n,r,d){return e.addEventListener(n,r,d),()=>{e.removeEventListener(n,r,d)}}t(E,"addEventListener");export{E as a};

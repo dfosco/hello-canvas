@@ -7,7 +7,7 @@
   },
   "generator": {
     "name": "@dfosco/hypercanvas",
-    "version": "0.30.0"
+    "version": "0.31.0-beta.1"
   },
   "sourceFiles": [
     ".agents/terminal-agent.agent.md",
@@ -24,8 +24,14 @@
     "assets/canvas/snapshots/frames/3c43dbc09f79c61cc61300e67b534b20/manifest.json",
     "assets/canvas/snapshots/frames/5500e42236c765766de3e995bf5db3f5/beb6f319311b2042cc012887c9ae3eab-light.png",
     "assets/canvas/snapshots/frames/5500e42236c765766de3e995bf5db3f5/manifest.json",
+    "assets/canvas/snapshots/frames/5be49e2b5f547cb08c42c98914da068a/d3244210bbda0d03eec761c21f7f9d08-dark.png",
+    "assets/canvas/snapshots/frames/5be49e2b5f547cb08c42c98914da068a/d3244210bbda0d03eec761c21f7f9d08-light.png",
+    "assets/canvas/snapshots/frames/5be49e2b5f547cb08c42c98914da068a/manifest.json",
     "assets/canvas/snapshots/frames/6f522dad919e970152db524986800600/a8ee1c5b8057ceb7f671981a95174843-light.png",
     "assets/canvas/snapshots/frames/6f522dad919e970152db524986800600/manifest.json",
+    "assets/canvas/snapshots/frames/893d1d21cfcd4677b5391b2b9991b0d8/76224a098c06a9c127d6ddb03cc73096-dark.png",
+    "assets/canvas/snapshots/frames/893d1d21cfcd4677b5391b2b9991b0d8/76224a098c06a9c127d6ddb03cc73096-light.png",
+    "assets/canvas/snapshots/frames/893d1d21cfcd4677b5391b2b9991b0d8/manifest.json",
     "assets/canvas/snapshots/frames/e4ba882f625b3837384adb4a1890a9f9/737bb1288775c26fcb9a5c8ce2f95d9f-light.png",
     "assets/canvas/snapshots/frames/e4ba882f625b3837384adb4a1890a9f9/manifest.json",
     "assets/hello-canvas.css",
@@ -55,14 +61,6 @@
     "components/BaseUiTooltip/base-ui-tooltip.story.jsx",
     "components/ChartSet/ChartSet.jsx",
     "components/ChartSet/chart-set.story.jsx",
-    "components/ColorModeSwitcher/ColorModeSwitcher.jsx",
-    "components/ColorModeSwitcher/ColorModeSwitcher.module.css",
-    "components/ColorModeSwitcher/color-mode-switcher.story.jsx",
-    "components/GlobalNavigation/GlobalNavigation.jsx",
-    "components/GlobalNavigation/GlobalNavigation.module.css",
-    "components/GlobalNavigation/global-navigation.story.jsx",
-    "components/SidebarNavigation/SidebarNavigation.jsx",
-    "components/SidebarNavigation/sidebar-navigation.story.jsx",
     "components/SiloChart/SiloChart.jsx",
     "prototypes/main.folder/LooplineSignup/Branding.jsx",
     "prototypes/main.folder/LooplineSignup/SignupForm.jsx",

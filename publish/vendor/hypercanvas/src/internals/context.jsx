@@ -7,6 +7,7 @@ import { StoryboardContext } from './StoryboardContext.js'
 import usePrototypeReloadGuard from './hooks/usePrototypeReloadGuard.js'
 import useConfigurationReloadGuard from './hooks/useConfigurationReloadGuard.js'
 import { storyboardWs } from './storyboard-ws.js'
+import { openNotebookSidebar } from '../core/notebook/browserBridge.js'
 import styles from './FlowError.module.css'
 
 export { StoryboardContext }
@@ -46,7 +47,7 @@ class SectionErrorBoundary extends Component {
             <strong>{this.props.section || 'Section'} error</strong>
             {message}
           </div>
-          <a className={styles.homeLink} href="/">← Back to workspace</a>
+          <button className={styles.homeLink} type="button" onClick={() => openNotebookSidebar()}>Open notebook sidebar</button>
         </main>
       )
     }
@@ -522,7 +523,7 @@ function StoryboardProviderInner({ flowName, sceneName, recordName, recordParam,
           Tried to open{' '}
           <a href={currentUrl} title={currentUrl}>{truncatedUrl}</a>
         </p>
-        <a className={styles.homeLink} href="/">← Go to index page</a>
+        <button className={styles.homeLink} type="button" onClick={() => openNotebookSidebar()}>Open notebook sidebar</button>
       </main>
     )
   }
@@ -543,7 +544,7 @@ function StoryboardProviderInner({ flowName, sceneName, recordName, recordParam,
           Tried to open{' '}
           <a href={currentUrl} title={currentUrl}>{truncatedUrl}</a>
         </p>
-        <a className={styles.homeLink} href="/">← Go to index page</a>
+        <button className={styles.homeLink} type="button" onClick={() => openNotebookSidebar()}>Open notebook sidebar</button>
       </main>
     )
   }
@@ -573,7 +574,7 @@ function StoryboardProviderInner({ flowName, sceneName, recordName, recordParam,
           Tried to load{' '}
           <a href={currentUrl} title={currentUrl}>{truncatedUrl}</a>
         </p>
-        <a className={styles.homeLink} href="/">← Go to homepage</a>
+        <button className={styles.homeLink} type="button" onClick={() => openNotebookSidebar()}>Open notebook sidebar</button>
       </div>
     )
   }

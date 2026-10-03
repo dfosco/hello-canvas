@@ -44,7 +44,6 @@ import {
   redoEvent as redoEventApi,
   undoEvent as undoEventApi,
   updateCanvas,
-  updateFolderMeta,
   uploadImage,
   addConnector as addConnectorApi,
   removeConnector as removeConnectorApi,
@@ -52,9 +51,9 @@ import {
   batchOperations,
   getHubRoles,
 } from './canvasApi.js'
-import PageSelector from './PageSelector.jsx'
 import Icon from '../Icon.jsx'
 import ChromeSlot from '../../core/ui/ChromeSlot.jsx'
+import { openNotebookSidebar } from '../../core/notebook/browserBridge.js'
 import { stories as storyIndex } from 'virtual:storyboard-data-index'
 import styles from './CanvasPage.module.css'
 import ConnectorLayer from './ConnectorLayer.jsx'
@@ -713,13 +712,13 @@ const ChromeWrappedWidget = memo(function ChromeWrappedWidget({
 })
 
 /**
- * Editable canvas/folder title — always visible, double-click to edit in dev mode.
+ * Editable page title — always visible, double-click to edit in dev mode.
  */
-function CanvasTitleEditable({ canvasId, canvasMeta, canvas, isLocalDev }) {
+function CanvasTitleEditable({ canvasId, canvas, isLocalDev }) {
   const [editing, setEditing] = useState(false)
   const [titleValue, setTitleValue] = useState('')
   const inputRef = useRef(null)
-  const displayTitle = canvasMeta?.title || canvas?.title || canvasId.split('/').pop()
+  const displayTitle = canvas?.title || canvasId.split('/').pop()
 
   useEffect(() => {
     if (editing && inputRef.current) {
@@ -733,29 +732,7 @@ function CanvasTitleEditable({ canvasId, canvasMeta, canvas, isLocalDev }) {
     setEditing(false)
     if (!trimmed || trimmed === displayTitle) return
     try {
-      if (canvasId.includes('/')) {
-        const folder = canvasId.split('/')[0]
-        const result = await updateFolderMeta(folder, trimmed)
-        if (result?.renamed && result?.folder) {
-          // Folder was renamed on disk — navigate to new route
-          const pageName = canvasId.split('/').slice(1).join('/')
-          const newCanvasId = `${result.folder}/${pageName}`
-          const base = (import.meta.env?.BASE_URL || '/').replace(/\/$/, '')
-          const targetUrl = `${base}/canvas/${newCanvasId}`
-          if (import.meta.hot) {
-            const timer = setTimeout(() => { window.location.href = targetUrl }, 3000)
-            import.meta.hot.on('vite:beforeFullReload', () => {
-              clearTimeout(timer)
-              sessionStorage.setItem('sb-pending-navigate', targetUrl)
-            })
-          } else {
-            setTimeout(() => { window.location.href = targetUrl }, 1000)
-          }
-          return
-        }
-      } else {
-        await updateCanvas(canvasId, { settings: { title: trimmed } })
-      }
+      await updateCanvas(canvasId, { settings: { title: trimmed } })
       // Reload to pick up the updated metadata from the data plugin
       if (import.meta.hot) {
         const timer = setTimeout(() => { window.location.reload() }, 2000)
@@ -808,7 +785,7 @@ function CanvasTitleEditable({ canvasId, canvasMeta, canvas, isLocalDev }) {
  *
  * @param {{ canvasId: string }} props - Canvas name as indexed by the data plugin
  */
-export default function CanvasPage({ canvasId: canvasIdProp, name, siblingPages = [], canvasMeta = null }) {
+export default function CanvasPage({ canvasId: canvasIdProp, name }) {
   const canvasId = canvasIdProp || name || ''
   const { canvas, jsxExports, jsxError, loading } = useCanvas(canvasId)
   const isLocalDev = typeof window !== 'undefined' && window.__SB_LOCAL_DEV__ === true && !new URLSearchParams(window.location.search).has('prodMode')
@@ -898,14 +875,12 @@ export default function CanvasPage({ canvasId: canvasIdProp, name, siblingPages 
     return () => { cancelled = true }
   }, [canvasId])
 
-  // Track this canvas as a recent visit so it appears in the workspace
-  // Recent tab and the command palette regardless of how the user arrived
-  // (card click, command palette, direct URL, link from another canvas, …).
+  // Keep legacy recent tracking for compatibility with the retained workspace.
   useEffect(() => {
     if (!canvasId) return
-    const label = canvasMeta?.title || canvas?.title || name || canvasId.split('/').pop() || canvasId
+    const label = canvas?.title || name || canvasId.split('/').pop() || canvasId
     trackRecentArtifact('canvas', canvasId, label)
-  }, [canvasId, canvasMeta, canvas, name])
+  }, [canvasId, canvas, name])
 
   // Centralized list of component export names.
   // When jsxExports is available, use it (discovers new exports not yet in sources).
@@ -4211,33 +4186,13 @@ export default function CanvasPage({ canvasId: canvasIdProp, name, siblingPages 
       <ChromeSlot id="canvas:title" surface="canvas" ctx={{ canvasId }}>
         <div className={styles.canvasTitle}>
           <ChromeSlot id="canvas:home-link" surface="canvas" ctx={{ canvasId }}>
-            <a href={(import.meta.env?.BASE_URL || '/')} className={styles.canvasLogo} aria-label="Go to homepage">
+            <button type="button" onClick={() => openNotebookSidebar()} className={styles.canvasLogo} aria-label="Open notebook sidebar" data-testid="canvas-home-action">
               <Icon name="home" size={16} color="#fff" />
-            </a>
+            </button>
           </ChromeSlot>
-          {/*
-            * Solo-page canvases would render the same name twice (CanvasTitleEditable
-            * and PageSelector both surface the canvas/page label). Hide the leftmost
-            * title in that case — PageSelector becomes the sole label, and rename
-            * still works via its per-page edit affordance. When the PageSelector
-            * would not render at all (non-localDev with a single page), keep
-            * CanvasTitleEditable so the canvas is never anonymous.
-            */}
-          {(siblingPages.length > 1 || !isLocalDev) && (
-            <ChromeSlot id="canvas:title-editable" surface="canvas" ctx={{ canvasId }}>
-              <span style={{ display: 'contents' }}>
-                <CanvasTitleEditable
-                  canvasId={canvasId}
-                  canvasMeta={canvasMeta}
-                  canvas={canvas}
-                  isLocalDev={isLocalDev}
-                />
-              </span>
-            </ChromeSlot>
-          )}
-          <ChromeSlot id="canvas:page-selector" surface="canvas" ctx={{ canvasId }}>
+          <ChromeSlot id="canvas:title-editable" surface="canvas" ctx={{ canvasId }}>
             <span style={{ display: 'contents' }}>
-              <PageSelector currentName={canvasId} pages={siblingPages} isLocalDev={isLocalDev} />
+              <CanvasTitleEditable canvasId={canvasId} canvas={canvas} isLocalDev={isLocalDev} />
             </span>
           </ChromeSlot>
         </div>

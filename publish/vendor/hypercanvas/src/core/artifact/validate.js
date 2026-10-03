@@ -141,6 +141,25 @@ function validateSchema(type, values) {
   return errors
 }
 
+function prototypeSlugExists(prototypesDir, name) {
+  const visit = directory => {
+    let entries = []
+    try { entries = fs.readdirSync(directory, { withFileTypes: true }) } catch { return false }
+    for (const entry of entries) {
+      if (entry.isSymbolicLink() || !entry.isDirectory()) continue
+      const candidate = path.join(directory, entry.name)
+      if (entry.name === name) {
+        let children = []
+        try { children = fs.readdirSync(candidate) } catch { children = [] }
+        if (children.some(file => file.endsWith('.prototype.json')) || children.some(file => /^index\.(jsx|js|tsx|ts)$/.test(file))) return true
+      }
+      if (visit(candidate)) return true
+    }
+    return false
+  }
+  return visit(prototypesDir)
+}
+
 /**
  * Validate semantic constraints (uniqueness, references, reserved names).
  */
@@ -155,10 +174,11 @@ function validateSemantic(type, values, root) {
   // Uniqueness checks
   if (type === 'prototype') {
     const prototypesDir = contentDir(root, 'prototypes')
-    const targetDir = values.folder
+    const isNotebook = fs.existsSync(path.join(root, 'hypercanvas.notebook.json'))
+    const targetDir = !isNotebook && values.folder
       ? path.join(prototypesDir, `${values.folder}.folder`, values.name)
       : path.join(prototypesDir, values.name)
-    if (fs.existsSync(targetDir)) {
+    if (fs.existsSync(targetDir) || (isNotebook && prototypeSlugExists(prototypesDir, values.name))) {
       errors.push({ field: 'name', message: `Prototype "${values.name}" already exists${values.folder ? ` in folder "${values.folder}"` : ''}` })
     }
   }
@@ -166,7 +186,8 @@ function validateSemantic(type, values, root) {
   if (type === 'canvas') {
     const canvasDir = contentDir(root, 'canvas')
     const fileName = `${values.name}.canvas.jsonl`
-    const candidates = values.folder
+    const isNotebook = fs.existsSync(path.join(root, 'hypercanvas.notebook.json'))
+    const candidates = values.folder && !isNotebook
       ? [path.join(canvasDir, values.folder, fileName), path.join(canvasDir, `${values.folder}.folder`, fileName)]
       : [path.join(canvasDir, fileName)]
     if (candidates.some(candidate => fs.existsSync(candidate))) {

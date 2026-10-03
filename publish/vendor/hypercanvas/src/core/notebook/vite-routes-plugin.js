@@ -10,7 +10,7 @@ function routeFiles(root, pattern) {
   return globSync(pattern, {
     cwd: root,
     absolute: true,
-    ignore: ['**/_*.{jsx,tsx,mdx}', '**/drafts/**'],
+    ignore: ['**/_*.{jsx,tsx,mdx}'],
   }).filter((file) => fs.statSync(file).isFile())
 }
 

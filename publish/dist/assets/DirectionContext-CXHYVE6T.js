@@ -1,1 +1,0 @@
-var r=Object.defineProperty;var o=(t,n)=>r(t,"name",{value:n,configurable:!0});import{c as e}from"./vendor-react-PJCXJ5Vl.js";const c=e.createContext(void 0);function x(){return e.useContext(c)?.direction??"ltr"}o(x,"useDirection");export{x as u};

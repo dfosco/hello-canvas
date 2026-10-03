@@ -1,0 +1,1 @@
+var o=Object.defineProperty;var e=(a,t)=>o(a,"name",{value:t,configurable:!0});import{u as s,c,d as r}from"./vendor-react-Gz0JtFrV.js";function n(){const a=s(),t=c();return r.useEffect(()=>{t(`/${a.search||""}${a.hash||""}`,{replace:!0})},[a.hash,a.search,t]),null}e(n,"HomeCompatibilityRoute");export{n as default};

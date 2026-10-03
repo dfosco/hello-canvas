@@ -9,6 +9,7 @@
  */
 import { Component } from 'react'
 import { useRouteError } from 'react-router-dom'
+import { openNotebookSidebar } from '../core/notebook/browserBridge.js'
 import css from './PrototypeErrorBoundary.module.css'
 
 /**
@@ -51,7 +52,7 @@ export function AppErrorBoundary() {
         An unexpected error crashed the application. Try reloading the page.
       </p>
       <div className={css.actions}>
-        <a className={css.homeLink} href="/">← Back to workspace</a>
+        <button className={css.homeLink} type="button" onClick={() => openNotebookSidebar()}>Open notebook sidebar</button>
         <button className={css.retryBtn} onClick={() => window.location.reload()}>
           Reload page
         </button>
@@ -76,7 +77,7 @@ function ErrorDisplay({ error, hint }) {
       </div>
       {stack && <StackTrace stack={stack} />}
       <div className={css.actions}>
-        <a className={css.homeLink} href="/">← Back to workspace</a>
+        <button className={css.homeLink} type="button" onClick={() => openNotebookSidebar()}>Open notebook sidebar</button>
       </div>
     </main>
   )

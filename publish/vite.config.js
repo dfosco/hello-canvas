@@ -23,7 +23,7 @@ export default defineConfig(() => {
     define: { 'globalThis.__HYPERCANVAS_NOTEBOOK_PUBLICATION__': 'true' },
     resolve: {
         alias: {
-            '@': path.resolve(__dirname, './src'),
+            '@': fileURLToPath(new URL('./notebook-content/', import.meta.url)),
         },
         dedupe: ['react', 'react-dom'],
     },

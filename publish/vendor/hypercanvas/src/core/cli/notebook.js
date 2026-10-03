@@ -10,6 +10,7 @@ import process from 'node:process'
 import { initializeNotebook, inspectNotebook } from '../notebook/notebook.js'
 import { publishNotebookProject } from '../notebook/publishing.js'
 import { runNotebookRuntimeCommand } from './notebookRuntimeCommands.js'
+import { notebookCatalogHelp, runNotebookCatalogCommand } from './notebookCatalogCommands.js'
 import { die, jsonOut, parseSimpleArgs } from './cliHelpers.js'
 
 function help() {
@@ -19,6 +20,9 @@ function help() {
   Usage:
     storyboard notebook inspect [path] [--json]
     storyboard notebook init [path] [--id <id>] [--title <title>] [--json]
+    storyboard notebook pages [--json]
+    storyboard notebook navigation read [--json]
+    storyboard notebook navigation update --notebook-id <id> --generation <n> --expected-revision <sha256> --operation <json>
     storyboard notebook publish <source> [destination] [--mode default|external] [--json]
     storyboard notebook recent
     storyboard notebook open <path>
@@ -27,6 +31,7 @@ function help() {
 
   A Notebook contains canvas/, prototypes/, assets/, and portable metadata.
   Runtime state is kept in .storyboard/ and the application is never copied in.
+${notebookCatalogHelp}
 `)
 }
 
@@ -36,13 +41,15 @@ if (!subcommand || subcommand === 'help' || flags.help || flags.h) {
   help()
   process.exit(0)
 }
-if (!['inspect', 'init', 'publish', 'recent', 'open', 'create', 'close'].includes(subcommand)) die(`Unknown notebook subcommand: ${subcommand}`)
+if (!['inspect', 'init', 'publish', 'recent', 'open', 'create', 'close', 'pages', 'navigation'].includes(subcommand)) die(`Unknown notebook subcommand: ${subcommand}`)
 
 if (['recent', 'open', 'create', 'close'].includes(subcommand)) {
   runNotebookRuntimeCommand([subcommand, ...positional]).then(result => {
     if (result.help) console.log(result.help)
     else console.log(JSON.stringify(result, null, 2))
   }).catch(error => die(error.message))
+} else if (['pages', 'navigation'].includes(subcommand)) {
+  runNotebookCatalogCommand([subcommand, ...process.argv.slice(4)]).then(jsonOut).catch(error => die(error.message))
 } else {
 const root = path.resolve(positional[0] || process.cwd())
 try {

@@ -504,7 +504,7 @@ describe('folder grouping', () => {
     expect(code).not.toContain('"X/posts"')
   })
 
-  it('allows prototypes with same name in different folders without clash', () => {
+  it('keeps duplicate prototype-scoped flows out of the runtime index and reports their conflict', () => {
     mkdirSync(path.join(tmpDir, 'src', 'prototypes', 'A.folder', 'Settings'), { recursive: true })
     mkdirSync(path.join(tmpDir, 'src', 'prototypes', 'B.folder', 'Settings'), { recursive: true })
     writeFileSync(
@@ -516,9 +516,11 @@ describe('folder grouping', () => {
       JSON.stringify({ from: 'B' }),
     )
 
-    const plugin = createPlugin()
-    // Same flow name in same prototype name → duplicate collision
-    expect(() => plugin.load(RESOLVED_ID)).toThrow(/Duplicate flow "Settings\/default"/)
+    const discovery = buildDataDiscovery(tmpDir)
+    expect(discovery.flows['Settings/default']).toBeUndefined()
+    expect(discovery._dataScopeConflicts).toEqual([
+      expect.objectContaining({ name: 'Settings/default', suffix: 'flow', paths: expect.any(Array) }),
+    ])
   })
 
   it('throws on nested .folder/ directories', () => {
@@ -1335,23 +1337,18 @@ describe('parseDataFile — canvas path-based IDs', () => {
     expect(parseDataFile('src/canvas/_hidden/public.canvas.jsonl')).toBeNull()
   })
 
-  it('skips canvas files inside drafts/ dirs in prod (default)', () => {
-    expect(parseDataFile('src/canvas/drafts/scratch.canvas.jsonl')).toBeNull()
-    expect(parseDataFile('src/canvas/drafts/private/notes.canvas.jsonl')).toBeNull()
-  })
-
-  it('includes canvas files inside drafts/ dirs when includeDraft:true (dev)', () => {
-    const file = parseDataFile('src/canvas/drafts/scratch.canvas.jsonl', { includeDraft: true })
+  it('includes canvas files inside drafts/ dirs and preserves legacy routes', () => {
+    const file = parseDataFile('src/canvas/drafts/scratch.canvas.jsonl')
     expect(file).not.toBeNull()
     expect(file.name).toBe('drafts/scratch')
     // Public route drops `drafts/` so locally-gitignored canvases reuse the
     // same URL as their non-prefixed counterpart.
     expect(file.inferredRoute).toBe('/canvas/scratch')
-    const inDir = parseDataFile('src/canvas/drafts/private/notes.canvas.jsonl', { includeDraft: true })
+    const inDir = parseDataFile('src/canvas/drafts/private/notes.canvas.jsonl')
     expect(inDir).not.toBeNull()
     expect(inDir.name).toBe('drafts/private/notes')
     expect(inDir.inferredRoute).toBe('/canvas/private/notes')
-    const inSubdir = parseDataFile('src/canvas/dfosco-explorations/drafts/notes.canvas.jsonl', { includeDraft: true })
+    const inSubdir = parseDataFile('src/canvas/dfosco-explorations/drafts/notes.canvas.jsonl')
     expect(inSubdir).not.toBeNull()
     expect(inSubdir.name).toBe('dfosco-explorations/drafts/notes')
     expect(inSubdir.inferredRoute).toBe('/canvas/dfosco-explorations/notes')
@@ -1374,7 +1371,7 @@ describe('parseDataFile — canvas path-based IDs', () => {
   })
 })
 
-describe('buildDataDiscovery — drafts canvas-group meta', () => {
+describe('buildDataDiscovery — legacy drafts paths', () => {
   function writePage(dir, name, title) {
     const evt = { event: 'canvas_created', title, timestamp: Date.now() }
     writeFileSync(path.join(dir, `${name}.canvas.jsonl`), JSON.stringify(evt) + '\n')
@@ -1393,7 +1390,7 @@ describe('buildDataDiscovery — drafts canvas-group meta', () => {
       }),
     )
 
-    const discovery = buildDataDiscovery(tmpDir, { includeDraft: true })
+    const discovery = buildDataDiscovery(tmpDir)
     const page = discovery.canvases['drafts/security-vision/1-security-vision']
     expect(page).toBeTruthy()
     expect(page._group).toBe('security-vision')
@@ -1401,6 +1398,22 @@ describe('buildDataDiscovery — drafts canvas-group meta', () => {
     // "drafts/security-vision" while the group lookup used "security-vision".
     expect(page._canvasMeta).toBeTruthy()
     expect(page._canvasMeta.title).toBe('Security Vision')
+  })
+
+  it('includes prototype stories and data under drafts while reporting colliding data scopes', () => {
+    const publicProto = path.join(tmpDir, 'src', 'prototypes', 'Dashboard')
+    const draftProto = path.join(tmpDir, 'src', 'prototypes', 'drafts', 'Dashboard')
+    mkdirSync(publicProto, { recursive: true })
+    mkdirSync(draftProto, { recursive: true })
+    writeFileSync(path.join(publicProto, 'user.object.json'), JSON.stringify({ label: 'public' }))
+    writeFileSync(path.join(draftProto, 'user.object.json'), JSON.stringify({ label: 'draft' }))
+    writeFileSync(path.join(draftProto, 'Preview.story.jsx'), 'export function Preview() { return null }')
+
+    const discovery = buildDataDiscovery(tmpDir)
+    expect(discovery._dataScopeConflicts).toHaveLength(1)
+    expect(discovery._dataScopeConflicts[0].name).toBe('Dashboard/user')
+    expect(discovery.objects['Dashboard/user']).toBeUndefined()
+    expect(discovery.stories.Preview).toBeTruthy()
   })
 })
 
@@ -1414,7 +1427,7 @@ describe('buildDataDiscovery — content-only Notebook boundaries', () => {
     writeFileSync(path.join(sourceDir, 'welcome.canvas.jsonl'), event)
     writeFileSync(path.join(publishDir, 'welcome.canvas.jsonl'), event)
 
-    const discovery = buildDataDiscovery(tmpDir, { includeDraft: true, contentOnly: true })
+    const discovery = buildDataDiscovery(tmpDir, { contentOnly: true })
     expect(Object.keys(discovery.canvases)).toEqual(['welcome'])
   })
 })

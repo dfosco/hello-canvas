@@ -53,6 +53,7 @@ import { createHostToolsHandler } from '../host-tools/server.js'
 import { createHostToolsInstaller } from '../host-tools/installer.js'
 import { preflightHostTools } from '../host-tools/preflight.js'
 import { createPublishingHandler } from '../notebook/publishing-routes.js'
+import { createNotebookNavigationRoutes } from '../notebook/navigation-routes.js'
 import { createSiteRoutes } from '../site/routes.js'
 import { resolveSiteDevelopmentUrl } from '../site/contract.js'
 import { SiteStore } from '../site/site.js'
@@ -866,6 +867,11 @@ export default function storyboardServer({ notebookRuntime = null } = {}) {
         applicationRoot: root,
         getNotebookRoot: requireNotebookRoot,
         sendJson: sendJsonLogged,
+      }))
+      routeHandlers.set('notebook', createNotebookNavigationRoutes({
+        runtime: notebookRuntime,
+        sendJson: sendJsonLogged,
+        eventSender: sendEvent,
       }))
       const siteRoot = notebookRoot
       const siteRoutes = createSiteRoutes({

@@ -1,1 +1,0 @@
-var i=Object.defineProperty;var r=(e,t)=>i(e,"name",{value:t,configurable:!0});import{i as n}from"./useBaseUiId-CavJVjrK.js";function u(e){return n(19)?e:e?"true":void 0}r(u,"inertValue");export{u as i};

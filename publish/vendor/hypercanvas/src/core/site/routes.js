@@ -1,10 +1,12 @@
 import fs from 'node:fs'
+import path from 'node:path'
 import { SiteStore, SITE_CONFIG_FILE, normalizeSiteId, detectSiteConfiguration, siteIdForTitle, assertAvailableSiteRoot, assertExternalSiteRoot, updateSiteDescriptor } from './site.js'
 import { SiteRuntime, rebindSite } from './runtime.js'
 import { captureSiteFrame, readSiteCapture } from './capture.js'
 import { resolveSiteDevelopmentUrl } from './contract.js'
 import { createFilesystemGrants } from '../system/filesystem-grants.js'
 import { createSitePreviewMiddleware } from './proxy.js'
+import { registerNotebookPage, unregisterNotebookPage, updateNotebookPage } from '../notebook/notebook.js'
 
 export function createSiteRoutes({ root, sendJson, ptyRuntime = null, workspaceScripts = null, serviceResolver = null, resolveNotebookWorkspaceId = null, filesystemGrants = createFilesystemGrants(), eventSender = null }) {
   const store = new SiteStore(root)
@@ -20,12 +22,23 @@ export function createSiteRoutes({ root, sendJson, ptyRuntime = null, workspaceS
   // background startup failure even when no lifecycle route awaits readiness.
   runtime.ready.catch(() => {})
   const missing = id => { const directory = store.getBinding(id)?.root; try { return Boolean(directory && !fs.statSync(directory).isDirectory()) } catch { return Boolean(directory) } }
-  async function deleteSite(id) {
+  async function deleteSite(id, options = {}) {
     const siteId = normalizeSiteId(id)
-    if (!store.get(siteId)) return { success: false, error: `Site "${siteId}" not found` }
+    const site = store.get(siteId)
+    if (!site) return { success: false, error: `Site "${siteId}" not found` }
+    if (fs.existsSync(path.join(root, 'hypercanvas.notebook.json')) && options.confirmed !== true) {
+      return {
+        success: false,
+        code: 'CONFIRMATION_REQUIRED',
+        error: `Unregister Site "${site.title || siteId}"? Its external project will remain at ${store.getBinding(siteId)?.root || 'its current location'}.`,
+        affectedFiles: [SITE_CONFIG_FILE],
+        preservedProjectRoot: store.getBinding(siteId)?.root || null,
+      }
+    }
     await runtime.ready
     await runtime.stop(siteId)
     const existed = store.remove(siteId)
+    if (existed) unregisterNotebookPage(root, { siteId })
     return existed
       ? { success: true, deleted: siteId, files: [SITE_CONFIG_FILE] }
       : { success: false, error: `Site "${siteId}" not found` }
@@ -111,7 +124,11 @@ export function createSiteRoutes({ root, sendJson, ptyRuntime = null, workspaceS
           source: 'managed', root: directory, workspaceId, startCommand: command, status: 'stopped',
           ...(developmentBaseUrl ? { developmentBaseUrl } : {}),
         })
-        return sendJson(res, 201, { site: { ...site, binding } })
+        const page = registerNotebookPage(root, { type: 'site', siteId: id, title: site.title }, {
+          sectionId: body.sectionId || null,
+          insertAfterPageId: body.insertAfterPageId || null,
+        })
+        return sendJson(res, 201, { site: { ...site, binding }, ...(page ? { pageId: page.id } : {}) })
       }
       if (ctx.method === 'PATCH' && route.endsWith('/metadata')) {
         const id = normalizeSiteId(route.split('/')[1])
@@ -137,6 +154,7 @@ export function createSiteRoutes({ root, sendJson, ptyRuntime = null, workspaceS
         }
         if (Object.keys(bindingUpdates).length) store.upsertBinding(id, bindingUpdates)
         const binding = runtime.status(id)
+        if (body.title !== undefined) updateNotebookPage(root, { siteId: id }, { title: site.title })
         return sendJson(res, 200, { site: { ...site, binding, missing: missing(id) } })
       }
       if (ctx.method === 'POST' && route.endsWith('/metadata')) {
@@ -161,12 +179,13 @@ export function createSiteRoutes({ root, sendJson, ptyRuntime = null, workspaceS
           ...(body.productionBaseUrl !== undefined || body.deployUrl !== undefined ? { productionBaseUrl: body.productionBaseUrl ?? body.deployUrl } : {}),
         }))
         store.upsertBinding(id, { source: 'managed', root: directory, workspaceId, startCommand: command, status: 'stopped', developmentBaseUrl })
+        if (body.title !== undefined) updateNotebookPage(root, { siteId: id }, { title: store.get(id).title })
         return sendJson(res, 200, { site: { ...store.get(id), binding: runtime.status(id) } })
       }
       if (ctx.method === 'DELETE' && route !== '/') {
         const id = normalizeSiteId(route.slice(1))
-        const result = await deleteSite(id)
-        return sendJson(res, result.success ? 200 : 404, result)
+        const result = await deleteSite(id, body)
+        return sendJson(res, result.success ? 200 : result.code === 'CONFIRMATION_REQUIRED' ? 409 : 404, result)
       }
       if (ctx.method === 'GET' && route.startsWith('/')) {
         const id = normalizeSiteId(route.slice(1))
@@ -194,6 +213,7 @@ export function createSiteRoutes({ root, sendJson, ptyRuntime = null, workspaceS
           ...(startCommand !== undefined ? { startCommand } : {}),
         }
         if (Object.keys(bindingUpdates).length) store.upsertBinding(site.id, bindingUpdates)
+        registerNotebookPage(root, { type: 'site', siteId: site.id, title: site.title })
         return sendJson(res, 201, { site: { ...site, binding: runtime.status(site.id) } })
       }
       const id = normalizeSiteId(body.siteId || route.split('/')[1])

@@ -18,6 +18,8 @@ import { pagesWorkflowYaml, pagesUrl } from './publishing/github.js'
 import { runOperation, redactOutput } from './publishing/operations.js'
 import { createPublishingHandler } from './publishing-routes.js'
 import { __test as publishingTest } from './publishing.js'
+import { createDefaultNavigation } from './navigation.js'
+import { SiteStore } from '../site/site.js'
 
 const roots = []
 function temp(name) {
@@ -176,8 +178,7 @@ describe('Notebook publishing contract', () => {
     expect(app).toContain('@dfosco/hypercanvas/canvas/style.css')
     expect(router).toContain('virtual:hypercanvas-notebook-routes')
     expect(router).toContain('prototypeLayoutRoute')
-    expect(home).toContain("import HomePage from './home'")
-    expect(home).toContain("import WorkspacePage from './workspace'")
+    expect(home).toContain("import NotebookEntry from '@dfosco/hypercanvas/notebook-entry'")
     expect(config).toContain("process.env.HYPERCANVAS_NOTEBOOK_ROOT = path.resolve(__dirname, './notebook-content')")
     expect(config).toContain("const base = process.env.VITE_BASE_PATH || \"./\"")
     expect(fs.existsSync(path.join(output, 'notebook-content/prototypes/welcome/index.jsx'))).toBe(true)
@@ -235,6 +236,45 @@ describe('Notebook publishing contract', () => {
     ] })
     expect(publishedSites).not.toContain('/private/site/source')
     expect(publishedSites).not.toContain('private-token')
+  })
+
+  it('embeds Site page publication data for the regular Notebook runtime', async () => {
+    const notebook = temp('published-site-page')
+    const destination = temp('published-site-page-output')
+    initializeNotebook(notebook, { title: 'Published Site page' })
+    const store = new SiteStore(notebook)
+    store.upsert({
+      id: 'docs',
+      title: 'Documentation',
+      deployments: { production: { baseUrl: 'https://docs.example.test/' } },
+    })
+    store.upsertBinding('docs', {
+      source: 'managed',
+      root: '/private/site/source',
+      env: { SECRET_TOKEN: 'private-token' },
+    })
+    const manifestPath = path.join(notebook, NOTEBOOK_MANIFEST_FILE)
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
+    const pages = [{ id: 'site-docs', type: 'site', siteId: 'docs', title: 'Documentation', route: '/sites/docs' }]
+    manifest.pages = pages
+    manifest.navigation = createDefaultNavigation(pages)
+    fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`)
+
+    await materializeProject({ notebookRoot: notebook, destination, mode: 'external' })
+
+    const html = fs.readFileSync(path.join(destination, 'index.html'), 'utf8')
+    const payloadJson = html.match(/window\.__HYPERCANVAS_NOTEBOOK_PUBLICATION__=(.*?)<\/script>/)?.[1]
+    expect(payloadJson).toBeTruthy()
+    expect(JSON.parse(payloadJson).pages).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        id: 'site-docs',
+        type: 'site',
+        available: true,
+        productionUrl: 'https://docs.example.test/',
+      }),
+    ]))
+    expect(html).not.toContain('/private/site/source')
+    expect(html).not.toContain('private-token')
   })
 
   it('copies arbitrary Notebook directories, honors ignore rules, and only removes stale owned files', async () => {

@@ -1,10 +1,5 @@
 {
-  "providers": [
-    "prototypes",
-    "flows",
-    "canvases",
-    "pages"
-  ],
+  "providers": [],
   "ranking": "frecency",
   "sections": [
     {
@@ -14,7 +9,7 @@
       "toolIds": [
         {
           "id": "workspace",
-          "label": "Homepage"
+          "label": "Open notebook sidebar"
         },
         {
           "id": "theme",
@@ -95,35 +90,6 @@
     },
     {
       "id": "sep3",
-      "items": []
-    },
-    {
-      "id": "prototypes",
-      "title": "Prototypes",
-      "source": "prototypes",
-      "meta": { "strokeWeight": 1.6, "scale": 1.1 }
-    },
-    {
-      "id": "sep4",
-      "items": []
-    },
-    {
-      "id": "canvases",
-      "title": "Canvas",
-      "source": "canvases",
-      "meta": { "strokeWeight": 1.6, "scale": 1.1 }
-    },
-    {
-      "id": "sep5",
-      "items": []
-    },
-    {
-      "id": "stories",
-      "title": "Components",
-      "source": "stories"
-    },
-    {
-      "id": "sep6",
       "items": []
     },
     {

@@ -1,1 +1,0 @@
-var t=Object.defineProperty;var m=(E,a)=>t(E,"name",{value:a,configurable:!0});function e(E,a=Number.MIN_SAFE_INTEGER,r=Number.MAX_SAFE_INTEGER){return Math.max(a,Math.min(E,r))}m(e,"clamp");export{e as c};

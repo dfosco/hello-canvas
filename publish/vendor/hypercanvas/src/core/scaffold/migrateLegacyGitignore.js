@@ -140,6 +140,9 @@ const ORPHAN_REMOVED_LINES = [
   '.github/agents/_buddy.md',
   '.github/agents/terminal-agent.md',
   '.github/agents/prompt-agent.md',
+  'assets/canvas/images/drafts/',
+  'src/canvas/**/drafts/',
+  'src/prototypes/**/drafts/',
 ]
 
 const ORPHAN_ABSORBED_LINES = [

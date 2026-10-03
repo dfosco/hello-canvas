@@ -31,10 +31,10 @@ const AgentChatWidget = forwardRef(function AgentChatWidget({ id, props, onUpdat
     const url = browserAgentSessionUrl({
       agentId,
       widgetId: id,
-      canvasId: window.__storyboardCanvasBridgeState?.canvasId,
+      canvasId: props?.canvasId || window.__storyboardCanvasBridgeState?.canvasId,
     })
     if (url) window.open(url, '_blank', 'noopener,noreferrer')
-  }, [agentId, id])
+  }, [agentId, id, props?.canvasId])
 
   useImperativeHandle(ref, () => ({
     handleAction(actionId) {

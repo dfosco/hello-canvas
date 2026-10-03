@@ -62,8 +62,7 @@ function parseStoryExportNames(filePath) {
   } catch { return [] }
 }
 
-function parseDataFile(filePath, opts = {}) {
-  const { includeDraft = false } = opts
+function parseDataFile(filePath) {
   const base = path.basename(filePath)
 
   // Handle .canvas.jsonl files
@@ -72,7 +71,6 @@ function parseDataFile(filePath, opts = {}) {
     if (canvasJsonlMatch[1].startsWith('_')) return null
     const normalized = filePath.replace(/\\/g, '/')
     if (normalized.split('/').some(seg => seg.startsWith('_'))) return null
-    if (!includeDraft && normalized.split('/').includes('drafts')) return null
 
     const baseName = canvasJsonlMatch[1]
     let name = baseName
@@ -82,9 +80,8 @@ function parseDataFile(filePath, opts = {}) {
     const folderDirMatch = normalized.match(/(?:^|\/)src\/prototypes\/([^/]+)\.folder\//)
     const folderName = folderDirMatch ? folderDirMatch[1] : null
 
-    // Drop `drafts/` segments when building the public URL, so gitignored drafts canvases (inside `drafts/`) are reachable at the same route
-    // as their non-prefixed counterpart. The on-disk `name` and `id` keep
-    // the `drafts/` segment so they remain unique vs a sibling without it.
+    // Preserve legacy route aliases while retaining the source path in the
+    // page identity. Route collisions are surfaced by the Notebook catalog.
     const stripDraft = (p) => p.split('/').filter(seg => seg !== 'drafts').join('/')
     const canvasCheck = normalized.match(/(?:^|\/)src\/canvas\//)
     if (canvasCheck) {
@@ -113,20 +110,14 @@ function parseDataFile(filePath, opts = {}) {
       inferredRoute = '/canvas/' + stripDraft(name)
       inferredRoute = inferredRoute.replace(/\/+/g, '/').replace(/\/$/, '') || '/canvas'
     }
-    // Derive group: canvases sharing a directory form a group. Strip
-    // `drafts/` segments so a gitignored page (e.g.
-    // src/canvas/widget/drafts/v6.canvas.jsonl) lands in the same group as
-    // its public siblings (src/canvas/widget/v1.canvas.jsonl, …). The
-    // page itself keeps `drafts/` in its `id`/`name` so it stays unique
-    // and is still flagged `_isPrivate` for UI.
+    // Derive the legacy workspace group while preserving the old route alias.
     const groupBase = stripDraft(name)
     const groupSlashIdx = groupBase.lastIndexOf('/')
     const group = canvasFolderName || (groupSlashIdx > 0 ? groupBase.substring(0, groupSlashIdx) : null)
     // Extract a relative path for toCanvasId (it expects src/canvas/... or src/prototypes/...)
     const canvasIdInput = normalized.replace(/^.*?(src\/(?:canvas|prototypes)\/)/, '$1')
     const id = toCanvasId(canvasIdInput)
-    const isPrivate = normalized.split('/').includes('drafts')
-    return { name, suffix: 'canvas', ext: 'jsonl', folder: canvasFolderName || folderName, inferredRoute, id, group, isPrivate }
+    return { name, suffix: 'canvas', ext: 'jsonl', folder: canvasFolderName || folderName, inferredRoute, id, group }
   }
 
   // Handle canvas .meta.json files
@@ -148,17 +139,13 @@ function parseDataFile(filePath, opts = {}) {
     if (storyMatch[1].startsWith('_')) return null
     const normalized = filePath.replace(/\\/g, '/')
     if (normalized.split('/').some(seg => seg.startsWith('_'))) return null
-    // Skip stories inside `drafts/` dirs in prod (visible in dev only).
-    if (!includeDraft && normalized.split('/').includes('drafts')) return null
-
     const name = storyMatch[1]
     let inferredRoute = null
 
     // All stories route under /components/ regardless of directory location
     const canvasCheck = normalized.match(/(?:^|\/)src\/canvas\//)
     const componentsCheck = normalized.match(/(?:^|\/)src\/components\//)
-    // Drop `drafts/` segments when building the public URL so private stories
-    // reuse the same route as their sibling outside `drafts/`.
+    // Keep the preexisting route alias so collisions stay explicit.
     const stripDraft = (p) => p.split('/').filter(seg => seg !== 'drafts').join('/')
     if (canvasCheck) {
       const dirPath = normalized.substring(0, normalized.lastIndexOf('/'))
@@ -178,21 +165,18 @@ function parseDataFile(filePath, opts = {}) {
       inferredRoute = stripDraft(inferredRoute).replace(/\/+/g, '/').replace(/\/$/, '') || '/components'
     }
 
-    const isPrivate = normalized.split('/').includes('drafts')
-    return { name, suffix: 'story', ext: storyMatch[2], inferredRoute, isPrivate }
+    return { name, suffix: 'story', ext: storyMatch[2], inferredRoute }
   }
 
   const match = base.match(/^(.+)\.(flow|scene|object|record|prototype|folder|component)\.(jsonc?)$/)
   if (!match) return null
 
-  // Skip _-prefixed files (drafts/internal — never visible)
+  // Skip _-prefixed internal files.
   if (match[1].startsWith('_')) return null
 
   // Skip files inside _-prefixed directories
   const normalized = filePath.replace(/\\/g, '/')
   if (normalized.split('/').some(seg => seg.startsWith('_'))) return null
-  // Skip files inside `drafts/` directories in prod
-  if (!includeDraft && normalized.split('/').includes('drafts')) return null
   // Normalize .scene → .flow for backward compatibility
   const suffix = match[2] === 'scene' ? 'flow' : match[2]
   let name = match[1]
@@ -206,8 +190,7 @@ function parseDataFile(filePath, opts = {}) {
     if (folderName) {
       name = folderName
     }
-    const isPrivate = normalized.split('/').includes('drafts')
-    return { name, suffix, ext: match[3], isPrivate }
+    return { name, suffix, ext: match[3] }
   }
 
   // Prototype metadata files are keyed by their prototype directory name
@@ -217,14 +200,12 @@ function parseDataFile(filePath, opts = {}) {
     if (protoMatch) {
       name = protoMatch[1]
     }
-    const isPrivate = normalized.split('/').includes('drafts')
-    return { name, suffix, ext: match[3], folder: folderName, isPrivate }
+    return { name, suffix, ext: match[3], folder: folderName }
   }
 
   // Component metadata files are keyed by their component config basename.
   if (suffix === 'component') {
-    const isPrivate = normalized.split('/').includes('drafts')
-    return { name, suffix, ext: match[3], isPrivate }
+    return { name, suffix, ext: match[3] }
   }
 
   // Scope flows, records, and objects inside src/prototypes/{Name}/ with a prefix
@@ -345,7 +326,7 @@ function batchGitMetadata(root, filePaths) {
  * Scan the repo for all data files, validate uniqueness, return the index.
  */
 function buildIndex(root, opts = {}) {
-  const { includeDraft = false, contentOnly = false } = opts
+  const { contentOnly = false } = opts
   // Fixtures exercise the file formats but are not workspace artifacts. Indexing
   // them exposes read-only test canvases in the UI, where mutations then fail.
   const ignore = ['node_modules/**', 'dist/**', '.git/**', '.worktrees/**', 'worktrees/**', 'public/**', 'fixtures/**', 'desktop/resources/**', 'artifacts/**']
@@ -372,6 +353,7 @@ function buildIndex(root, opts = {}) {
 
   const index = { flow: {}, object: {}, record: {}, prototype: {}, folder: {}, component: {}, canvas: {}, 'canvas-meta': {}, story: {} }
   const seen = {} // "name.suffix" or "id.suffix" → absolute path (for duplicate detection)
+  const dataScopeConflicts = []
   const protoFolders = {} // prototype name → folder name (for injection)
   const flowRoutes = {} // flow name → inferred route (for _route injection)
   const canvasRoutes = {} // canvas name → inferred route
@@ -379,10 +361,9 @@ function buildIndex(root, opts = {}) {
   const canvasNameCount = {} // canvas basename → count (for ambiguity detection)
   const canvasGroups = {} // canvas name → group name (shared folder prefix)
   const storyRoutes = {} // story name → inferred route
-  const privateBySuffix = {} // suffix → { name|id: true } for drafts-only entries
 
   for (const relPath of [...files, ...canvasFiles, ...canvasMetaFiles, ...storyFiles]) {
-    const parsed = parseDataFile(contentOnly && !relPath.startsWith('src/') ? `src/${relPath}` : relPath, { includeDraft })
+    const parsed = parseDataFile(contentOnly && !relPath.startsWith('src/') ? `src/${relPath}` : relPath)
     if (!parsed) continue
 
     // Canvas files use path-based IDs for dedup; others use basename
@@ -392,6 +373,13 @@ function buildIndex(root, opts = {}) {
     const absPath = path.resolve(root, relPath)
 
     if (seen[dedupKey]) {
+      if (['flow', 'object', 'record'].includes(parsed.suffix) && parsed.name.includes('/')) {
+        dataScopeConflicts.push({ key: dedupKey, name: parsed.name, suffix: parsed.suffix, paths: [seen[dedupKey], absPath] })
+        delete index[parsed.suffix][parsed.name]
+        delete flowRoutes[parsed.name]
+        seen[dedupKey] = absPath
+        continue
+      }
       const hint = parsed.suffix === 'folder'
           ? '  Folder names must be unique across the project.'
           : parsed.suffix === 'canvas'
@@ -452,15 +440,9 @@ function buildIndex(root, opts = {}) {
       storyRoutes[parsed.name] = parsed.inferredRoute
     }
 
-    // Track private (~-prefixed) status for prototypes, canvases and stories
-    if (parsed.isPrivate) {
-      const key = parsed.suffix === 'canvas' ? (parsed.id || parsed.name) : parsed.name
-      privateBySuffix[parsed.suffix] ||= {}
-      privateBySuffix[parsed.suffix][key] = true
-    }
   }
 
-  return { index, protoFolders, flowRoutes, canvasRoutes, canvasAliases, canvasGroups, storyRoutes, privateBySuffix }
+  return { index, protoFolders, flowRoutes, canvasRoutes, canvasAliases, canvasGroups, storyRoutes, dataScopeConflicts }
 }
 
 /**
@@ -912,7 +894,7 @@ function viteModulePath(absPath, moduleRoot) {
   return '/@fs/' + path.resolve(absPath).replace(/\\/g, '/')
 }
 
-function buildDiscoveryResult({ index, protoFolders, flowRoutes, canvasRoutes, canvasAliases, canvasGroups, storyRoutes, privateBySuffix = {} }, root, moduleRoot = root) {
+function buildDiscoveryResult({ index, protoFolders, flowRoutes, canvasRoutes, canvasAliases, canvasGroups, storyRoutes, dataScopeConflicts = [] }, root, moduleRoot = root) {
   const discovery = {
     flows: {},
     objects: {},
@@ -1083,11 +1065,6 @@ function buildDiscoveryResult({ index, protoFolders, flowRoutes, canvasRoutes, c
       }
       parsed = resolveTemplateVars(parsed, templateVars)
 
-      // Flag private (~-prefixed) entries so the workspace can de-emphasize them
-      if (privateBySuffix[suffix]?.[name]) {
-        parsed = { ...parsed, _isPrivate: true }
-      }
-
       if (suffix === 'prototype') {
         discovery.prototypeKnobs[name] = extractPrototypeKnobs(parsed)
       }
@@ -1110,13 +1087,11 @@ function buildDiscoveryResult({ index, protoFolders, flowRoutes, canvasRoutes, c
     if (storyRoutes[name]) {
       storyMeta._route = storyRoutes[name]
     }
-    if (privateBySuffix.story?.[name]) {
-      storyMeta._isPrivate = true
-    }
     discovery.stories[name] = storyMeta
   }
 
   discovery._resolvedFlowRoutes = resolvedFlowRoutes
+  if (dataScopeConflicts.length) discovery._dataScopeConflicts = dataScopeConflicts
   return discovery
 }
 
@@ -1381,7 +1356,6 @@ export default function storyboardDataPlugin({ notebookRuntime = null } = {}) {
   let contentOnly = false
   let buildResult = null
   // Set by configResolved — true during `vite` (dev), false during `vite build`.
-  let includeDraft = true
   let isBuild = false
   let outDir = ''
 
@@ -1401,7 +1375,7 @@ export default function storyboardDataPlugin({ notebookRuntime = null } = {}) {
       contentOnly = activeRoot !== root
       buildResult = null
     }
-    if (!buildResult) buildResult = buildIndex(discoveryRoot, { includeDraft, contentOnly })
+    if (!buildResult) buildResult = buildIndex(discoveryRoot, { contentOnly })
     return buildResult
   }
 
@@ -1443,10 +1417,6 @@ export default function storyboardDataPlugin({ notebookRuntime = null } = {}) {
         ? (notebookRuntime.status().root || root)
         : (process.env.HYPERCANVAS_NOTEBOOK_ROOT ? path.resolve(process.env.HYPERCANVAS_NOTEBOOK_ROOT) : root)
       contentOnly = discoveryRoot !== root
-      // Prototypes/canvases inside `drafts/` dirs are drafts-only: indexed
-      // during dev so users can hit their routes, excluded from production
-      // builds so private experiments don't ship.
-      includeDraft = config.command === 'serve'
       isBuild = config.command === 'build'
       outDir = path.resolve(root, config.build?.outDir || 'dist')
 
@@ -1664,7 +1634,7 @@ export default function storyboardDataPlugin({ notebookRuntime = null } = {}) {
           || path.isAbsolute(relative)
         if (contentOnly && outsideDiscoveryRoot) return null
         const normalized = relative.replace(/\\/g, '/')
-        return parseDataFile(contentOnly ? `src/${normalized}` : normalized, { includeDraft })
+        return parseDataFile(contentOnly ? `src/${normalized}` : normalized)
       }
 
       const triggerFullReload = () => {
@@ -1695,7 +1665,6 @@ export default function storyboardDataPlugin({ notebookRuntime = null } = {}) {
           if (parsed.inferredRoute) result._route = parsed.inferredRoute
           const folderDirMatch = path.relative(discoveryRoot, absPath).replace(/\\/g, '/').match(/(?:^|\/)(?:src\/)?(?:prototypes|canvas)\/([^/]+)\.folder\//)
           if (folderDirMatch) result._folder = folderDirMatch[1]
-          if (parsed.isPrivate) result._isPrivate = true
           return result
         } catch {
           return null

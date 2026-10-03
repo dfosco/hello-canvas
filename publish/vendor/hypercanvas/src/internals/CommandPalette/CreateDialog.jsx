@@ -47,6 +47,7 @@ export default function CreateDialog({ type, basePath, initialValues = null, onC
       <CreateArtifactForm
         type={type}
         basePath={basePath}
+        initialValues={initialValues}
         onClose={onClose}
         hideHeader
       />

@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import CoreUIBar from './CoreUIBar.jsx'
-import { _resetSidePanel } from '../stores/sidePanelStore.js'
 import { _resetToolbarConfig } from '../stores/toolbarConfigStore.js'
 
 vi.mock('./RunningSitesPanel.jsx', () => ({ default: () => <div data-testid="running-sites-panel" /> }))
@@ -24,7 +23,6 @@ const toolbarConfig = {
 
 describe('CoreUIBar side panel mounting', () => {
   beforeEach(() => {
-    _resetSidePanel()
     _resetToolbarConfig()
     vi.stubGlobal('requestAnimationFrame', callback => {
       callback()
@@ -34,18 +32,21 @@ describe('CoreUIBar side panel mounting', () => {
 
   afterEach(() => {
     cleanup()
-    _resetSidePanel()
     _resetToolbarConfig()
     vi.unstubAllGlobals()
   })
 
-  it('mounts the Sites panel when a tool opens it even without sidepanel menu metadata', async () => {
+  it('opens and focuses the Notebook sidebar from the Sites tool', async () => {
+    const onOpenSidebar = vi.fn()
+    window.addEventListener('storyboard:open-notebook-sidebar', onOpenSidebar)
     render(<CoreUIBar toolbarConfig={toolbarConfig} />)
 
     expect(screen.queryByRole('complementary', { name: 'Side panel' })).toBeNull()
     fireEvent.click(await screen.findByRole('button', { name: 'Sites' }))
 
-    expect(await screen.findByRole('complementary', { name: 'Side panel' })).toBeTruthy()
-    expect(screen.getByTestId('running-sites-panel')).toBeTruthy()
+    expect(onOpenSidebar).toHaveBeenCalledTimes(1)
+    expect(onOpenSidebar.mock.calls[0][0].detail).toEqual({ focusType: 'site' })
+    expect(screen.queryByTestId('running-sites-panel')).toBeNull()
+    window.removeEventListener('storyboard:open-notebook-sidebar', onOpenSidebar)
   })
 })

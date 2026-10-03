@@ -23,7 +23,7 @@ import {
 import { widgetTypes, isWidgetFlagEnabled } from '../canvas/widgets/widgetConfig.js'
 import CreateDialog from './CreateDialog.jsx'
 import { isTauriAvailable } from '../../core/notebook/tauri-bridge.js'
-import { isBrowserCoreMode } from '../../core/notebook/browserBridge.js'
+import { coreRequestJson, isBrowserCoreMode, openNotebookSidebar } from '../../core/notebook/browserBridge.js'
 import WidgetArtifactDialog from './WidgetArtifactDialog.jsx'
 
 // Widget types that need artifact selection BEFORE creation (via dialog).
@@ -838,6 +838,17 @@ function buildToolsSection(section, prefix, onNavigateToPage) {
       continue
     }
 
+    if (tool.inlineAction === 'open-notebook-sidebar') {
+      items.push({
+        id: `cfg:${section.id}:${toolId}`,
+        children: label,
+        keywords: [label, toolId, 'home', 'pages', 'sidebar'],
+        showType: false,
+        onClick: () => openNotebookSidebar({ focusType: tool.focusType || null }),
+      })
+      continue
+    }
+
     if (tool.render === 'link' && tool.url) {
       const resolvedUrl = tool.url.startsWith('/') ? prefix + tool.url : tool.url
       items.push({
@@ -1060,8 +1071,8 @@ function buildPaletteItems(basePath, onCreateAction, onNavigateToPage) {
     keywords: ['settings', 'preferences', 'config', 'configuration'],
     onClick: () => document.dispatchEvent(new CustomEvent('storyboard:open-settings')),
   }
-  const homepageGroup = groups.find(group => group.items?.some(item => item.children === 'Go to workspace' || item.children === 'Homepage'))
-  const homepageIndex = homepageGroup?.items?.findIndex(item => item.children === 'Go to workspace' || item.children === 'Homepage') ?? -1
+  const homepageGroup = groups.find(group => group.items?.some(item => ['Go to workspace', 'Homepage', 'Open notebook sidebar'].includes(item.children)))
+  const homepageIndex = homepageGroup?.items?.findIndex(item => ['Go to workspace', 'Homepage', 'Open notebook sidebar'].includes(item.children)) ?? -1
   if (homepageGroup && homepageIndex >= 0) {
     homepageGroup.items.splice(homepageIndex + 1, 0, settingsItem)
   } else {
@@ -1079,6 +1090,7 @@ export default function StoryboardCommandPalette({ basePath }) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
   const [items, setItems] = useState([])
+  const [notebookPages, setNotebookPages] = useState([])
   const [toolMenus, setToolMenus] = useState([])
   const [authorIndex, setAuthorIndex] = useState(new Map())
   const [hiddenFromSearchIds, setHiddenFromSearchIds] = useState(new Set())
@@ -1088,6 +1100,15 @@ export default function StoryboardCommandPalette({ basePath }) {
   const [widgetArtifactType, setWidgetArtifactType] = useState(null)
   const [currentTheme, setCurrentTheme] = useState(() => getTheme())
   const [refreshKey, setRefreshKey] = useState(0)
+
+  useEffect(() => {
+    if (!open || !isBrowserCoreMode()) return undefined
+    const controller = new AbortController()
+    coreRequestJson('/_storyboard/notebook/pages', { cache: 'no-store', signal: controller.signal })
+      .then(data => { if (!controller.signal.aborted) setNotebookPages(Array.isArray(data.pages) ? data.pages : []) })
+      .catch(() => { if (!controller.signal.aborted) setNotebookPages([]) })
+    return () => controller.abort()
+  }, [open])
 
   // Track modifier keys for link items (cmd/ctrl → new tab, alt → copy link).
   // Updated from the most recent keyboard/mouse event via a capturing listener
@@ -1329,6 +1350,37 @@ export default function StoryboardCommandPalette({ basePath }) {
     return result
   }, [items])
 
+  const searchedPageItems = useMemo(() => {
+    const query = search.trim().toLowerCase()
+    if (activePage !== 'root' || !query) return []
+    const base = (basePath || '/').replace(/\/+$/, '')
+    const prefix = base === '/' ? '' : base
+    const pageItems = notebookPages
+      .filter(page => `${page.title || ''} ${page.id || ''} ${page.type || ''} ${page.status || ''}`.toLowerCase().includes(query))
+      .map(page => {
+        const params = new URLSearchParams()
+        if (page.diagnostics?.some(item => item.code === 'PAGE_ROUTE_CONFLICT')) params.set('_notebookPage', page.id)
+        const route = `${prefix}${page.route || '/'}`
+        return {
+          id: `notebook-page:${page.id}`,
+          label: page.title || page.id,
+          type: page.type,
+          unavailable: page.available === false,
+          url: `${route}${params.size ? `?${params}` : ''}`,
+          page,
+        }
+      })
+    const componentItems = listStories()
+      .filter(name => `${name} component story`.toLowerCase().includes(query))
+      .map(name => ({
+        id: `notebook-component:${name}`,
+        label: name,
+        type: 'component',
+        url: `${prefix}${getStoryData(name)?._route || `/components/${name}`}`,
+      }))
+    return [...pageItems, ...componentItems]
+  }, [activePage, basePath, notebookPages, search])
+
   // Build search value string from keywords array.
   // `index_tags` (array) are prepended so they get prefix-match scoring
   // (highest tier in scoreMatch), allowing per-entry boosting in search
@@ -1448,6 +1500,27 @@ export default function StoryboardCommandPalette({ basePath }) {
                 ))}
               </Command.Group>
             ))}
+
+            {searchedPageItems.length > 0 && (
+              <Command.Group heading="Notebook pages and components">
+                {searchedPageItems.map(item => (
+                  <Command.Item
+                    key={item.id}
+                    value={`${item.label} ${item.type || ''} ${item.page?.id || ''}`}
+                    onSelect={() => {
+                      if (item.page) trackRecent(item.page.type, item.page.id, item.label)
+                      window.location.href = item.url
+                    }}
+                  >
+                    <ItemIcon type={item.type} />
+                    <span style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                      <span>{item.label}</span>
+                      {item.unavailable && <small>Unavailable</small>}
+                    </span>
+                  </Command.Item>
+                ))}
+              </Command.Group>
+            )}
 
             {/* Main config-driven groups */}
             {cleanedItems.map((list) => (

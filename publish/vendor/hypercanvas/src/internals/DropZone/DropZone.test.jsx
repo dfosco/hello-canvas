@@ -14,6 +14,10 @@ vi.mock('../../core/notebook/tauri-bridge.js', () => ({
   }),
 }))
 
+vi.mock('../hooks/useFeatureFlag.js', () => ({
+  useFeatureFlag: () => true,
+}))
+
 import NotebookDialog from '../NotebookDialog/NotebookDialog.jsx'
 import DropZone from './DropZone.jsx'
 import { __resetDropRouter } from '../dragDrop/dropRouter.js'

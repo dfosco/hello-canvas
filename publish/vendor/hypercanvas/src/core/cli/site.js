@@ -1,14 +1,17 @@
+import fs from 'node:fs'
+import path from 'node:path'
 import { SiteStore, SITE_CONFIG_FILE, detectSiteConfiguration, siteIdForTitle, assertAvailableSiteRoot, updateSiteDescriptor } from '../site/site.js'
 import { SiteRuntime, discoverSiteServer, rebindSite } from '../site/runtime.js'
 import { getPaseoConnection, ensurePaseoWorkspaceForRoot } from '../canvas/paseo-runtime-client.js'
 import { initPaseoTerminalRuntime } from '../canvas/paseo-terminal-runtime.js'
 import { die, jsonOut, parseSimpleArgs } from './cliHelpers.js'
 import { resolveNotebookRoot } from './filesystemRoots.js'
+import { registerNotebookPage, unregisterNotebookPage, updateNotebookPage } from '../notebook/notebook.js'
 
 const subcommand = process.argv[3]
 const { positional, flags } = parseSimpleArgs(process.argv.slice(4))
 if (!subcommand || flags.help || flags.h) {
-  console.log('Usage: storyboard site list | detect <project> | create <external-root> --title <name> [--description <text>] [--development-base-url <url>] [--start-command <command>] [--production-base-url <url>] | metadata <id> [--title <title>] [--description <text>] [--development-base-url <url>] [--start-command <command>] [--production-base-url <url>] [--root <external-directory> for rebind] | add <id> [--title <title>] [--description <text>] [--development-base-url <url>] [--root <external-project>] [--start-command <command>] [--production-base-url <url>] | remove <id> | status <id> | logs <id> | start <id> | run <id> (alias for start) | stop <id> | restart <id> --confirmed | discover <id> | rebind <id> <url> | capture <id> [--route <route>] [--width <px>] [--height <px>]')
+  console.log('Usage: storyboard site list | detect <project> | create <external-root> --title <name> [--description <text>] [--development-base-url <url>] [--start-command <command>] [--production-base-url <url>] | metadata <id> [--title <title>] [--description <text>] [--development-base-url <url>] [--start-command <command>] [--production-base-url <url>] [--root <external-directory> for rebind] | add <id> [--title <title>] [--description <text>] [--development-base-url <url>] [--root <external-project>] [--start-command <command>] [--production-base-url <url>] | remove <id> --confirmed | status <id> | logs <id> | start <id> | run <id> (alias for start) | stop <id> | restart <id> --confirmed | discover <id> | rebind <id> <url> | capture <id> [--route <route>] [--width <px>] [--height <px>]')
   process.exit(0)
 }
 
@@ -135,12 +138,16 @@ try {
   } else if (subcommand === 'remove' || subcommand === 'delete') {
     const id = positional[0]
     if (!id || !store.get(id)) die(`Site not found: ${id}`)
+    if (fs.existsSync(path.join(notebookRoot, 'hypercanvas.notebook.json')) && flags.confirmed !== true) {
+      die(`Removing Site "${id}" unregisters it from ${SITE_CONFIG_FILE} and leaves its external project intact. Re-run with --confirmed after reviewing this file.`)
+    }
     const binding = store.getBinding(id)
     const ptyRuntime = binding?.terminalSessionId ? await initPaseoTerminalRuntime(notebookRoot) : null
     const runtime = new SiteRuntime(store, { ptyRuntime, requirePtyRuntime: false, reconcileOnStart: false })
     try {
       await runtime.stop(id)
       store.remove(id)
+      unregisterNotebookPage(notebookRoot, { siteId: id })
       result = { success: true, deleted: id, files: [SITE_CONFIG_FILE] }
     } finally {
       await runtime.close()
@@ -202,6 +209,10 @@ try {
     }
   }
   else die(`Unknown site subcommand: ${subcommand}`)
+  if (result?.site?.id) {
+    if (subcommand === 'metadata') updateNotebookPage(notebookRoot, { siteId: result.site.id }, { title: result.site.title })
+    else if (['create', 'add'].includes(subcommand)) registerNotebookPage(notebookRoot, { type: 'site', siteId: result.site.id, title: result.site.title })
+  }
   if (flags.json) jsonOut(result)
   else console.log(JSON.stringify(result, null, 2))
 } catch (error) { die(error.message) }

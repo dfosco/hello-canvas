@@ -119,7 +119,6 @@ function useGitHubUser() {
 const STARRED_KEY = 'sb-workspace-starred'
 const GROUP_BY_FOLDERS_KEY = 'sb-workspace-group-folders'
 const COLLAPSED_FOLDERS_KEY = 'sb-workspace-collapsed-folders'
-const SHOW_DRAFTS_KEY = 'sb-workspace-show-drafts'
 
 function readJSON(key, fallback) {
   try { return JSON.parse(localStorage.getItem(key)) || fallback }
@@ -1459,7 +1458,7 @@ function WorkspaceImpl({
         externalUrl: null,
         folder: null,
         description: null,
-        isPrivate: !!data._isPrivate || name.split('/').includes('drafts'),
+        isPrivate: !!data._isPrivate,
       })
     }
 
@@ -1526,9 +1525,6 @@ function WorkspaceImpl({
       return new Set(Array.isArray(parsed) ? parsed : [])
     } catch { return new Set() }
   })
-  const [showDrafts, setShowDrafts] = useState(() => {
-    try { return localStorage.getItem(SHOW_DRAFTS_KEY) !== 'false' } catch { return true }
-  })
   const [hiddenItems, setHiddenItems] = useState(new Set())
   const { starred, toggle: toggleStar } = useStarred()
   const recentIds = useRecent()
@@ -1552,9 +1548,8 @@ function WorkspaceImpl({
   const navFiltered = useMemo(() => {
     let filtered = activeNav === 'all' ? allItems : allItems.filter(i => i.type === TYPE_MAP[activeNav])
     if (hiddenItems.size > 0) filtered = filtered.filter(i => !hiddenItems.has(i.id))
-    if (!showDrafts) filtered = filtered.filter(i => !i.isPrivate)
     return filtered
-  }, [allItems, activeNav, hiddenItems, showDrafts])
+  }, [allItems, activeNav, hiddenItems])
 
   // Filter by tab
   const items = useMemo(() => {
@@ -1593,7 +1588,7 @@ function WorkspaceImpl({
     const folders = Object.entries(folderItems).map(([dirName, fItems]) => ({
       dirName,
       name: folderMeta[dirName]?.name || dirName,
-      isPrivate: !!folderMeta[dirName]?.isPrivate || dirName === 'drafts',
+      isPrivate: !!folderMeta[dirName]?.isPrivate,
       items: fItems,
     }))
     folders.sort((a, b) => {
@@ -1618,14 +1613,6 @@ function WorkspaceImpl({
       if (next.has(dirName)) next.delete(dirName)
       else next.add(dirName)
       try { localStorage.setItem(COLLAPSED_FOLDERS_KEY, JSON.stringify([...next])) } catch { /* empty */ }
-      return next
-    })
-  }, [])
-
-  const toggleShowDrafts = useCallback(() => {
-    setShowDrafts(prev => {
-      const next = !prev
-      try { localStorage.setItem(SHOW_DRAFTS_KEY, String(next)) } catch { /* empty */ }
       return next
     })
   }, [])
@@ -1932,15 +1919,6 @@ function WorkspaceImpl({
                   onChange={toggleGrouping}
                 />
                 Group by folders
-              </label>
-              <label className={css.groupByFolders}>
-                <input
-                  type="checkbox"
-                  className={css.groupByFoldersCheckbox}
-                  checked={showDrafts}
-                  onChange={toggleShowDrafts}
-                />
-                Show drafts
               </label>
               {activeNav === 'sites' && sites.length > 0 && <button type="button" className={css.siteCreateButton} onClick={createSite}>
                 <PlusIcon size={14} /> Add Site

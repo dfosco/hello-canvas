@@ -49,7 +49,7 @@ function dispatchGateActivation(widgetId) {
   }))
 }
 
-afterEach(() => { vi.unstubAllGlobals(); vi.clearAllMocks(); delete window.__SB_LOCAL_DEV__ })
+afterEach(() => { vi.unstubAllGlobals(); vi.clearAllMocks(); delete window.__SB_LOCAL_DEV__; delete window.__HYPERCANVAS_NOTEBOOK_PUBLICATION__ })
 
 beforeEach(() => {
   // Authoring runtime flag: enables the live preview path under test.
@@ -270,8 +270,46 @@ it('renders published Site Frames as a poster linked to the production URL', asy
   }} />)
   const link = getByRole('link', { name: 'Docs' })
   expect(link.getAttribute('href')).toBe('https://example.com/docs/guide')
-  expect(link.querySelector('img')?.getAttribute('src')).toBe('assets/canvas/snapshots/frames/abc/light.png')
+  expect(link.querySelector('img')?.getAttribute('src')).toBe('/assets/canvas/snapshots/frames/abc/light.png')
   expect(() => getByRole('button', { name: 'Click to interact' })).toThrow()
+})
+
+it('uses the exported page frame descriptor for snapshot and link-only publication', () => {
+  delete window.__SB_LOCAL_DEV__
+  window.__HYPERCANVAS_NOTEBOOK_PUBLICATION__ = {
+    pages: [{
+      id: 'canvas-one', type: 'canvas', route: '/',
+      siteFrames: {
+        'site-frame-exported': {
+          available: true,
+          siteId: 'docs',
+          route: 'guide',
+          title: 'Docs',
+          snapshot: 'assets/canvas/snapshots/frames/abc/light.png',
+          openUrl: 'https://example.com/docs/guide',
+        },
+      },
+    }],
+  }
+  const { getByRole } = render(<SiteFrame id="site-frame-exported" props={{ siteId: 'docs', route: 'guide', title: 'Docs' }} />)
+  const link = getByRole('link', { name: 'Docs' })
+  expect(link.getAttribute('href')).toBe('https://example.com/docs/guide')
+  expect(link.querySelector('img')?.getAttribute('src')).toBe('/assets/canvas/snapshots/frames/abc/light.png')
+})
+
+it('renders a published link-only Site Frame when no snapshot exists', () => {
+  delete window.__SB_LOCAL_DEV__
+  window.__HYPERCANVAS_NOTEBOOK_PUBLICATION__ = {
+    pages: [{
+      id: 'canvas-one', type: 'canvas', route: '/',
+      siteFrames: {
+        'site-frame-link': { available: true, siteId: 'docs', route: 'guide', openUrl: 'https://example.com/docs/guide' },
+      },
+    }],
+  }
+  const { getByRole, queryByRole } = render(<SiteFrame id="site-frame-link" props={{ siteId: 'docs', route: 'guide', title: 'Docs' }} />)
+  expect(getByRole('link', { name: 'Open production site' }).getAttribute('href')).toBe('https://example.com/docs/guide')
+  expect(queryByRole('img')).toBeNull()
 })
 
 it('surfaces a failed capture as an error state instead of an eternal capture indicator', async () => {

@@ -10,6 +10,7 @@ import { validateArtifact, resolvePrototypeDir, toPascalCase } from './validate.
 import { buildTemplateRecipeIndex, resolveTemplateRecipeEntry } from '../workshop/features/templateIndex.js'
 import { renderPartialIndexJsx, findComponentFile, readWorkshopPartials } from '../workshop/features/partialRender.js'
 import { SiteStore, SITE_CONFIG_FILE, updateSiteDescriptor } from '../site/site.js'
+import { inspectNotebook, registerNotebookPage, unregisterNotebookPage, updateNotebookPage } from '../notebook/notebook.js'
 
 function contentDir(root, name) {
   return fs.existsSync(path.join(root, 'hypercanvas.notebook.json'))
@@ -157,13 +158,45 @@ function canvasFiles(root, filePath) {
   return files
 }
 
+function notebookRoot(root) {
+  return fs.existsSync(path.join(root, 'hypercanvas.notebook.json'))
+}
+
+function listAffectedFiles(root, directory) {
+  const files = []
+  const visit = current => {
+    let entries = []
+    try { entries = fs.readdirSync(current, { withFileTypes: true }) } catch { return }
+    for (const entry of entries) {
+      const target = path.join(current, entry.name)
+      if (entry.isDirectory() && !entry.isSymbolicLink()) visit(target)
+      else files.push(path.relative(root, target).replaceAll('\\', '/'))
+    }
+  }
+  visit(directory)
+  return files.sort()
+}
+
+function confirmationRequired(affectedFiles, options) {
+  const expected = [...affectedFiles].sort()
+  const supplied = Array.isArray(options?.confirmedFiles) ? [...options.confirmedFiles].sort() : null
+  if (supplied && supplied.length === expected.length && supplied.every((file, index) => file === expected[index])) return null
+  return {
+    success: false,
+    code: 'CONFIRMATION_REQUIRED',
+    error: 'Review and confirm the affected files before deleting this page.',
+    affectedFiles: expected,
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Create operations
 // ---------------------------------------------------------------------------
 
 function createPrototype(values, root) {
   const prototypesDir = contentDir(root, 'prototypes')
-  const targetDir = values.folder
+  const notebookRoot = fs.existsSync(path.join(root, 'hypercanvas.notebook.json'))
+  const targetDir = values.folder && !notebookRoot
     ? path.join(prototypesDir, `${values.folder}.folder`, values.name)
     : path.join(prototypesDir, values.name)
 
@@ -245,7 +278,8 @@ function createCanvas(values, root) {
   //     ("workspace" → .folder/, default "pages" → plain dir)
   let targetDir = canvasDir
   let usedFolderKind = null
-  if (values.folder) {
+  const notebookRoot = fs.existsSync(path.join(root, 'hypercanvas.notebook.json'))
+  if (values.folder && !notebookRoot) {
     const dotFolderDir = path.join(canvasDir, `${values.folder}.folder`)
     const plainDir = path.join(canvasDir, values.folder)
     if (fs.existsSync(dotFolderDir)) {
@@ -282,7 +316,7 @@ function createCanvas(values, root) {
 
   // Route always strips `.folder/` (per the data plugin), so both kinds
   // produce the same `/canvas/<folder>/<name>` URL shape.
-  const canvasRoute = `/canvas/${values.folder ? `${values.folder}/` : ''}${values.name}`
+  const canvasRoute = `/canvas/${values.folder && !notebookRoot ? `${values.folder}/` : ''}${values.name}`
   return {
     success: true,
     type: 'canvas',
@@ -433,7 +467,32 @@ export function createArtifact(type, values, root) {
   }
 
   try {
-    return creator(validation.normalized, root)
+    const normalized = validation.normalized
+    if (fs.existsSync(path.join(root, 'hypercanvas.notebook.json')) && normalized.sectionId) {
+      const state = inspectNotebook(root)
+      if (!state.manifest?.navigation?.files?.sections?.some(section => section.id === normalized.sectionId)) {
+        return { success: false, errors: [{ field: 'sectionId', message: `Section "${normalized.sectionId}" not found` }] }
+      }
+    }
+    const result = creator(normalized, root)
+    if (result.success && fs.existsSync(path.join(root, 'hypercanvas.notebook.json')) && ['prototype', 'canvas', 'site'].includes(type)) {
+      const payloadPath = type === 'canvas'
+        ? result.files?.find(file => file.endsWith('.canvas.jsonl'))
+        : type === 'prototype' ? result.path : null
+      const page = registerNotebookPage(root, {
+        type,
+        title: normalized.title || normalized.name,
+        ...(payloadPath ? { path: payloadPath } : {}),
+        ...(type === 'site' ? { siteId: normalized.name } : {}),
+        ...(result.route ? { route: result.route } : {}),
+      }, {
+        sectionId: normalized.sectionId || null,
+        sectionTitle: !normalized.sectionId && normalized.folder ? normalized.folder : null,
+        insertAfterPageId: normalized.insertAfterPageId || null,
+      })
+      if (page) result.pageId = page.id
+    }
+    return result
   } catch (err) {
     return { success: false, errors: [{ field: '_fs', message: err.message }] }
   }
@@ -453,6 +512,9 @@ export function editArtifact(type, name, updates, root) {
       ...(updates.developmentBaseUrl !== undefined ? { developmentBaseUrl: updates.developmentBaseUrl } : {}),
     }
     const binding = Object.keys(bindingUpdates).length ? store.upsertBinding(current.id, bindingUpdates) : store.getBinding(current.id)
+    if (notebookRoot(root) && updates.title !== undefined) {
+      updateNotebookPage(root, { siteId: name }, { title: updates.title })
+    }
     return { success: true, updated: { ...updated, ...(binding ? { binding } : {}) }, files: [SITE_CONFIG_FILE] }
   }
   if (type === 'prototype') {
@@ -485,6 +547,9 @@ export function editArtifact(type, name, updates, root) {
     if (updates.url !== undefined) json.url = updates.url
 
     fs.writeFileSync(protoJsonPath, JSON.stringify(json, null, 2) + '\n', 'utf-8')
+    if (notebookRoot(root) && updates.title !== undefined) {
+      updateNotebookPage(root, { path: path.relative(root, protoDir).replaceAll('\\', '/') }, { title: updates.title })
+    }
     return { success: true, updated: name, files: [path.relative(root, protoJsonPath)] }
   }
 
@@ -500,6 +565,9 @@ export function editArtifact(type, name, updates, root) {
         if (updates[key] !== undefined) meta[key] = updates[key]
       }
       fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2) + '\n', 'utf-8')
+      if (notebookRoot(root) && updates.title !== undefined) {
+        updateNotebookPage(root, { path: path.relative(root, filePath).replaceAll('\\', '/') }, { title: updates.title })
+      }
       return { success: true, updated: name, files: [path.relative(root, metaPath)] }
     }
     const text = fs.readFileSync(filePath, 'utf-8')
@@ -511,6 +579,9 @@ export function editArtifact(type, name, updates, root) {
     }
     lines[0] = JSON.stringify(firstEvent)
     fs.writeFileSync(filePath, lines.join('\n') + '\n', 'utf-8')
+    if (notebookRoot(root) && updates.title !== undefined) {
+      updateNotebookPage(root, { path: path.relative(root, filePath).replaceAll('\\', '/') }, { title: updates.title })
+    }
     return { success: true, updated: name, files: [path.relative(root, filePath)] }
   }
 
@@ -525,7 +596,20 @@ export function deleteArtifact(type, name, options, root) {
 
   if (type === 'site') {
     const file = SITE_CONFIG_FILE
-    return new SiteStore(root).remove(name) ? { success: true, deleted: name, files: [file] } : { success: false, error: `Site "${name}" not found` }
+    const site = new SiteStore(root).get(name)
+    if (!site) return { success: false, error: `Site "${name}" not found` }
+    if (notebookRoot(root) && options?.confirmed !== true) {
+      return {
+        success: false,
+        code: 'CONFIRMATION_REQUIRED',
+        error: `Unregister Site "${site.title || name}"? Its external project will remain at ${site.projectRoot || 'its current location'}.`,
+        affectedFiles: [file],
+        preservedProjectRoot: site.projectRoot || null,
+      }
+    }
+    const removed = new SiteStore(root).remove(name)
+    if (removed && notebookRoot(root)) unregisterNotebookPage(root, { siteId: name })
+    return removed ? { success: true, deleted: name, files: [file], preservedProjectRoot: site.projectRoot || null } : { success: false, error: `Site "${name}" not found` }
   }
 
   if (type === 'prototype') {
@@ -538,8 +622,17 @@ export function deleteArtifact(type, name, options, root) {
     if (!resolved.startsWith(path.resolve(prototypesDir))) {
       return { success: false, error: 'Invalid path — outside prototypes directory' }
     }
-    const files = fs.readdirSync(protoDir, { recursive: true }).map(file => path.relative(root, path.join(protoDir, file)))
+    const files = listAffectedFiles(root, protoDir)
+    const legacyCanvases = files.filter(file => file.endsWith('.canvas.jsonl'))
+    if (legacyCanvases.length) {
+      return { success: false, code: 'UNSUPPORTED_CANVAS_LOCATION', error: 'This Prototype contains legacy Canvas pages. Resolve those unsupported locations before deleting the Prototype.', affectedFiles: legacyCanvases }
+    }
+    if (notebookRoot(root)) {
+      const confirmation = confirmationRequired(files, options)
+      if (confirmation) return confirmation
+    }
     fs.rmSync(protoDir, { recursive: true, force: true })
+    if (notebookRoot(root)) unregisterNotebookPage(root, { path: path.relative(root, protoDir).replaceAll('\\', '/') })
     return { success: true, deleted: name, files }
   }
 
@@ -549,10 +642,15 @@ export function deleteArtifact(type, name, options, root) {
       return { success: false, error: `Canvas "${name}" not found` }
     }
     const files = canvasFiles(root, filePath)
+    if (notebookRoot(root)) {
+      const confirmation = confirmationRequired(files.map(file => file.replaceAll('\\', '/')), options)
+      if (confirmation) return confirmation
+    }
     fs.unlinkSync(filePath)
     // Also remove .jsx companion if it exists
     const jsxPath = filePath.replace('.canvas.jsonl', '.canvas.jsx')
     if (fs.existsSync(jsxPath)) fs.unlinkSync(jsxPath)
+    if (notebookRoot(root)) unregisterNotebookPage(root, { path: path.relative(root, filePath).replaceAll('\\', '/') })
     return { success: true, deleted: name, files }
   }
 

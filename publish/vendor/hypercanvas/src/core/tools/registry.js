@@ -6,6 +6,7 @@
  */
 export const coreHandlers = {
   create:               () => import('./handlers/create.js'),
+  workspace:             () => import('./handlers/workspace.js'),
   theme:                () => import('./handlers/theme.js'),
   'palette-theme':      () => import('./handlers/paletteTheme.js'),
   comments:             () => import('./handlers/comments.js'),

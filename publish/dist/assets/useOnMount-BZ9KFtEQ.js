@@ -1,1 +1,0 @@
-var c=Object.defineProperty;var o=(t,s)=>c(t,"name",{value:s,configurable:!0});import{c as e}from"./vendor-react-PJCXJ5Vl.js";const n=[];function f(t){e.useEffect(t,n)}o(f,"useOnMount");export{f as u};

@@ -23,7 +23,7 @@ import ignore from 'ignore'
 import { inspectNotebook, NOTEBOOK_CONFIG_FILES, NOTEBOOK_MANIFEST_FILE, NOTEBOOK_PUBLISH_DIR, NOTEBOOK_DIRECTORIES } from '../notebook.js'
 import { SiteStore } from '../../site/site.js'
 import { materializeFromText } from '../../canvas/materializer.js'
-import { preparePublishedFrames } from '../frame-snapshot-publishing.js'
+import { preparePublishedFrames, preparePublishedSitePages } from '../frame-snapshot-publishing.js'
 import { publishingError } from './errors.js'
 
 const require = createRequire(import.meta.url)
@@ -374,6 +374,54 @@ function escapeHtml(value) {
   return String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
 
+function safePublicationDiagnostics(diagnostics, notebookRoot) {
+  return (Array.isArray(diagnostics) ? diagnostics : []).map(item => {
+    let message = String(item?.message || 'This page is unavailable.')
+    if (notebookRoot) message = message.replaceAll(notebookRoot, '[Notebook]')
+    message = message.replace(/(?:\/Users\/|\/home\/|\/private\/var\/)[^\s"'<>]+/g, '[local path]')
+    return { code: typeof item?.code === 'string' ? item.code : 'PAGE_UNAVAILABLE', message }
+  })
+}
+
+function publicationPayload(notebook, frames, sitePages) {
+  const pages = (notebook.pages || []).map(page => {
+    const common = {
+      id: page.id,
+      type: page.type,
+      title: page.title,
+      route: page.route || null,
+      available: page.available === true,
+      diagnostics: safePublicationDiagnostics(page.diagnostics, notebook.root),
+    }
+    if (page.type === 'canvas') return { ...common, siteFrames: frames.get(pageSlug(page)) || {} }
+    if (page.type === 'prototype') return { ...common, path: page.path }
+    const site = sitePages.get(page.id)
+    return {
+      ...common,
+      siteId: page.siteId,
+      available: page.available !== false && site?.available === true,
+      diagnostics: safePublicationDiagnostics(site?.diagnostics || page.diagnostics, notebook.root),
+      productionUrl: site?.productionUrl || null,
+      snapshot: site?.snapshot || null,
+      snapshotDark: site?.snapshotDark || null,
+      publicationStatus: site?.publicationStatus || 'unavailable',
+    }
+  })
+  return {
+    formatVersion: 2,
+    notebookId: notebook.manifest.id,
+    title: notebook.manifest.title || 'Notebook',
+    navigation: notebook.manifest.navigation,
+    pages,
+  }
+}
+
+function injectPublicationPayload(indexHtml, payload) {
+  const json = JSON.stringify(payload).replaceAll('<', '\\u003c')
+  const script = `<script>window.__HYPERCANVAS_NOTEBOOK_PUBLICATION__=${json}</script>`
+  return indexHtml.replace('</head>', `${script}\n  </head>`)
+}
+
 function publishedPages(notebook) {
   const canvases = notebook.pages
     .filter((page) => page.type === 'canvas' && page.available)
@@ -488,6 +536,10 @@ function normalRuntimeFiles(notebook, sourceFiles, basePath = './') {
     `const base = process.env.VITE_BASE_PATH || ${JSON.stringify(basePath)}`,
   )
   viteConfig = viteConfig.replace(
+    "'@': path.resolve(__dirname, './src'),",
+    "'@': fileURLToPath(new URL('./notebook-content/', import.meta.url)),",
+  )
+  viteConfig = viteConfig.replace(
     '    base,\n',
     "    base,\n    define: { 'globalThis.__HYPERCANVAS_NOTEBOOK_PUBLICATION__': 'true' },\n",
   )
@@ -557,7 +609,7 @@ function normalRuntimeFiles(notebook, sourceFiles, basePath = './') {
   return files
 }
 
-function generatedFiles(notebook, pages, frames, sourceFiles, basePath = './', generatedNotebookFiles = {}, publishedSites = []) {
+function generatedFiles(notebook, pages, frames, sourceFiles, basePath = './', generatedNotebookFiles = {}, publishedSites = [], sitePages = new Map()) {
   const files = normalRuntimeFiles(notebook, sourceFiles, basePath)
   Object.assign(files, vendoredRuntimeFiles())
   Object.assign(files, generatedNotebookFiles)
@@ -577,9 +629,14 @@ function generatedFiles(notebook, pages, frames, sourceFiles, basePath = './', g
     devDependencies: {},
   }) + '\n'
   files[PUBLICATION_MARKER_FILE] = jsonScript(publicationMarker(notebook, sourceFiles, Object.keys(generatedNotebookFiles))) + '\n'
-  files[NOTEBOOK_MANIFEST_FILE] = jsonScript(notebook.manifest) + '\n'
-  files[`public/${NOTEBOOK_MANIFEST_FILE}`] = jsonScript(notebook.manifest) + '\n'
+  const manifestPath = path.join(notebook.root, NOTEBOOK_MANIFEST_FILE)
+  const manifestSource = fs.existsSync(manifestPath)
+    ? fs.readFileSync(manifestPath, 'utf8')
+    : `${jsonScript(notebook.manifest)}\n`
+  files[NOTEBOOK_MANIFEST_FILE] = manifestSource
+  files[`public/${NOTEBOOK_MANIFEST_FILE}`] = manifestSource
   files['public/hypercanvas.sites.json'] = jsonScript({ sites: publishedSites }) + '\n'
+  files['index.html'] = injectPublicationPayload(files['index.html'], publicationPayload(notebook, frames, sitePages))
   files['publish-manifest.json'] = jsonScript({
     formatVersion: 1,
     title: notebook.manifest.title,
@@ -812,7 +869,10 @@ export async function materializeProject({ notebookRoot, destination, mode = 'ex
   const sourceFiles = notebookSourceFiles(notebook.root)
   const pages = publishedPages(notebook)
   const canvases = pages.filter((page) => page.type === 'canvas')
-  const { frames, warnings } = await preparePublishedFrames({ notebookRoot: notebook.root, canvases })
+  const [{ frames, warnings }, sitePages] = await Promise.all([
+    preparePublishedFrames({ notebookRoot: notebook.root, canvases }),
+    preparePublishedSitePages({ notebookRoot: notebook.root, pages: notebook.pages }),
+  ])
   const { directory } = ensureProjectDirectory({ destination, notebookRoot: notebook.root, mode })
   const previousMarker = readMarker(directory)
   const generatedNotebookFiles = generatedPrototypeMetadata(pages, sourceFiles)
@@ -822,7 +882,7 @@ export async function materializeProject({ notebookRoot, destination, mode = 'ex
     ...(site.description ? { description: site.description } : {}),
     productionUrl: site.deployments?.production?.baseUrl || null,
   }))
-  const files = generatedFiles(notebook, pages, frames, sourceFiles, basePath, generatedNotebookFiles, publishedSites)
+  const files = generatedFiles(notebook, pages, frames, sourceFiles, basePath, generatedNotebookFiles, publishedSites, sitePages)
   files['package-lock.json'] = null
   preflightSourceFiles({
     notebookRoot: notebook.root,

@@ -15,6 +15,21 @@ Walks through all breaking changes between Hypercanvas versions and applies the 
 
 ## Migrations
 
+### Current Notebook navigation
+
+The Notebook root (`/`) resolves to the first page in the active saved layout.
+In sectioned Files mode, this is the first page in the first section, or the
+first root page if it appears earlier. Type mode uses the first page in its
+first saved type group. Artifact inventory and organization live in the
+Notebook sidebar. `/workspace` remains available as a deprecated compatibility
+route, and `/viewfinder` redirects to the Notebook root.
+
+Existing local page-order and sidebar preferences are retained where possible.
+Do not replace root links with `/workspace`; use `/` for Notebook entry and
+open the sidebar without changing the current URL for in-page navigation.
+
+### Historical migration notes
+
 ### From 0.10.x → 0.11.0-beta.0
 
 #### 1. Prototype Vite-overlay isolation now ships from the package
@@ -271,7 +286,7 @@ If the client deploys Hypercanvas for external users (not just internal design),
 | Setting | Description |
 |---------|-------------|
 | `enabled` | Master toggle for customer mode |
-| `homepage` | `false` = default workspace, `true` = empty page, or a string (`"landing"`, `"/MyProto"`, `"https://..."`) to redirect from `/`, `/workspace`, `/viewfinder` |
+| `homepage` | `false` = first page in the saved Notebook layout, `true` = empty page, or a string (`"landing"`, `"/MyProto"`, `"https://..."`) to redirect from `/` |
 | `tools` | `"all"` (default), `"none"`, `{ "hide": [keys] }`, or `{ "only": [keys] }` — granular toolbar tool gating |
 | `commandPalette` | `false` hides Cmd+K (button + shortcut) |
 | `branchBar` | `false` hides the top branch/dev bar |

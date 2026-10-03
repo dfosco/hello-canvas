@@ -40,11 +40,8 @@ agent-browser.json
 .storyboard/
 src/canvas/images/~*
 assets/canvas/images/~*
-assets/canvas/images/drafts/
 assets/canvas/snapshots/~*
 assets/.storyboard-public/terminal-snapshots/~*
-src/canvas/**/drafts/
-src/prototypes/**/drafts/
 _*.md
 .sync-target
 .worktrees

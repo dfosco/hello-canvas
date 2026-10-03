@@ -6,6 +6,11 @@
   flex-shrink: 0;
 }
 
+/* Keep the global toolbar clear of the Site terminal panel when it is open. */
+html[data-site-terminal-open="true"] #storyboard-controls {
+  bottom: calc(var(--site-terminal-toolbar-offset, 244px) + 12px) !important;
+}
+
 /* The Sites trigger is configured as always-visible so it remains available
    on mobile; Hide Toolbars still suppresses it through the shared chrome flag. */
 html.storyboard-chrome-hidden [data-tool-id="running-sites"] {

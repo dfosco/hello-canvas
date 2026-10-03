@@ -50,11 +50,9 @@ describe('storyboard-scaffold integration', () => {
 
     // The fragment body content should be present.
     expect(gitignore).toContain('.storyboard/')
-    expect(gitignore).toContain('src/canvas/**/drafts/')
-    expect(gitignore).toContain('src/prototypes/**/drafts/')
-    // The drafts image dir is also gitignored — second privacy layer for
-    // canvas images that belong to a draft canvas.
-    expect(gitignore).toContain('assets/canvas/images/drafts/')
+    expect(gitignore).not.toContain('src/canvas/**/drafts/')
+    expect(gitignore).not.toContain('src/prototypes/**/drafts/')
+    expect(gitignore).not.toContain('assets/canvas/images/drafts/')
   })
 
   it('fresh client: scaffolds every domain config used by the runtime', () => {
@@ -170,7 +168,7 @@ describe('storyboard-scaffold integration', () => {
     expect(updated).not.toContain('# Storyboard: runtime state (gitignored) + private tilde-prefixed files')
 
     // Fragment body matches the library.
-    expect(updated).toContain('src/canvas/**/drafts/')
+    expect(updated).not.toContain('src/canvas/**/drafts/')
 
     // Second run is a no-op.
     const before = updated
@@ -195,6 +193,10 @@ describe('storyboard-scaffold integration', () => {
       '.github/agents/prompt-agent.md',
       '.claude/agents/',
       '_*.md',
+      'assets/canvas/images/drafts/',
+      'src/canvas/**/drafts/',
+      'src/prototypes/**/drafts/',
+      'custom/**/drafts/**',
       '',
       '# <!-- storyboard:scaffold/gitignore:runtime-state --start-->',
       'STALE',
@@ -219,6 +221,10 @@ describe('storyboard-scaffold integration', () => {
     expect(updated).not.toContain('.github/skills/playwright-cli')
     expect(updated).not.toContain('.github/agents/_buddy.md')
     expect(updated).not.toContain('# Agent symlinks are build targets')
+    expect(updated).not.toContain('assets/canvas/images/drafts/')
+    expect(updated).not.toContain('src/canvas/**/drafts/')
+    expect(updated).not.toContain('src/prototypes/**/drafts/')
+    expect(updated).toContain('custom/**/drafts/**')
 
     // Absorbed-tier orphans removed from outside, kept inside the block.
     expect(outside).not.toContain('.claude/agents/')
@@ -278,7 +284,7 @@ describe('storyboard-scaffold integration', () => {
 
     // Marker block present with library body.
     expect(updated).toContain('storyboard:scaffold/gitignore:runtime-state --start')
-    expect(updated).toContain('src/canvas/**/drafts/')
+    expect(updated).not.toContain('src/canvas/**/drafts/')
 
     // Second run is a no-op.
     const before = updated
